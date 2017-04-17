@@ -1,0 +1,20 @@
+{
+  "plugins": [
+    "idx",
+    "transform-class-properties",
+    ["transform-async-to-module-method", {
+      "module": "async-to-generator",
+      "method": "default",
+    }],
+  ],
+  "presets": [
+    "flow",
+    "stage-1",
+    ["env", {
+      "exclude": ["transform-regenerator"],
+      "targets": {
+        "node": 4,
+      },
+    }],
+  ],
+}
