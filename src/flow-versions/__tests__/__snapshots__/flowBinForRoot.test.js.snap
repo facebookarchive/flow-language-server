@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`flowBinForRoot flowSemverForPath returns the flowconfig's version with a message when both flowconfig and package.json dependency are present 1`] = `
+Array [
+  Array [
+    "Determining the version of flow for your project...",
+  ],
+  Array [
+    "Found flow version requirement ^0.47.0 in your package.json",
+  ],
+  Array [
+    "Found flow version requirement 0.47.0 in your .flowconfig",
+  ],
+]
+`;
+
+exports[`flowBinForRoot flowSemverForPath returns the flowconfig's version without a message when only a flowconfig is present 1`] = `
+Array [
+  Array [
+    "Determining the version of flow for your project...",
+  ],
+  Array [
+    "Found flow version requirement 0.47.0 in your .flowconfig",
+  ],
+]
+`;
+
+exports[`flowBinForRoot flowSemverForPath returns the package.json's version without a message when only the package.json version is present 1`] = `
+Array [
+  Array [
+    "Determining the version of flow for your project...",
+  ],
+  Array [
+    "Found flow version requirement ^0.47.0 in your package.json",
+  ],
+]
+`;
