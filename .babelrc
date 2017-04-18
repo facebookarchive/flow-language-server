@@ -1,0 +1,25 @@
+{
+  "plugins": [
+    "transform-class-properties",
+  ],
+  "presets": [
+    "flow",
+    "stage-1",
+    ["env", {
+      "targets": {
+        "node": 4,
+      },
+    }],
+  ],
+  "env": {
+    "development": {
+      "presets": [
+        ["env", {
+          "targets": {
+            "node": "current",
+          },
+        }],
+      ],
+    },
+  },
+}
