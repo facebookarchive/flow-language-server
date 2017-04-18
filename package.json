@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "yarn watch",
+    "watch-server": "babel -s --ignore node_modules ./server/src -d ./server/lib -w",
+    "watch-vscode": "babel -s --ignore node_modules ./flow-vscode/src -d ./flow-vscode/lib -w",
+    "watch": "yarn watch-server & yarn watch-vscode"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
@@ -13,10 +19,13 @@
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "jest": "^19.0.2"
+    "jest": "^19.0.2",
+    "vscode-languageserver-types": "^3.2.0"
   },
   "dependencies": {
     "flow-bin": "^0.44.1",
-    "regenerator-runtime": "^0.10.3"
+    "regenerator-runtime": "^0.10.3",
+    "vscode-languageserver": "^3.2.0",
+    "vscode-uri": "^1.0.0"
   }
 }
