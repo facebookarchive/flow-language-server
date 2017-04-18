@@ -1,0 +1,8 @@
+# This is intentionally blank as this sandbox is used as a path with sensible
+# flow defaults (not those of the language server project) to provide
+# diagnostics and completion to anonymous buffers that are provided to the
+# server.
+
+# The dummy.js file serves as the "path" for the buffer, but is never written
+# to, instead flow is told the "new contents" of the file are the buffer
+# contents
