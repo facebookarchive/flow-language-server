@@ -1,43 +1,22 @@
 {
-  "name": "language-client-example",
-  "description": "VSCode part of a language server",
-  "author": "Microsoft Corporation",
-  "license": "MIT",
+  "name": "flow-languageclient",
+  "description": "Flow support for VS Code",
+  "publisher": "flowtype",
+  "displayName": "Flow Language Support",
+  "private": true,
   "version": "0.0.1",
-  "publisher": "vscode",
   "engines": {
     "vscode": "^1.8.0"
   },
   "categories": [
-    "Other"
+    "Languages",
+    "Linters"
   ],
   "activationEvents": [
-    "onLanguage:plaintext"
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact"
   ],
   "main": "./out/src/extension",
-  "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "Example configuration",
-      "properties": {
-        "languageServerExample.maxNumberOfProblems": {
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "languageServerExample.trace.server": {
-          "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VSCode and the languageServerExample service."
-        }        
-      }
-    }
-  },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -watch -p ./",
