@@ -10,9 +10,9 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
+    "babel-plugin-transform-async-to-module-method": "^6.24.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.4.0",
-    "babel-preset-es2017": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
@@ -22,6 +22,7 @@
     "vscode-languageserver-types": "^3.2.0"
   },
   "dependencies": {
+    "async-to-generator": "^1.1.0",
     "cross-spawn": "^4.0.0",
     "dequeue": "^1.0.5",
     "elegant-spinner": "^1.0.1",
