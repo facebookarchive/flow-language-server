@@ -5,9 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "yarn watch",
-    "watch-server": "babel -s --ignore node_modules ./server/src -d ./server/lib -w",
-    "watch-vscode": "babel -s --ignore node_modules ./flow-vscode/src -d ./flow-vscode/lib -w",
-    "watch": "yarn watch-server & yarn watch-vscode"
+    "watch": "babel -s --ignore node_modules ./server/src -d ./server/lib -w"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
