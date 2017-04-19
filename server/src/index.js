@@ -1,7 +1,5 @@
 // @flow
 
-import 'regenerator-runtime/runtime';
-
 import {
   IPCMessageReader,
   IPCMessageWriter,
