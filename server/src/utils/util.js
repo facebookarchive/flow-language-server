@@ -1,6 +1,14 @@
 /* @flow */
 
-import type {DiagnosticSeverityType} from 'vscode-languageserver-types';
+import type {TextDocuments} from 'vscode-languageserver';
+import type {
+  DiagnosticSeverityType,
+  Position,
+  Range,
+} from 'vscode-languageserver-types';
+import type {
+  TextDocumentPositionParams,
+} from 'vscode-languageserver/lib/protocol';
 
 import invariant from 'invariant';
 import URI from 'vscode-uri';
@@ -11,6 +19,17 @@ const FlowSeverity = {
   Warning: 'warning',
 };
 type FlowSeverityValue = 'error' | 'warning';
+
+// 1-based index for both line and column
+type FlowPoint = {
+  line: number,
+  column: number,
+};
+
+type FlowLocation = {
+  start: FlowPosition,
+  end: FlowPosition,
+};
 
 const flowSeverityToLSPSeverityMap: {
   [FlowSeverityValue]: DiagnosticSeverityType,
@@ -42,4 +61,27 @@ export function flowSeverityToLSPSeverity(
   );
 
   return flowSeverityToLSPSeverityMap[flowSeverity];
+}
+
+export function lspPositionToFlowPoint(lspPosition: Position): FlowPoint {
+  return {
+    line: lspPosition.line + 1,
+    column: lspPosition.character + 1,
+  };
+}
+
+export function flowLocationToLSPRange(flowLocation: FlowLocation): Range {
+  // LSP Positions are 0-based indexes for both line and character while
+  // Flow points are 1-based indexes
+  return {
+    start: {
+      line: flowLocation.start.line - 1,
+      character: flowLocation.start.column - 1,
+    },
+    end: {
+      line: flowLocation.end.line - 1,
+      // Flow locations are inclusive and LSP ranges are exclusive
+      character: flowLocation.end.column,
+    },
+  };
 }

@@ -41,7 +41,7 @@ export default class Completion {
     );
 
     if (completions) {
-      const out = {
+      return {
         isIncomplete: false,
         items: completions.map(atomCompletion => {
           const completion: CompletionItem = {
@@ -51,7 +51,6 @@ export default class Completion {
           if (atomCompletion.description) {
             completion.detail = atomCompletion.description;
           }
-          completion.detail = 'FLOW - ' + completion.detail;
 
           completion.kind = this.typeToKind(
             atomCompletion.type,
@@ -65,7 +64,6 @@ export default class Completion {
           return completion;
         }),
       };
-      return out;
     }
 
     return {
