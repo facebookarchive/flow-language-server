@@ -1,5 +1,5 @@
 // @flow
-import type {IConnection, TextDocuments} from 'vscode-languageserver';
+import type {IConnection} from 'vscode-languageserver';
 import type {Diagnostic} from 'vscode-languageserver-types';
 
 import entries from 'object.entries';
@@ -24,27 +24,25 @@ const supportedLanguages = new Set(['javascript', 'javascriptreact']);
 
 class Diagnostics {
   connection: IConnection;
-  documents: TextDocuments;
 
-  constructor(connection: IConnection, documents: TextDocuments) {
+  constructor(connection: IConnection) {
     this.connection = connection;
-    this.documents = documents;
   }
 
   validate = async (textDocument: TextDocument, content: ?string) => {
-    const {uri, languageId} = textDocument;
+    const {languageId} = textDocument;
     if (!supportedLanguages.has(languageId)) {
       return;
     }
 
+    const uri = URI.parse(textDocument.uri);
+
     let diags;
-    if (uri.startsWith('untitled')) {
+    if (uri.scheme === 'untitled') {
       diags = await this._getBufferDiagnostics(uri, textDocument.getText());
-    } else if (uri.startsWith('file://')) {
+    } else if (uri.scheme === 'file') {
       diags = await this._getFileDiagnostics(
-        // HACK: slice off the file:// beginning of the uri for the
-        // absolute path
-        uri.slice(7),
+        uri.fsPath,
         textDocument.getText(),
       );
     } else {
@@ -148,10 +146,7 @@ class Diagnostics {
    * When the file is  saved properly into the Flow root, it will be
    * processed as a file instead.
    */
-  async _getBufferDiagnostics(
-    uri: string,
-    content: string,
-  ): InternalDiagnostics {
+  async _getBufferDiagnostics(uri: URI, content: string): InternalDiagnostics {
     if (hasFlowPragma(content)) {
       const dummyPath = path.join(__dirname, 'sandbox', 'dummy.js');
       const diags = await this._getFileDiagnostics(
