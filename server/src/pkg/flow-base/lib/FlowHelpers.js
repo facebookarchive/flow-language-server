@@ -154,31 +154,25 @@ async function canFindFlow(flowPath: string): Promise<boolean> {
 }
 
 /**
- * @return The path to Flow on the user's machine. First using the the user's 
+ * @return The path to Flow on the user's machine. First using the the user's
  *   config, then looking into the node_modules for the project.
- * 
- *   It is cached, so it is expected that changing the users settings will 
+ *
+ *   It is cached, so it is expected that changing the users settings will
  *   trigger a call to `clearWorkspaceCaches`.
  */
 
 async function getPathToFlow(): Promise<string> {
   if (!global.cachedPathToFlowBin) {
-    const config = global.vscode.workspace.getConfiguration('flow');
-    const shouldUseNodeModule = config.get('useNPMPackagedFlow');
-    const userPath = config.get('pathToFlow');
-
-    if (shouldUseNodeModule && await canFindFlow(nodeModuleFlowLocation())){
+    if (await canFindFlow(nodeModuleFlowLocation())) {
       global.cachedPathToFlowBin = nodeModuleFlowLocation();
-    } else if (await canFindFlow(userPath)) {
-      global.cachedPathToFlowBin = userPath;
     } else {
-      global.cachedPathToFlowBin = "flow";
+      global.cachedPathToFlowBin = 'flow';
     }
 
-    logger.info("Path to Flow: " + global.cachedPathToFlowBin);
-   }
+    logger.info('Path to Flow: ' + global.cachedPathToFlowBin);
+  }
 
-  return global.cachedPathToFlowBin
+  return global.cachedPathToFlowBin;
 }
 
 /**
@@ -187,9 +181,9 @@ async function getPathToFlow(): Promise<string> {
  */
 function nodeModuleFlowLocation(): string {
   if (process.platform === 'win32') {
-    return `${global.vscode.workspace.rootPath}\\node_modules\\.bin\\flow.cmd`
+    return `${global.workspacePath}\\node_modules\\.bin\\flow.cmd`;
   } else {
-    return `${global.vscode.workspace.rootPath}/node_modules/.bin/flow`
+    return `${global.workspacePath}/node_modules/.bin/flow`;
   }
 }
 

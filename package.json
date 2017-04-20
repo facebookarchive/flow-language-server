@@ -5,26 +5,42 @@
   "license": "MIT",
   "scripts": {
     "dev": "yarn watch",
-    "watch-server": "babel -s --ignore node_modules ./server/src -d ./server/lib -w",
-    "watch-vscode": "babel -s --ignore node_modules ./flow-vscode/src -d ./flow-vscode/lib -w",
-    "watch": "yarn watch-server & yarn watch-vscode"
+    "watch": "babel -s --ignore node_modules ./server/src -d ./server/lib -w"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
+    "babel-plugin-transform-async-to-module-method": "^6.24.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.4.0",
-    "babel-preset-es2017": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
+    "flowgen": "^1.2.0",
     "jest": "^19.0.2",
     "vscode-languageserver-types": "^3.2.0"
   },
   "dependencies": {
+    "async-to-generator": "^1.1.0",
+    "cross-spawn": "^4.0.0",
+    "dequeue": "^1.0.5",
+    "elegant-spinner": "^1.0.1",
+    "event-kit": "^2.0.0",
     "flow-bin": "^0.44.1",
+    "fs-plus": "^2.8.2",
+    "fuzzaldrin": "^2.1.0",
+    "js-beautify": "^1.6.12",
+    "log4js": "^0.6.37",
+    "lru-cache": "^4.0.1",
+    "mkdirp": "^0.5.1",
+    "object.entries": "^1.0.4",
     "regenerator-runtime": "^0.10.3",
+    "rimraf": "^2.5.4",
+    "rxjs": "^5.0.0-beta.8",
+    "semver": "^5.3.0",
+    "shell-quote": "^1.6.0",
+    "temp": "^0.8.3",
     "vscode-languageserver": "^3.2.0",
     "vscode-uri": "^1.0.0"
   }

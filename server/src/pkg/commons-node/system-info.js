@@ -16,7 +16,7 @@ import os from 'os';
 import nuclideUri from '../nuclide-remote-uri/lib/main';
 import {checkOutput} from './process';
 
-const NUCLIDE_PACKAGE_JSON_PATH = require.resolve('../../../package.json');
+const NUCLIDE_PACKAGE_JSON_PATH = require.resolve('../../../../package.json');
 const NUCLIDE_BASEDIR = nuclideUri.dirname(NUCLIDE_PACKAGE_JSON_PATH);
 
 const pkgJson = JSON.parse(fs.readFileSync(NUCLIDE_PACKAGE_JSON_PATH).toString());
