@@ -4,26 +4,19 @@ import type {DiagnosticSeverityType} from 'vscode-languageserver-types';
 
 import invariant from 'invariant';
 import URI from 'vscode-uri';
-
-// LSP Severity types
-const DiagnosticSeverity = {
-  ERROR: 1,
-  WARNING: 2,
-  INFORMATION: 3,
-  HINT: 4,
-};
+import {DiagnosticSeverity} from 'vscode-languageserver-types';
 
 const FlowSeverity = {
-  ERROR: 'error',
-  WARNING: 'warning',
+  Error: 'error',
+  Warning: 'warning',
 };
 type FlowSeverityValue = 'error' | 'warning';
 
 const flowSeverityToLSPSeverityMap: {
   [FlowSeverityValue]: DiagnosticSeverityType,
 } = {
-  [FlowSeverity.ERROR]: DiagnosticSeverity.ERROR,
-  [FlowSeverity.WARNING]: DiagnosticSeverity.WARNING,
+  [FlowSeverity.Error]: DiagnosticSeverity.Error,
+  [FlowSeverity.Warning]: DiagnosticSeverity.Warning,
 };
 
 export function toURI(filePath: string): URI {
@@ -43,8 +36,8 @@ export function flowSeverityToLSPSeverity(
   flowSeverity: string,
 ): DiagnosticSeverityType {
   invariant(
-    flowSeverity === FlowSeverity.ERROR ||
-      flowSeverity === FlowSeverity.WARNING,
+    flowSeverity === FlowSeverity.Error ||
+      flowSeverity === FlowSeverity.Warning,
     'must be valid Flow severity',
   );
 

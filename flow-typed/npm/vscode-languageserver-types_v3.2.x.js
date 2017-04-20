@@ -103,14 +103,15 @@ declare module 'vscode-languageserver-types' {
     is: typeof Location$is,
   };
 
-  declare var Error: 1;
+  declare var DiagnosticSeverity: {
+    Error: 1,
+    Warning: 2,
+    Information: 3,
+    Hint: 4,
+  };
 
-  declare var Warning: 2;
-
-  declare var Information: 3;
-
-  declare var Hint: 4;
   declare type DiagnosticSeverityType = 1 | 2 | 3 | 4;
+
   /**
    * Represents a diagnostic, such as a compiler error or warning. Diagnostic objects
    * are only valid in the scope of a resource.
@@ -370,8 +371,8 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface TextDocumentIdentifier {
     /**
-       * The text document's uri.
-       */
+     * The text document's uri.
+     */
     uri: string,
   }
 
@@ -472,43 +473,28 @@ declare module 'vscode-languageserver-types' {
     is: typeof TextDocumentItem$is,
   };
 
-  declare var CompletionTypeText: 1;
+  declare var CompletionItemKind: {
+    Text: 1,
+    Method: 2,
+    Function: 3,
+    Constructor: 4,
+    Field: 5,
+    Variable: 6,
+    Class: 7,
+    Interface: 8,
+    Module: 9,
+    Property: 10,
+    Unit: 11,
+    Value: 12,
+    Enum: 13,
+    Keyword: 14,
+    Snippet: 15,
+    Color: 16,
+    File: 17,
+    Reference: 18,
+  };
 
-  declare var CompletionTypeMethod: 2;
-
-  declare var CompletionTypeFunction: 3;
-
-  declare var CompletionTypeConstructor: 4;
-
-  declare var CompletionTypeField: 5;
-
-  declare var CompletionTypeVariable: 6;
-
-  declare var CompletionTypeClass: 7;
-
-  declare var CompletionTypeInterface: 8;
-
-  declare var CompletionTypeModule: 9;
-
-  declare var CompletionTypeProperty: 10;
-
-  declare var CompletionTypeUnit: 11;
-
-  declare var CompletionTypeValue: 12;
-
-  declare var CompletionTypeEnum: 13;
-
-  declare var CompletionTypeKeyword: 14;
-
-  declare var CompletionTypeSnippet: 15;
-
-  declare var CompletionTypeColor: 16;
-
-  declare var CompletionTypeFile: 17;
-
-  declare var CompletionTypeReference: 18;
-
-  declare type CompletionItemKind =
+  declare type CompletionItemKindType =
     | 1
     | 2
     | 3
@@ -527,10 +513,9 @@ declare module 'vscode-languageserver-types' {
     | 16
     | 17
     | 18;
-  declare var PlainText: 1;
 
-  declare var Snippet: 2;
   declare type InsertTextFormat = 1 | 2;
+
   /**
    * A completion item represents a text snippet that is
    * proposed to complete text that is being typed.
@@ -956,8 +941,8 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface WorkspaceSymbolParams {
     /**
-       * A non-empty query string
-       */
+     * A non-empty query string
+     */
     query: string,
   }
   /**
@@ -966,8 +951,8 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface CodeActionContext {
     /**
-       * An array of diagnostics.
-       */
+     * An array of diagnostics.
+     */
     diagnostics: Diagnostic[],
   }
 
@@ -1111,11 +1096,11 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface TextDocument {
     /**
-       * The associated URI for this document. Most documents have the __file__-scheme, indicating that they
-       * represent files on disk. However, some documents may have other schemes indicating that they are not
-      available on disk.
-       * @readonly
-      */
+     * The associated URI for this document. Most documents have the __file__-scheme, indicating that they
+     * represent files on disk. However, some documents may have other schemes indicating that they are not
+     * available on disk.
+     * @readonly
+    */
     uri: string,
 
     /**
@@ -1125,16 +1110,16 @@ declare module 'vscode-languageserver-types' {
     languageId: string,
 
     /**
-           * The version number of this document (it will strictly increase after each
-           * change, including undo/redo).
-           * @readonly
-           */
+     * The version number of this document (it will strictly increase after each
+     * change, including undo/redo).
+     * @readonly
+     */
     version: number,
 
     /**
-           * Get the text of this document.
-           * @return  The text of this document.
-           */
+     * Get the text of this document.
+     * @return  The text of this document.
+     */
     getText(): string,
 
     /**
