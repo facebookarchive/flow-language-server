@@ -780,11 +780,11 @@ declare module 'vscode-languageserver' {
    * @return  a [connection](#IConnection)
    */
   declare function createConnection(
-    inputStream: ReadableStream,
-    outputStream: WritableStream,
+    inputStream: stream$Reader,
+    outputStream: stream$Writer,
   ): IConnection;
 
-  declare class IPCMessageReader {}
+  declare class IPCMessageReader extends stream$Reader {}
 
-  declare class IPCMessageWriter {}
+  declare class IPCMessageWriter extends stream$Writer {}
 }
