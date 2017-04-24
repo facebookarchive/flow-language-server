@@ -1,11 +1,12 @@
 // @flow
 
-import {IConnection, TextDocuments} from 'vscode-languageserver';
+import {IConnection} from 'vscode-languageserver';
 
 import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
 import Hover from './Hover';
+import TextDocuments from './TextDocuments';
 import {
   FlowExecInfoContainer,
 } from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
@@ -18,7 +19,6 @@ const logger = getLogger();
 
 const documents = new TextDocuments();
 export function createServer(connection: IConnection) {
-  documents.listen(connection);
   connection.onInitialize(params => {
     logger.debug('connection initialized');
     const flow = new FlowSingleProjectLanguageService(
@@ -79,6 +79,7 @@ export function createServer(connection: IConnection) {
 
   return {
     listen() {
+      documents.listen(connection);
       connection.listen();
     },
   };

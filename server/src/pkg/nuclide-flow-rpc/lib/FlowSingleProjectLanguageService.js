@@ -337,7 +337,7 @@ export class FlowSingleProjectLanguageService {
   async getAutocompleteSuggestions(
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
-    position: atom$Point,
+    position: atom$PointObject,
     activatedManually: boolean,
     prefix: string,
   ): Promise<?AutocompleteResult> {
@@ -397,7 +397,7 @@ export class FlowSingleProjectLanguageService {
   async typeHint(
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
-    position: atom$Point,
+    position: atom$PointObject,
   ): Promise<?TypeHint> {
     // Do not show typehints for whitespace.
     const character = buffer.getTextInRange([

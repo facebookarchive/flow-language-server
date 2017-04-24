@@ -8,14 +8,18 @@ import type {
 import SimpleTextBuffer from 'simple-text-buffer';
 import * as path from 'path';
 import URI from 'vscode-uri';
-import invariant from 'invariant';
 
+import TextDocument from './TextDocument';
 import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
-import {flowSeverityToLSPSeverity, hasFlowPragma, toURI} from './utils/util';
+import {
+  atomRangeToLSPRange,
+  flowSeverityToLSPSeverity,
+  hasFlowPragma,
+  toURI,
+} from './utils/util';
 import {getLogger} from './pkg/nuclide-logging';
-import {atomRangeToLSPRange} from './utils/util';
 
 const logger = getLogger();
 

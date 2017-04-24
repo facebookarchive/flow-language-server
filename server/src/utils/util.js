@@ -48,23 +48,32 @@ export function flowSeverityToLSPSeverity(
   return flowSeverityToLSPSeverityMap[flowSeverity];
 }
 
-export function lspPositionToAtomPoint(lspPosition: Position): atom$Point {
+export function lspPositionToAtomPoint(
+  lspPosition: Position,
+): atom$PointObject {
   return {
     row: lspPosition.line,
     column: lspPosition.character,
   };
 }
 
-export function atomPointToLSPPosition(atomPoint: atom$Point) {
+export function atomPointToLSPPosition(atomPoint: atom$PointObject): Position {
   return {
     line: atomPoint.row,
     character: atomPoint.column,
   };
 }
 
-export function atomRangeToLSPRange(atomRange: atom$Range): Range {
+export function atomRangeToLSPRange(atomRange: atom$RangeObject): Range {
   return {
     start: atomPointToLSPPosition(atomRange.start),
     end: atomPointToLSPPosition(atomRange.end),
+  };
+}
+
+export function lspRangeToAtomRange(lspRange: Range): atom$RangeObject {
+  return {
+    start: lspPositionToAtomPoint(lspRange.start),
+    end: lspPositionToAtomPoint(lspRange.end),
   };
 }

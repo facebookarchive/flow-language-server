@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "yarn watch",
     "build": "babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
+    "test": "jest",
     "watch": "yarn build -- --watch"
   },
   "devDependencies": {
@@ -43,5 +44,8 @@
     "temp": "^0.8.3",
     "vscode-languageserver": "^3.2.0",
     "vscode-uri": "^1.0.0"
+  },
+  "jest": {
+    "testPathIgnorePatterns": ["/node_modules/", "flow-vscode/", "server/lib/"]
   }
 }

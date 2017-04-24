@@ -1,6 +1,6 @@
 // @flow
 
-import type {IConnection, TextDocuments} from 'vscode-languageserver';
+import type {IConnection} from 'vscode-languageserver';
 import type {
   CompletionList,
   CompletionItemKindType,
@@ -16,6 +16,7 @@ import URI from 'vscode-uri';
 import {CompletionItemKind} from 'vscode-languageserver-types';
 import SimpleTextBuffer from 'simple-text-buffer';
 
+import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
 import {getLogger} from './pkg/nuclide-logging';
 
@@ -87,7 +88,7 @@ export default class Completion {
     };
   }
 
-  typeToKind(type: string, description: string): CompletionItemKindType {
+  typeToKind(type: ?string, description: ?string): CompletionItemKindType {
     if (type === 'function') {
       return CompletionItemKind.Function;
     }
