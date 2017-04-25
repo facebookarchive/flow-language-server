@@ -9,15 +9,12 @@ import {
   lspPositionToAtomPoint,
   lspRangeToAtomRange,
 } from './utils/util';
-import {getLogger} from './pkg/nuclide-logging';
-
-const logger = getLogger();
 
 export default class TextDocument {
   uri: NuclideUri;
   languageId: string;
   version: number;
-  _buffer: SimpleTextBuffer;
+  buffer: SimpleTextBuffer;
   _emitter: Emitter;
 
   constructor(uri: string, languageId: string, version: number, text: string) {
@@ -25,9 +22,10 @@ export default class TextDocument {
     this.languageId = languageId;
     this.version = version;
     this._emitter = new Emitter();
-    this._buffer = new SimpleTextBuffer(text);
+    this.buffer = new SimpleTextBuffer(text);
+    this.isDirty = false;
 
-    this._buffer.onDidStopChanging(this._handleDidStopChanging);
+    this.buffer.onDidStopChanging(this._handleDidStopChanging);
   }
 
   dispose() {
@@ -35,15 +33,15 @@ export default class TextDocument {
   }
 
   get lineCount(): number {
-    return this._buffer.getLineCount();
+    return this.buffer.getLineCount();
   }
 
   getText(): string {
-    return this._buffer.getText();
+    return this.buffer.getText();
   }
 
   offsetAt(position: Position): number {
-    return this._buffer.characterIndexForPosition(
+    return this.buffer.characterIndexForPosition(
       lspPositionToAtomPoint(position),
     );
   }
@@ -54,21 +52,22 @@ export default class TextDocument {
 
   positionAt(offset: number): Position {
     return atomPointToLSPPosition(
-      this._buffer.positionForCharacterIndex(offset),
+      this.buffer.positionForCharacterIndex(offset),
     );
   }
 
   updateMany(changes: Array<TextDocumentContentChangeEvent>, version: number) {
+    this.isDirty = true;
     for (const change of changes) {
       if (change.range != null) {
         // Incremental update
-        this._buffer.setTextInRange(
+        this.buffer.setTextInRange(
           lspRangeToAtomRange(change.range),
           change.text,
         );
       } else {
         // Full text update
-        this._buffer.setText(change.text);
+        this.buffer.setText(change.text);
       }
     }
     this.version = version;

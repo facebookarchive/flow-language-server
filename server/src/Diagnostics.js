@@ -5,7 +5,6 @@ import type {
   FileDiagnosticMessage,
 } from './pkg/nuclide-diagnostics-common/lib/rpc-types';
 
-import SimpleTextBuffer from 'simple-text-buffer';
 import * as path from 'path';
 import URI from 'vscode-uri';
 
@@ -40,7 +39,7 @@ export default class Diagnostics {
     this.flow = flow;
   }
 
-  validate = async (textDocument: TextDocument, content: ?string) => {
+  validate = async (textDocument: TextDocument) => {
     const {languageId} = textDocument;
     if (!supportedLanguages.has(languageId)) {
       return;
@@ -50,12 +49,9 @@ export default class Diagnostics {
 
     let diags;
     if (uri.scheme === 'untitled') {
-      diags = await this._getBufferDiagnostics(uri, textDocument.getText());
+      diags = await this._getBufferDiagnostics(uri, textDocument);
     } else if (uri.scheme === 'file') {
-      diags = await this._getFileDiagnostics(
-        uri.fsPath,
-        textDocument.getText(),
-      );
+      diags = await this._getFileDiagnostics(uri.fsPath, textDocument);
     } else {
       logger.warn(`received unknown uri for diagnostics validation: ${uri}`);
       diags = noDiagnostics;
@@ -77,7 +73,7 @@ export default class Diagnostics {
   // transforms flow's diagnostics into LSP diagnostics
   async _getFileDiagnostics(
     filePath: string,
-    content: string,
+    doc: TextDocument,
     pathToURI: string => URI = toURI,
   ): Promise<Array<InternalDiagnostic>> {
     // flowFindDiagnostics takes the provided filePath and then walks up directories
@@ -85,7 +81,7 @@ export default class Diagnostics {
     // flow workspace.
     const update = await this.flow.getDiagnostics(
       filePath,
-      new SimpleTextBuffer(content),
+      doc.isDirty ? doc.buffer : null,
     );
     const filePathToMessages = update && update.filePathToMessages;
     if (!filePathToMessages) {
@@ -122,13 +118,13 @@ export default class Diagnostics {
    */
   async _getBufferDiagnostics(
     uri: URI,
-    content: string,
+    doc: TextDocument,
   ): Promise<Array<InternalDiagnostic>> {
-    if (hasFlowPragma(content)) {
+    if (hasFlowPragma(doc.getText())) {
       const dummyPath = path.join(__dirname, 'sandbox', 'dummy.js');
       const diags = await this._getFileDiagnostics(
         dummyPath,
-        content,
+        doc,
         fromPath => (fromPath === dummyPath ? uri : URI.file(uri)),
       );
       return diags;

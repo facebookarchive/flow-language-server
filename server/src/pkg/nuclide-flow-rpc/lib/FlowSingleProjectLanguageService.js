@@ -219,17 +219,23 @@ export class FlowSingleProjectLanguageService {
    */
   async getDiagnostics(
     filePath: NuclideUri,
-    buffer: simpleTextBuffer$TextBuffer,
+    buffer?: simpleTextBuffer$TextBuffer,
   ): Promise<?DiagnosticProviderUpdate> {
     logger.info('fetching diagnostics for', filePath);
     await this._forceRecheck(filePath);
 
+    // Flow LSP Addition: if given a dirty buffer, check contents rather than
+    // use status
     const options = {};
-
-    const args = ['status', '--json', filePath];
+    let args;
+    if (buffer) {
+      options.stdin = buffer.getText();
+      args = ['check-contents', '--json', filePath];
+    } else {
+      args = ['status', '--json', filePath];
+    }
 
     let result;
-
     try {
       // Don't log errors if the command returns a nonzero exit code, because status returns nonzero
       // if it is reporting any issues, even when it succeeds.

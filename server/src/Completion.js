@@ -14,7 +14,6 @@ import {
 
 import URI from 'vscode-uri';
 import {CompletionItemKind} from 'vscode-languageserver-types';
-import SimpleTextBuffer from 'simple-text-buffer';
 
 import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
@@ -42,12 +41,12 @@ export default class Completion {
     position,
   }: TextDocumentPositionParams): Promise<CompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
-    const currentContents = this.documents.get(textDocument.uri).getText();
+    const doc = this.documents.get(textDocument.uri);
     const prefix = '.'; // TODO do better.
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
-      new SimpleTextBuffer(currentContents),
+      doc.buffer,
       lspPositionToAtomPoint(position),
       true, // activatedManually
       prefix,

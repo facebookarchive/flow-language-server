@@ -67,6 +67,7 @@ export default class TextDocuments {
 
       this._docs.set(textDocument.uri, doc);
       doc.onDidStopChanging(this._handleStopChanging);
+      this._emitter.emit('didOpenTextDocument', {textDocument: doc});
     });
 
     connection.onDidChangeTextDocument((e: DidChangeTextDocumentParams) => {
@@ -94,5 +95,9 @@ export default class TextDocuments {
 
   onDidChangeContent(handler: onChangeHandler): void {
     this._emitter.on('didChangeContent', handler);
+  }
+
+  onDidOpenTextDocument(handler: Function): void {
+    this._emitter.on('didOpenTextDocument', handler);
   }
 }

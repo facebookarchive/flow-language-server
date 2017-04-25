@@ -41,6 +41,11 @@ export function createServer(connection: IConnection) {
       diagnostics.validate(document);
     });
 
+    documents.onDidOpenTextDocument(({textDocument}) => {
+      logger.debug('document opened');
+      diagnostics.validate(textDocument);
+    });
+
     const completion = new Completion(connection, documents, flow);
     connection.onCompletion(docParams => {
       logger.debug('completion requested');
