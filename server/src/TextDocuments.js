@@ -13,6 +13,7 @@ import type {
 
 import type {TextDocumentItem} from 'vscode-languageserver-types';
 
+import invariant from 'invariant';
 import TextDocument from './TextDocument';
 import {Emitter} from 'event-kit';
 import {TextDocumentSyncKind} from 'vscode-languageserver';
@@ -21,6 +22,12 @@ import {getLogger} from './pkg/nuclide-logging';
 const logger = getLogger();
 
 type onChangeHandler = (e: TextDocumentChangeEvent) => void;
+type onDidOpenHandler = (e: TextDocumentChangeEvent) => void;
+
+type ManagedDocument = {
+  document: TextDocument,
+  onDidStopChangingDisposable: IDisposable,
+};
 
 function textDocumentFromLSPTextDocument(textDocument: TextDocumentItem) {
   return new TextDocument(
@@ -32,11 +39,11 @@ function textDocumentFromLSPTextDocument(textDocument: TextDocumentItem) {
 }
 
 export default class TextDocuments {
-  _docs: Map<string, TextDocument>;
+  _managedDocuments: Map<string, ManagedDocument>;
   _emitter: Emitter;
 
   constructor() {
-    this._docs = new Map();
+    this._managedDocuments = new Map();
     this._emitter = new Emitter();
   }
 
@@ -45,51 +52,57 @@ export default class TextDocuments {
   }
 
   get(uri: string) {
-    const doc = this._docs.get(uri);
+    const managedDocument = this._managedDocuments.get(uri);
 
-    if (doc == null) {
+    if (managedDocument == null || managedDocument.document == null) {
       logger.error(
         'asked up update doc with uri',
         uri,
         'but buffer was not considered open',
       );
 
-      throw new Error('document with uri', uri, 'does not exist');
+      throw new Error('document with uri ' + uri + ' does not exist');
     }
-    return doc;
+    return managedDocument.document;
   }
 
   listen(connection: IConnection): void {
-    global.connection = connection;
     connection.onDidOpenTextDocument((e: DidOpenTextDocumentParams) => {
       const {textDocument} = e;
-      const doc = textDocumentFromLSPTextDocument(textDocument);
+      const document = textDocumentFromLSPTextDocument(textDocument);
 
-      this._docs.set(textDocument.uri, doc);
-      doc.onDidStopChanging(this._handleStopChanging);
-      this._emitter.emit('didOpenTextDocument', {textDocument: doc});
+      this._managedDocuments.set(textDocument.uri, {
+        document,
+        onDidStopChangingDisposable: document.onDidStopChanging(
+          this._handleDidStopChanging,
+        ),
+      });
+      this._emitter.emit('didOpenTextDocument', {textDocument: document});
     });
 
     connection.onDidChangeTextDocument((e: DidChangeTextDocumentParams) => {
       const {contentChanges, textDocument} = e;
-      const doc = this.get(textDocument.uri);
-      doc.updateMany(contentChanges, textDocument.version);
+      const document = this.get(textDocument.uri);
+      document.updateMany(contentChanges, textDocument.version);
     });
 
     connection.onDidCloseTextDocument((e: DidCloseTextDocumentParams) => {
       const {textDocument} = e;
 
-      const doc = this._docs.get(textDocument.uri);
-      doc && doc.dispose();
-      this._docs.delete(textDocument.uri);
+      const managedDocument = this._managedDocuments.get(textDocument.uri);
+      invariant(managedDocument != null, 'requires managed document');
+      managedDocument.onDidStopChangingDisposable.dispose();
+      this._managedDocuments.delete(textDocument.uri);
     });
   }
 
   all(): Array<TextDocument> {
-    return Array.from(this._docs.values());
+    return Array.from(this._managedDocuments.values()).map(
+      ({document}) => document,
+    );
   }
 
-  _handleStopChanging = (document: TextDocument) => {
+  _handleDidStopChanging = (document: TextDocument) => {
     this._emitter.emit('didChangeContent', {document});
   };
 
@@ -97,7 +110,7 @@ export default class TextDocuments {
     this._emitter.on('didChangeContent', handler);
   }
 
-  onDidOpenTextDocument(handler: Function): void {
+  onDidOpenTextDocument(handler: onDidOpenHandler): void {
     this._emitter.on('didOpenTextDocument', handler);
   }
 }

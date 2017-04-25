@@ -11,19 +11,18 @@ import {
 } from './utils/util';
 
 export default class TextDocument {
-  uri: NuclideUri;
-  languageId: string;
-  version: number;
   buffer: SimpleTextBuffer;
-  _emitter: Emitter;
+  isDirty: boolean = false;
+  languageId: string;
+  uri: NuclideUri;
+  version: number;
+  _emitter: Emitter = new Emitter();
 
   constructor(uri: string, languageId: string, version: number, text: string) {
     this.uri = uri;
     this.languageId = languageId;
     this.version = version;
-    this._emitter = new Emitter();
     this.buffer = new SimpleTextBuffer(text);
-    this.isDirty = false;
 
     this.buffer.onDidStopChanging(this._handleDidStopChanging);
   }
@@ -58,6 +57,8 @@ export default class TextDocument {
 
   updateMany(changes: Array<TextDocumentContentChangeEvent>, version: number) {
     this.isDirty = true;
+    this.version = version;
+
     for (const change of changes) {
       if (change.range != null) {
         // Incremental update
@@ -70,9 +71,6 @@ export default class TextDocument {
         this.buffer.setText(change.text);
       }
     }
-    this.version = version;
-
-    return this;
   }
 
   _handleDidStopChanging = () => {

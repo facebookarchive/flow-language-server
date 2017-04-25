@@ -37,12 +37,12 @@ export function createServer(connection: IConnection) {
     });
 
     documents.onDidChangeContent(({document}) => {
-      logger.debug('content changed');
+      logger.debug('content in document', document.uri, 'changed');
       diagnostics.validate(document);
     });
 
     documents.onDidOpenTextDocument(({textDocument}) => {
-      logger.debug('document opened');
+      logger.debug('document', textDocument.uri, 'opened');
       diagnostics.validate(textDocument);
     });
 
