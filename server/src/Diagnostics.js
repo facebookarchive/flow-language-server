@@ -28,7 +28,6 @@ type InternalDiagnostic = {
 };
 
 const noDiagnostics = [];
-const supportedLanguages = new Set(['javascript', 'javascriptreact']);
 
 export default class Diagnostics {
   connection: IConnection;
@@ -41,7 +40,8 @@ export default class Diagnostics {
 
   validate = async (textDocument: TextDocument) => {
     const {languageId} = textDocument;
-    if (!supportedLanguages.has(languageId)) {
+    if (!languageId.includes('javascript')) {
+      logger.warn(`language ${languageId} for document ${textDocument.uri} did not contain 'javascript'`);
       return;
     }
 
@@ -140,7 +140,7 @@ function toMessage(diagnostic: FileDiagnosticMessage): string {
     for (const trace of diagnostic.trace) {
       if (trace.text != null) {
         // put new 'sentences' on their own line
-        if (trace.text[0] === trace.text[0].toUpperCase()) {
+        if (trace.text[0] && trace.text[0] === trace.text[0].toUpperCase()) {
           message += '\n';
         } else {
           message += ' ';

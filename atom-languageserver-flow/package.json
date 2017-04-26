@@ -1,0 +1,51 @@
+{
+  "name": "languageserver-flow",
+  "main": "./lib/index",
+  "version": "0.1.0",
+  "description": "Provide Flow language support via the Flow Language Server",
+  "engines": {
+    "atom": ">=1.13.0"
+  },
+  "dependencies": {
+    "atom-languageclient": "git://github.com/atom/atom-languageclient.git"
+  },
+  "consumedServices": {
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  },
+  "providedServices": {
+    "autocomplete.provider": {
+      "versions": {
+        "2.0.0": "provideAutocomplete"
+      }
+    },
+    "linter": {
+      "versions": {
+        "1.0.0": "provideLinter"
+      }
+    },
+    "nuclide-outline-view": {
+      "versions": {
+        "0.0.0": "provideOutlines"
+      }
+    },
+    "nuclide-definition-provider": {
+      "versions": {
+        "0.0.0": "provideDefinitions"
+      }
+    },
+    "hyperclick.provider": {
+      "versions": {
+        "0.0.0": "provideHyperclick"
+      }
+    },
+    "nuclide-find-references.provider": {
+      "versions": {
+        "0.0.0": "provideFindReferences"
+      }
+    }
+  }
+}

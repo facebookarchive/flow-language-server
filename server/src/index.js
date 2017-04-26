@@ -15,12 +15,12 @@ import {
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {getLogger} from './pkg/nuclide-logging';
 
-const logger = getLogger();
-
 export function createServer(connection: IConnection) {
   const documents = new TextDocuments();
 
   connection.onInitialize(params => {
+    const logger = getLogger();
+
     logger.debug('connection initialized');
     const flow = new FlowSingleProjectLanguageService(
       params.rootPath,
@@ -39,7 +39,7 @@ export function createServer(connection: IConnection) {
     });
 
     documents.onDidSave(({document}) => {
-      logger.debug('document', document.uri, 'saved, running diagnostics');
+      logger.debug(`document ${document.uri} saved, running diagnostics`);
       diagnostics.validate(document);
     });
 
@@ -50,7 +50,7 @@ export function createServer(connection: IConnection) {
 
     const completion = new Completion(connection, documents, flow);
     connection.onCompletion(docParams => {
-      logger.debug('completion requested');
+      logger.debug(`completion requested for document ${docParams.textDocument.uri} with position ${JSON.stringify(docParams.position, null, 2)}`);
       return completion.provideCompletionItems(docParams);
     });
 

@@ -62,7 +62,7 @@ export function atomPointToLSPPosition(atomPoint: atom$PointObject): Position {
   };
 }
 
-export function atomRangeToLSPRange(atomRange: atom$RangeObject): Range {
+export function atomRangeToLSPRange(atomRange: atom$Range): Range {
   return {
     start: atomPointToLSPPosition(atomRange.start),
     end: atomPointToLSPPosition(atomRange.end),

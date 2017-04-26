@@ -2,28 +2,31 @@
 // @flow
 /* eslint-disable no-console */
 
-import {createConnection} from 'vscode-languageserver';
 import invariant from 'invariant';
+import patchNuclideLogger from '../patchNuclideLogger';
+import {createConnection} from 'vscode-languageserver';
 
-import {getLogger} from '../pkg/nuclide-logging';
 import {createServer} from '../index';
 
-const logger = getLogger();
+async function init() {
+  let connection;
+  try {
+    connection = createConnection();
+  } catch (e) {
+    console.error(e.message);
+    process.exit(1);
+  }
+  invariant(connection, 'for flow; program should have excited otherwise');
 
-process.on('uncaughtException', e => logger.error('uncaughtException', e));
-process.on('unhandledRejection', e => logger.error('unhandledRejection', e));
-
-let connection;
-try {
-  connection = createConnection();
-} catch (e) {
-  console.error(e.message);
-  process.exit(1);
+  if (process.argv.includes('--node-ipc')) {
+    // Unfortunately VSCode with node ipc disconnects immediately if the server
+    // is not created right away, so patch the logger afterwards
+    createServer(connection).listen();
+    patchNuclideLogger(connection);
+  } else {
+    await patchNuclideLogger(connection);
+    createServer(connection).listen();
+  }
 }
 
-invariant(connection, 'for flow; program should have excited otherwise');
-
-global.console.log = connection.console.log.bind(connection.console);
-global.console.error = connection.console.error.bind(connection.console);
-
-createServer(connection).listen();
+init();
