@@ -6,8 +6,11 @@ import type {
   Range,
 } from 'vscode-languageserver-types';
 
+import {Point} from 'simple-text-buffer';
+
 import {DiagnosticSeverity} from 'vscode-languageserver-types';
 import invariant from 'invariant';
+import nullthrows from 'nullthrows';
 import URI from 'vscode-uri';
 
 const FlowSeverity = {
@@ -17,7 +20,7 @@ const FlowSeverity = {
 type FlowSeverityValue = 'Error' | 'Warning';
 
 const flowSeverityToLSPSeverityMap: {
-  [FlowSeverityValue]: DiagnosticSeverityType,
+  [string]: DiagnosticSeverityType,
 } = {
   [FlowSeverity.Error]: DiagnosticSeverity.Error,
   [FlowSeverity.Warning]: DiagnosticSeverity.Warning,
@@ -40,21 +43,16 @@ export function flowSeverityToLSPSeverity(
   flowSeverity: string,
 ): DiagnosticSeverityType {
   invariant(
-    flowSeverity === FlowSeverity.Error ||
-      flowSeverity === FlowSeverity.Warning,
-    'must be valid Flow severity',
+    flowSeverity === FlowSeverity.Warning ||
+      flowSeverity === FlowSeverity.Error,
+    'must be a valid flow severity',
   );
 
-  return flowSeverityToLSPSeverityMap[flowSeverity];
+  return nullthrows(flowSeverityToLSPSeverityMap[flowSeverity]);
 }
 
-export function lspPositionToAtomPoint(
-  lspPosition: Position,
-): atom$PointObject {
-  return {
-    row: lspPosition.line,
-    column: lspPosition.character,
-  };
+export function lspPositionToAtomPoint(lspPosition: Position): atom$Point {
+  return new Point(lspPosition.line, lspPosition.character);
 }
 
 export function atomPointToLSPPosition(atomPoint: atom$PointObject): Position {
