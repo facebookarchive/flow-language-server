@@ -70,9 +70,14 @@ export default class TextDocument {
     );
   }
 
-  onDidStopChanging(handler: (doc: TextDocument) => void): IDisposable {
+  onDidStopChanging(handler: (document: TextDocument) => void): IDisposable {
     this.assertNotDisposed();
     return this._emitter.on('didStopChanging', handler);
+  }
+
+  onDidSave(handler: (document: TextDocument) => void): IDisposable {
+    this.assertNotDisposed();
+    return this._emitter.on('didSave', handler);
   }
 
   positionAt(offset: number): Position {
@@ -83,12 +88,14 @@ export default class TextDocument {
   }
 
   save(version: number, text: ?string) {
+    this.assertNotDisposed();
     if (text != null) {
       this.buffer.setText(text);
     }
 
     this.version = version;
     this.isDirty = false;
+    this._emitter.emit('didSave', this);
     logger.debug(`TextDocument: saved ${this.uri} and marked not dirty`);
   }
 

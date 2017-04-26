@@ -38,8 +38,8 @@ export function createServer(connection: IConnection) {
       flow.dispose();
     });
 
-    documents.onDidChangeContent(({document}) => {
-      logger.debug('content in document', document.uri, 'changed');
+    documents.onDidSave(({document}) => {
+      logger.debug('document', document.uri, 'saved, running diagnostics');
       diagnostics.validate(document);
     });
 

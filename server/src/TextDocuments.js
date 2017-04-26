@@ -93,6 +93,7 @@ export default class TextDocuments {
     this._disposables.add(document);
     this._emitter.emit('didOpenTextDocument', {textDocument: document});
     document.onDidStopChanging(this._handleDidStopChanging);
+    document.onDidSave(this._handleDidSave);
   }
 
   removeDocument(uri: NuclideUri) {
@@ -111,11 +112,19 @@ export default class TextDocuments {
     this._emitter.on('didChangeContent', handler);
   }
 
+  onDidSave(handler: (e: TextDocumentChangeEvent) => void): void {
+    this._emitter.on('didSave', handler);
+  }
+
   onDidOpenTextDocument(handler: (e: TextDocumentChangeEvent) => void): void {
     this._emitter.on('didOpenTextDocument', handler);
   }
 
   _handleDidStopChanging = (document: TextDocument) => {
     this._emitter.emit('didChangeContent', {document});
+  };
+
+  _handleDidSave = (document: TextDocument) => {
+    this._emitter.emit('didSave', {document});
   };
 }
