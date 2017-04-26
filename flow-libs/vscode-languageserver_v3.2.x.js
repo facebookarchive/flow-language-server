@@ -1608,14 +1608,14 @@ declare module 'vscode-languageserver/lib/protocol' {
    */
   declare interface DidSaveTextDocumentParams {
     /**
-       * The document that was closed.
-       */
+     * The document that was closed.
+     */
     textDocument: VersionedTextDocumentIdentifier,
 
     /**
-           * Optional the content when saved. Depends on the includeText value
-           * when the save notifcation was requested.
-           */
+     * Optional the content when saved. Depends on the includeText value
+     * when the save notifcation was requested.
+     */
     text?: string,
   }
   /**

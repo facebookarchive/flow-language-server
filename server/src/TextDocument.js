@@ -2,13 +2,18 @@
 import type {TextDocumentContentChangeEvent} from 'vscode-languageserver-types';
 import type {NuclideUri} from './pkg/commons-node/nuclideUri';
 
+import invariant from 'invariant';
 import SimpleTextBuffer from 'simple-text-buffer';
+import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
 import {Emitter} from 'event-kit';
 import {
   atomPointToLSPPosition,
   lspPositionToAtomPoint,
   lspRangeToAtomRange,
 } from './utils/util';
+import {getLogger} from './pkg/nuclide-logging';
+
+const logger = getLogger();
 
 export default class TextDocument {
   buffer: SimpleTextBuffer;
@@ -16,6 +21,8 @@ export default class TextDocument {
   languageId: string;
   uri: NuclideUri;
   version: number;
+
+  _disposables: UniversalDisposable = new UniversalDisposable();
   _emitter: Emitter = new Emitter();
 
   constructor(uri: string, languageId: string, version: number, text: string) {
@@ -24,38 +31,70 @@ export default class TextDocument {
     this.version = version;
     this.buffer = new SimpleTextBuffer(text);
 
-    this.buffer.onDidStopChanging(this._handleDidStopChanging);
+    this._disposables.add(this._emitter);
+    this._disposables.add(
+      this.buffer.onDidStopChanging(this._handleDidStopChanging),
+    );
+  }
+
+  assertNotDisposed() {
+    invariant(
+      !this.disposed,
+      `TextDocument with uri ${this.uri} was already disposed`,
+    );
   }
 
   dispose() {
-    this._emitter.dispose();
+    this.assertNotDisposed();
+    this._disposables.dispose();
+  }
+
+  get disposed(): boolean {
+    return this._disposables.disposed;
   }
 
   get lineCount(): number {
+    this.assertNotDisposed();
     return this.buffer.getLineCount();
   }
 
   getText(): string {
+    this.assertNotDisposed();
     return this.buffer.getText();
   }
 
   offsetAt(position: Position): number {
+    this.assertNotDisposed();
     return this.buffer.characterIndexForPosition(
       lspPositionToAtomPoint(position),
     );
   }
 
   onDidStopChanging(handler: (doc: TextDocument) => void): IDisposable {
+    this.assertNotDisposed();
     return this._emitter.on('didStopChanging', handler);
   }
 
   positionAt(offset: number): Position {
+    this.assertNotDisposed();
     return atomPointToLSPPosition(
       this.buffer.positionForCharacterIndex(offset),
     );
   }
 
+  save(version: number, text: ?string) {
+    if (text != null) {
+      this.buffer.setText(text);
+    }
+
+    this.version = version;
+    this.isDirty = false;
+    logger.debug(`TextDocument: saved ${this.uri} and marked not dirty`);
+  }
+
   updateMany(changes: Array<TextDocumentContentChangeEvent>, version: number) {
+    this.assertNotDisposed();
+
     this.isDirty = true;
     this.version = version;
 
@@ -71,9 +110,12 @@ export default class TextDocument {
         this.buffer.setText(change.text);
       }
     }
+
+    logger.debug(`TextDocument: ${this.uri} updated and marked dirty`);
   }
 
   _handleDidStopChanging = () => {
+    this.assertNotDisposed();
     this._emitter.emit('didStopChanging', this);
   };
 }

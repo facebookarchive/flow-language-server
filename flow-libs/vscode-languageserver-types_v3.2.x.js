@@ -401,8 +401,8 @@ declare module 'vscode-languageserver-types' {
    */
   declare type VersionedTextDocumentIdentifier = {
     /**
-       * The version number of this document.
-       */
+     * The version number of this document.
+     */
     version: number,
   } & TextDocumentIdentifier;
 

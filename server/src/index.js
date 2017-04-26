@@ -17,8 +17,9 @@ import {getLogger} from './pkg/nuclide-logging';
 
 const logger = getLogger();
 
-const documents = new TextDocuments();
 export function createServer(connection: IConnection) {
+  const documents = new TextDocuments();
+
   connection.onInitialize(params => {
     logger.debug('connection initialized');
     const flow = new FlowSingleProjectLanguageService(
@@ -33,6 +34,7 @@ export function createServer(connection: IConnection) {
     });
 
     connection.onShutdown(() => {
+      documents.dispose();
       flow.dispose();
     });
 
