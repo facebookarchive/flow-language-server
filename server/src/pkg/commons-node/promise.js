@@ -1,21 +1,20 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
 import invariant from 'assert';
 
 type RunReturn<T> = {
-  status: 'success';
-  result: T;
+  status: 'success',
+  result: T,
 } | {
-  status: 'outdated';
+  status: 'outdated',
 };
 
 /**
@@ -83,16 +82,15 @@ export class RequestSerializer<T> {
   async waitForLatestResult(): Promise<T> {
     let lastPromise = null;
     let result: any = null;
-    /* eslint-disable babel/no-await-in-loop */
     while (lastPromise !== this._latestPromise) {
       lastPromise = this._latestPromise;
       // Wait for the current last know promise to resolve, or a next run have started.
+      // eslint-disable-next-line no-await-in-loop
       result = await new Promise((resolve, reject) => {
         this._waitResolve = resolve;
         this._latestPromise.then(resolve);
       });
     }
-    /* eslint-enable babel/no-await-in-loop */
     return (result: T);
   }
 
@@ -109,6 +107,10 @@ export class RequestSerializer<T> {
  */
 export function sleep(milliSeconds: number): Promise<void> {
   return new Promise(resolve => { setTimeout(resolve, milliSeconds); });
+}
+
+export function nextTick(): Promise<void> {
+  return new Promise(resolve => { process.nextTick(resolve); });
 }
 
 /**
@@ -140,6 +142,36 @@ export async function triggerAfterWait<T>(
 }
 
 /**
+ * Returns a Promise that resolves to the same value as the given promise, or rejects if it takes
+ * longer than `milliseconds` milliseconds
+ */
+export function timeoutPromise<T>(
+  promise: Promise<T>,
+  milliseconds: number,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    let timeout = setTimeout(
+      () => {
+        timeout = null;
+        reject(new Error(`Promise timed out after ${String(milliseconds)} ms`));
+      },
+      milliseconds,
+    );
+    promise.then(value => {
+      if (timeout != null) {
+        clearTimeout(timeout);
+      }
+      resolve(value);
+    }).catch(value => {
+      if (timeout != null) {
+        clearTimeout(timeout);
+      }
+      reject(value);
+    });
+  });
+}
+
+/**
  * Call an async function repeatedly with a maximum number of trials limit,
  * until a valid result that's defined by a validation function.
  * A failed call can result from an async thrown exception, or invalid result.
@@ -162,9 +194,9 @@ export async function retryLimit<T>(
   let result = null;
   let tries = 0;
   let lastError = null;
-  /* eslint-disable babel/no-await-in-loop */
   while (tries === 0 || tries < maximumTries) {
     try {
+      // eslint-disable-next-line no-await-in-loop
       result = await retryFunction();
       lastError = null;
       if (validationFunction(result)) {
@@ -176,10 +208,10 @@ export async function retryLimit<T>(
     }
 
     if (++tries < maximumTries && retryIntervalMs !== 0) {
+      // eslint-disable-next-line no-await-in-loop
       await sleep(retryIntervalMs);
     }
   }
-  /* eslint-enable babel/no-await-in-loop */
   if (lastError != null) {
     throw lastError;
   } else if (tries === maximumTries) {
@@ -279,10 +311,11 @@ export class Deferred<T> {
  * @return Promise that resolves to an asynchronously derived value or null.
  */
 export function asyncFind<T, U>(
-  items: Array<T>,
-  test: (t: T) => ?Promise<U>,
+  items_: Array<T>,
+  test: (t: T) => ?Promise<?U>,
   thisArg?: mixed,
 ): Promise<?U> {
+  let items = items_;
   return new Promise((resolve, reject) => {
     // Create a local copy of items to defend against the caller modifying the
     // array before this Promise is resolved.
@@ -472,4 +505,22 @@ export async function asyncSome<T>(
  */
 export function isPromise(object: any): boolean {
   return Boolean(object) && typeof object === 'object' && typeof object.then === 'function';
+}
+
+/**
+ * We can't name a function 'finally', so use lastly instead.
+ * fn() will be executed (and completed) after the provided promise resolves/rejects.
+ */
+export function lastly<T>(
+  promise: Promise<T>,
+  fn: () => Promise<mixed> | mixed,
+): Promise<T> {
+  return promise
+    .then(ret => {
+      return Promise.resolve(fn())
+        .then(() => ret);
+    }, err => {
+      return Promise.resolve(fn())
+        .then(() => Promise.reject(err));
+    });
 }

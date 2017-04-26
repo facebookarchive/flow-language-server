@@ -1,12 +1,11 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
 
@@ -47,11 +46,7 @@ function reset<T>(field: string, constructor: () => T): T {
 }
 
 export default {
-  // Disable Object shorthand on the following line because an issue in Flow prevents using
-  // shorthand with the reserved word "get" (among others).
-  //
-  // eslint-disable-next-line babel/object-shorthand
-  get: get,
+  get,
   clear,
   reset,
 };

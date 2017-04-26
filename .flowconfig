@@ -1,7 +1,20 @@
 [ignore]
+; annotated with `@flow` but have errors
+<PROJECT_ROOT>/node_modules/fbjs/lib/.*
 
 [include]
 
 [libs]
+flow-libs/
 
 [options]
+emoji=true
+experimental.const_params=true
+experimental.strict_type_args=true
+module.use_strict=true
+unsafe.enable_getters_and_setters=true
+
+suppress_comment=.*\\$FlowFixMe.*
+suppress_comment=.*\\$FlowIssue.*
+suppress_comment=.*\\$FlowIgnore.*
+suppress_comment=.*\\$FlowFB.*
