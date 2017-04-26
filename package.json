@@ -46,6 +46,7 @@
     "vscode-uri": "^1.0.0"
   },
   "jest": {
-    "testPathIgnorePatterns": ["/node_modules/", "flow-vscode/", "server/lib/"]
+    "testMatch": ["**/*.test.js"],
+    "testPathIgnorePatterns": ["/node_modules/", "flow-vscode/*", "server/lib/*"]
   }
 }
