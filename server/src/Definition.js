@@ -1,8 +1,15 @@
 import type {IConnection, TextDocuments} from 'vscode-languageserver';
 import type {Definition, Range} from 'vscode-languageserver-types';
+import type {
+  TextDocumentPositionParams,
+} from 'vscode-languageserver/lib/protocol';
 
 import URI from 'vscode-uri';
 import {flowFindDefinition} from './pkg/flow-base/lib/FlowService';
+import {getLogger} from './pkg/nuclide-logging/lib/main';
+import {lspPositionToFlowPoint} from './utils/util';
+
+const logger = getLogger();
 
 export default class DefinitionSupport {
   connection: IConnection;
@@ -16,18 +23,17 @@ export default class DefinitionSupport {
   async provideDefinition({
     textDocument,
     position,
-  }: TextDocumentPositionParams): Promise<null | Definition> {
+  }: TextDocumentPositionParams): Promise<?Definition> {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const currentContents = this.documents.get(textDocument.uri).getText();
 
-    const line = position.line + 1; // fix offsets
-    const col = position.character + 1; // fix offsets
+    const flowPoint = lspPositionToFlowPoint(position);
 
     const definition = await flowFindDefinition(
       fileName,
       currentContents,
-      line,
-      col,
+      flowPoint.line,
+      flowPoint.column,
     );
 
     if (definition) {
@@ -35,6 +41,7 @@ export default class DefinitionSupport {
         line: definition.point.line,
         character: definition.point.column,
       };
+
       const range: Range = {
         start: point,
         end: point,
@@ -46,6 +53,7 @@ export default class DefinitionSupport {
       };
     }
 
+    logger.debug('did not find definition');
     return null; // no definition
   }
 }

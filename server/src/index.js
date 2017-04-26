@@ -5,6 +5,7 @@ import {IConnection, TextDocuments} from 'vscode-languageserver';
 import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
+import Hover from './Hover';
 import {getLogger} from './pkg/nuclide-logging/lib/main';
 
 const logger = getLogger();
@@ -18,12 +19,12 @@ export function createServer(connection: IConnection) {
 
     const diagnostics = new Diagnostics(connection, documents);
     connection.onDidChangeConfiguration(({settings}) => {
-      logger.info('config changed');
+      logger.debug('config changed');
       documents.all().forEach(doc => diagnostics.validate(doc));
     });
 
     documents.onDidChangeContent(({document}) => {
-      logger.info('content changed');
+      logger.debug('content changed');
       diagnostics.validate(document);
     });
 
@@ -38,9 +39,14 @@ export function createServer(connection: IConnection) {
     });
 
     const definition = new Definition(connection, documents);
-    connection.onDefinition(docParams =>
-      definition.provideDefinition(docParams),
+    connection.onDefinition(
+      async docParams => await definition.provideDefinition(docParams),
     );
+
+    const hover = new Hover(connection, documents);
+    connection.onHover(docParams => {
+      return hover.provideHover(docParams);
+    });
 
     logger.info('Flow language server started');
 
@@ -51,6 +57,7 @@ export function createServer(connection: IConnection) {
         completionProvider: {
           resolveProvider: true,
         },
+        hoverProvider: true,
       },
     };
   });

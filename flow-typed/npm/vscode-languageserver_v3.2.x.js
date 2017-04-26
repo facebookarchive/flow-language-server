@@ -399,10 +399,10 @@ declare module 'vscode-languageserver' {
     listen(): void,
 
     /**
-           * Installs a request handler described by the given [RequestType](#RequestType).
-           * @param type The [RequestType](#RequestType) describing the request.
-           * @param handler The handler to install
-           */
+     * Installs a request handler described by the given [RequestType](#RequestType).
+     * @param type The [RequestType](#RequestType) describing the request.
+     * @param handler The handler to install
+     */
     onRequest<R, E, RO>(
       type: RequestType0<R, E, RO>,
       handler: RequestHandler0<R, E>,
@@ -413,17 +413,17 @@ declare module 'vscode-languageserver' {
     ): void,
 
     /**
-           * Installs a request handler for the given method.
-           * @param method The method to register a request handler for.
-           * @param handler The handler to install.
-           */
+     * Installs a request handler for the given method.
+     * @param method The method to register a request handler for.
+     * @param handler The handler to install.
+     */
     onRequest<R, E>(method: string, handler: GenericRequestHandler<R, E>): void,
 
     /**
-           * Send a request to the client.
-           * @param type The [RequestType](#RequestType) describing the request.
-           * @param params The request's parameters.
-           */
+     * Send a request to the client.
+     * @param type The [RequestType](#RequestType) describing the request.
+     * @param params The request's parameters.
+     */
     sendRequest<R, E, RO>(
       type: RequestType0<R, E, RO>,
       token?: CancellationToken,
@@ -435,17 +435,17 @@ declare module 'vscode-languageserver' {
     ): Thenable<R>,
 
     /**
-           * Send a request to the client.
-           * @param method The method to invoke on the client.
-           * @param params The request's parameters.
-           */
+     * Send a request to the client.
+     * @param method The method to invoke on the client.
+     * @param params The request's parameters.
+     */
     sendRequest<R>(method: string, ...params: any[]): Thenable<R>,
 
     /**
-           * Installs a notification handler described by the given [NotificationType](#NotificationType).
-           * @param type The [NotificationType](#NotificationType) describing the notification.
-           * @param handler The handler to install.
-           */
+     * Installs a notification handler described by the given [NotificationType](#NotificationType).
+     * @param type The [NotificationType](#NotificationType) describing the notification.
+     * @param handler The handler to install.
+     */
     onNotification<RO>(
       type: NotificationType0<RO>,
       handler: NotificationHandler0,

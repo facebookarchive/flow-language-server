@@ -259,7 +259,9 @@ export class FlowRoot {
     } catch (e) {
       return null;
     }
+
     const type = json.type;
+    const loc = json.loc;
     const rawType = json.raw_type;
     if (!type || type === '(unknown)' || type === '') {
       if (type === '') {
@@ -271,7 +273,7 @@ export class FlowRoot {
       }
       return null;
     }
-    return {type, rawType};
+    return {type, rawType, loc};
   }
 
   async flowGetCoverage(path: NuclideUri): Promise<?FlowCoverageResult> {
