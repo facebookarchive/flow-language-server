@@ -7,7 +7,6 @@ import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import SimpleTextBuffer from 'simple-text-buffer';
 import URI from 'vscode-uri';
 import {getLogger} from './pkg/nuclide-logging';
 import {atomPointToLSPPosition, lspPositionToAtomPoint} from './utils/util';
@@ -34,11 +33,11 @@ export default class DefinitionSupport {
     position,
   }: TextDocumentPositionParams): Promise<?Definition> {
     const fileName = URI.parse(textDocument.uri).fsPath;
-    const currentContents = this.documents.get(textDocument.uri).getText();
+    const doc = this.documents.get(textDocument.uri);
 
     const definitionResults = await this.flow.getDefinition(
       fileName,
-      new SimpleTextBuffer(currentContents),
+      doc.buffer,
       lspPositionToAtomPoint(position),
     );
 

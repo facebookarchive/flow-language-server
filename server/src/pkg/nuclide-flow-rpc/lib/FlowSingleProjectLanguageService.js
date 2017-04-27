@@ -24,17 +24,11 @@ import type {
   Definition,
   DefinitionQueryResult,
 } from '../../nuclide-definition-service/lib/rpc-types';
-import type {
-  SingleFileLanguageService,
-} from '../../nuclide-language-service-rpc';
-import type {
-  NuclideEvaluationExpression,
-} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {SingleFileLanguageService} from '../../nuclide-language-service-rpc';
+import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 import type {TextEdit} from '../../nuclide-textedit/lib/rpc-types';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
-import type {
-  FindReferencesReturn,
-} from '../../nuclide-find-references/lib/rpc-types';
+import type {FindReferencesReturn} from '../../nuclide-find-references/lib/rpc-types';
 
 import type {ServerStatusType} from '..';
 import type {FlowExecInfoContainer} from './FlowExecInfoContainer';
@@ -84,8 +78,7 @@ export class FlowSingleProjectLanguageService {
       }
       return execInfo.flowVersion;
     });
-    this._process
-      .getServerStatusUpdates()
+    this._process.getServerStatusUpdates()
       .filter(state => state === 'not running')
       .subscribe(() => this._version.invalidateVersion());
   }
@@ -118,11 +111,7 @@ export class FlowSingleProjectLanguageService {
     buffer: simpleTextBuffer$TextBuffer,
     position: atom$Point,
   ): Promise<?DefinitionQueryResult> {
-    const match = wordAtPositionFromBuffer(
-      buffer,
-      position,
-      JAVASCRIPT_WORD_REGEX,
-    );
+    const match = wordAtPositionFromBuffer(buffer, position, JAVASCRIPT_WORD_REGEX);
     if (match == null) {
       return null;
     }
@@ -146,17 +135,18 @@ export class FlowSingleProjectLanguageService {
       if (json.path) {
         const loc = {
           file: json.path,
-          point: new Point(json.line - 1, json.start - 1),
+          point: new Point(
+            json.line - 1,
+            json.start - 1,
+          ),
         };
         return {
           queryRange: [match.range],
-          definitions: [
-            {
-              path: loc.file,
-              position: loc.point,
-              language: 'Flow',
-            },
-          ],
+          definitions: [{
+            path: loc.file,
+            position: loc.point,
+            language: 'Flow',
+          }],
         };
       } else {
         return null;
@@ -166,7 +156,10 @@ export class FlowSingleProjectLanguageService {
     }
   }
 
-  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition> {
+  getDefinitionById(
+    file: NuclideUri,
+    id: string,
+  ): Promise<?Definition> {
     throw new Error('Not Yet Implemented');
   }
 
@@ -184,12 +177,7 @@ export class FlowSingleProjectLanguageService {
 
     const options = {stdin: buffer.getText()};
     const args = [
-      'find-refs',
-      '--json',
-      '--path',
-      filePath,
-      position.row + 1,
-      position.column + 1,
+      'find-refs', '--json', '--path', filePath, position.row + 1, position.column + 1,
     ];
     try {
       const result = await this._process.execFlow(args, options);
@@ -221,7 +209,6 @@ export class FlowSingleProjectLanguageService {
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
   ): Promise<?DiagnosticProviderUpdate> {
-    logger.info('fetching diagnostics for', filePath);
     await this._forceRecheck(filePath);
 
     const options = {};
@@ -233,11 +220,7 @@ export class FlowSingleProjectLanguageService {
     try {
       // Don't log errors if the command returns a nonzero exit code, because status returns nonzero
       // if it is reporting any issues, even when it succeeds.
-      result = await this._process.execFlow(
-        args,
-        options,
-        /* waitForServer */ true,
-      );
+      result = await this._process.execFlow(args, options, /* waitForServer */ true);
       if (!result) {
         return null;
       }
@@ -284,17 +267,14 @@ export class FlowSingleProjectLanguageService {
     return ideConnections
       .switchMap(ideConnection => {
         if (ideConnection != null) {
-          return ideConnection
-            .observeDiagnostics()
+          return ideConnection.observeDiagnostics()
             .filter(msg => msg.kind === 'errors')
             .map(msg => {
               invariant(msg.kind === 'errors');
               return msg.errors;
             })
             .map(diagnosticsJson => {
-              const diagnostics = flowStatusOutputToDiagnostics(
-                diagnosticsJson,
-              );
+              const diagnostics = flowStatusOutputToDiagnostics(diagnosticsJson);
               const filePathToMessages = new Map();
 
               for (const diagnostic of diagnostics) {
@@ -314,18 +294,20 @@ export class FlowSingleProjectLanguageService {
           return Observable.of(new Map());
         }
       })
-      .scan((oldDiagnostics, newDiagnostics) => {
-        for (const [filePath, diagnostics] of oldDiagnostics) {
-          if (diagnostics.length > 0 && !newDiagnostics.has(filePath)) {
-            newDiagnostics.set(filePath, []);
+      .scan(
+        (oldDiagnostics, newDiagnostics) => {
+          for (const [filePath, diagnostics] of oldDiagnostics) {
+            if (diagnostics.length > 0 && !newDiagnostics.has(filePath)) {
+              newDiagnostics.set(filePath, []);
+            }
           }
-        }
-        return newDiagnostics;
-      }, new Map())
+          return newDiagnostics;
+        },
+        new Map(),
+      )
       .concatMap(filePathToMessages => {
-        const fileDiagnosticUpdates: Array<FileDiagnosticUpdate> = [
-          ...filePathToMessages.entries(),
-        ].map(([filePath, messages]) => ({filePath, messages}));
+        const fileDiagnosticUpdates: Array<FileDiagnosticUpdate> = [...filePathToMessages.entries()]
+          .map(([filePath, messages]) => ({filePath, messages}));
         return Observable.from(fileDiagnosticUpdates);
       })
       .catch(err => {
@@ -333,6 +315,7 @@ export class FlowSingleProjectLanguageService {
         throw err;
       });
   }
+
 
   async getAutocompleteSuggestions(
     filePath: NuclideUri,
@@ -355,24 +338,14 @@ export class FlowSingleProjectLanguageService {
     // single alphanumeric character, autocomplete-plus no longer includes the dot in the prefix.
     const prefixHasDot = prefix.indexOf('.') !== -1;
 
-    if (
-      !activatedManually &&
-      !prefixHasDot &&
-      replacementPrefix.length < minimumPrefixLength
-    ) {
+    if (!activatedManually && !prefixHasDot && replacementPrefix.length < minimumPrefixLength) {
       return null;
     }
 
     const options = {};
 
     // Note that Atom coordinates are 0-indexed whereas Flow's are 1-indexed, so we must add 1.
-    const args = [
-      'autocomplete',
-      '--json',
-      filePath,
-      position.row + 1,
-      position.column + 1,
-    ];
+    const args = ['autocomplete', '--json', filePath, position.row + 1, position.column + 1];
 
     options.stdin = buffer.getText();
     try {
@@ -382,13 +355,9 @@ export class FlowSingleProjectLanguageService {
       }
       const json: FlowAutocompleteOutput = parseJSON(args, result.stdout);
       const resultsArray: Array<FlowAutocompleteItem> = json.result;
-      const completions = resultsArray.map(item =>
-        processAutocompleteItem(replacementPrefix, item),
-      );
-      return filterResultsByPrefix(prefix, {
-        isIncomplete: false,
-        items: completions,
-      });
+      const completions =
+        resultsArray.map(item => processAutocompleteItem(replacementPrefix, item));
+      return filterResultsByPrefix(prefix, {isIncomplete: false, items: completions});
     } catch (e) {
       return {isIncomplete: false, items: []};
     }
@@ -417,7 +386,8 @@ export class FlowSingleProjectLanguageService {
 
     const line = position.row + 1;
     const column = position.column + 1;
-    const args = ['type-at-pos', '--json', '--path', filePath, line, column];
+    const args =
+      ['type-at-pos', '--json', '--path', filePath, line, column];
 
     let result;
     try {
@@ -588,12 +558,10 @@ export class FlowSingleProjectLanguageService {
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
     range: atom$Range,
-  ): Promise<
-    ?{
-      newCursor?: number,
-      formatted: string,
-    }
-  > {
+  ): Promise<?{
+    newCursor?: number,
+    formatted: string,
+  }> {
     throw new Error('Not implemented');
   }
 
@@ -604,6 +572,7 @@ export class FlowSingleProjectLanguageService {
   ): Promise<?FindReferencesReturn> {
     throw new Error('Not Yet Implemented');
   }
+
 
   getEvaluationExpression(
     filePath: NuclideUri,
@@ -625,9 +594,7 @@ function parseJSON(args: Array<any>, value: string): any {
   try {
     return JSON.parse(value);
   } catch (e) {
-    logger.warn(
-      `Invalid JSON result from flow ${args.join(' ')}. JSON:\n'${value}'.`,
-    );
+    logger.warn(`Invalid JSON result from flow ${args.join(' ')}. JSON:\n'${value}'.`);
     throw e;
   }
 }
@@ -653,9 +620,8 @@ export function processAutocompleteItem(
   const funcDetails = flowItem.func_details;
   if (funcDetails) {
     // The parameters in human-readable form for use on the right label.
-    const rightParamStrings = funcDetails.params.map(
-      param => `${param.name}: ${param.type}`,
-    );
+    const rightParamStrings = funcDetails.params
+      .map(param => `${param.name}: ${param.type}`);
     let snippetArgs = `(${getSnippetString(funcDetails.params.map(param => param.name))})`;
     let leftLabel = funcDetails.return_type;
     let rightLabel = `(${rightParamStrings.join(', ')})`;
@@ -696,15 +662,13 @@ function getSnippetString(paramNames: Array<string>): string {
  * will be selected along with the last non-optional parameter and you can just type to overwrite
  * them.
  */
-// Exported for testing
-export function groupParamNames(
-  paramNames: Array<string>,
-): Array<Array<string>> {
+ // Exported for testing
+export function groupParamNames(paramNames: Array<string>): Array<Array<string>> {
   // Split the parameters into two groups -- all of the trailing optional paramaters, and the rest
   // of the parameters. Trailing optional means all optional parameters that have only optional
   // parameters after them.
-  const [ordinaryParams, trailingOptional] = paramNames.reduceRight(
-    ([ordinary, optional], param) => {
+  const [ordinaryParams, trailingOptional] =
+    paramNames.reduceRight(([ordinary, optional], param) => {
       // If there have only been optional params so far, and this one is optional, add it to the
       // list of trailing optional params.
       if (isOptional(param) && ordinary.length === 0) {

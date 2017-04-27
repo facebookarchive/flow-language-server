@@ -6,8 +6,11 @@ import type {
   Range,
 } from 'vscode-languageserver-types';
 
+import {Point} from 'simple-text-buffer';
+
 import {DiagnosticSeverity} from 'vscode-languageserver-types';
 import invariant from 'invariant';
+import nullthrows from 'nullthrows';
 import URI from 'vscode-uri';
 
 const FlowSeverity = {
@@ -17,7 +20,7 @@ const FlowSeverity = {
 type FlowSeverityValue = 'Error' | 'Warning';
 
 const flowSeverityToLSPSeverityMap: {
-  [FlowSeverityValue]: DiagnosticSeverityType,
+  [string]: DiagnosticSeverityType,
 } = {
   [FlowSeverity.Error]: DiagnosticSeverity.Error,
   [FlowSeverity.Warning]: DiagnosticSeverity.Warning,
@@ -40,31 +43,35 @@ export function flowSeverityToLSPSeverity(
   flowSeverity: string,
 ): DiagnosticSeverityType {
   invariant(
-    flowSeverity === FlowSeverity.Error ||
-      flowSeverity === FlowSeverity.Warning,
-    'must be valid Flow severity',
+    flowSeverity === FlowSeverity.Warning ||
+      flowSeverity === FlowSeverity.Error,
+    'must be a valid flow severity',
   );
 
-  return flowSeverityToLSPSeverityMap[flowSeverity];
+  return nullthrows(flowSeverityToLSPSeverityMap[flowSeverity]);
 }
 
 export function lspPositionToAtomPoint(lspPosition: Position): atom$Point {
-  return {
-    row: lspPosition.line,
-    column: lspPosition.character,
-  };
+  return new Point(lspPosition.line, lspPosition.character);
 }
 
-export function atomPointToLSPPosition(atomPoint: atom$Point) {
+export function atomPointToLSPPosition(atomPoint: atom$PointObject): Position {
   return {
     line: atomPoint.row,
     character: atomPoint.column,
   };
 }
 
-export function atomRangeToLSPRange(atomRange: atom$Range): Range {
+export function atomRangeToLSPRange(atomRange: atom$RangeObject): Range {
   return {
     start: atomPointToLSPPosition(atomRange.start),
     end: atomPointToLSPPosition(atomRange.end),
+  };
+}
+
+export function lspRangeToAtomRange(lspRange: Range): atom$RangeObject {
+  return {
+    start: lspPositionToAtomPoint(lspRange.start),
+    end: lspPositionToAtomPoint(lspRange.end),
   };
 }

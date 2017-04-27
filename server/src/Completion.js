@@ -1,6 +1,6 @@
 // @flow
 
-import type {IConnection, TextDocuments} from 'vscode-languageserver';
+import type {IConnection} from 'vscode-languageserver';
 import type {
   CompletionList,
   CompletionItemKindType,
@@ -14,8 +14,8 @@ import {
 
 import URI from 'vscode-uri';
 import {CompletionItemKind} from 'vscode-languageserver-types';
-import SimpleTextBuffer from 'simple-text-buffer';
 
+import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
 import {getLogger} from './pkg/nuclide-logging';
 
@@ -41,12 +41,12 @@ export default class Completion {
     position,
   }: TextDocumentPositionParams): Promise<CompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
-    const currentContents = this.documents.get(textDocument.uri).getText();
+    const doc = this.documents.get(textDocument.uri);
     const prefix = '.'; // TODO do better.
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
-      new SimpleTextBuffer(currentContents),
+      doc.buffer,
       lspPositionToAtomPoint(position),
       true, // activatedManually
       prefix,
@@ -87,7 +87,7 @@ export default class Completion {
     };
   }
 
-  typeToKind(type: string, description: string): CompletionItemKindType {
+  typeToKind(type: ?string, description: ?string): CompletionItemKindType {
     if (type === 'function') {
       return CompletionItemKind.Function;
     }

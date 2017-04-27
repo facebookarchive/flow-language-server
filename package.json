@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "yarn watch",
     "build": "babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
+    "test": "jest",
     "watch": "yarn build -- --watch"
   },
   "devDependencies": {
@@ -34,6 +35,7 @@
     "log4js": "^0.6.37",
     "lru-cache": "^4.0.1",
     "mkdirp": "^0.5.1",
+    "nullthrows": "^1.0.0",
     "regenerator-runtime": "^0.10.3",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.0-beta.8",
@@ -43,5 +45,15 @@
     "temp": "^0.8.3",
     "vscode-languageserver": "^3.2.0",
     "vscode-uri": "^1.0.0"
+  },
+  "jest": {
+    "testMatch": [
+      "**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "flow-vscode/*",
+      "server/lib/*"
+    ]
   }
 }

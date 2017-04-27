@@ -3,18 +3,10 @@
 /* eslint-disable no-console */
 
 import {createConnection} from 'vscode-languageserver';
-import * as log4js from 'log4js';
 import invariant from 'invariant';
 
 import {getLogger} from '../pkg/nuclide-logging';
 import {createServer} from '../index';
-
-log4js.configure({
-  appenders: [
-    {type: 'console'},
-    {type: 'file', filename: '/tmp/flow-server.log'},
-  ],
-});
 
 const logger = getLogger();
 
@@ -30,4 +22,8 @@ try {
 }
 
 invariant(connection, 'for flow; program should have excited otherwise');
+
+global.console.log = connection.console.log.bind(connection.console);
+global.console.error = connection.console.error.bind(connection.console);
+
 createServer(connection).listen();

@@ -1,11 +1,12 @@
 // @flow
 
-import {IConnection, TextDocuments} from 'vscode-languageserver';
+import {IConnection} from 'vscode-languageserver';
 
 import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
 import Hover from './Hover';
+import TextDocuments from './TextDocuments';
 import {
   FlowExecInfoContainer,
 } from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
@@ -16,9 +17,9 @@ import {getLogger} from './pkg/nuclide-logging';
 
 const logger = getLogger();
 
-const documents = new TextDocuments();
 export function createServer(connection: IConnection) {
-  documents.listen(connection);
+  const documents = new TextDocuments();
+
   connection.onInitialize(params => {
     logger.debug('connection initialized');
     const flow = new FlowSingleProjectLanguageService(
@@ -33,12 +34,18 @@ export function createServer(connection: IConnection) {
     });
 
     connection.onShutdown(() => {
+      documents.dispose();
       flow.dispose();
     });
 
-    documents.onDidChangeContent(({document}) => {
-      logger.debug('content changed');
+    documents.onDidSave(({document}) => {
+      logger.debug('document', document.uri, 'saved, running diagnostics');
       diagnostics.validate(document);
+    });
+
+    documents.onDidOpenTextDocument(({textDocument}) => {
+      logger.debug('document', textDocument.uri, 'opened');
+      diagnostics.validate(textDocument);
     });
 
     const completion = new Completion(connection, documents, flow);
@@ -79,6 +86,7 @@ export function createServer(connection: IConnection) {
 
   return {
     listen() {
+      documents.listen(connection);
       connection.listen();
     },
   };

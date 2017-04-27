@@ -1,11 +1,11 @@
-import type {IConnection, TextDocuments} from 'vscode-languageserver';
+import type {IConnection} from 'vscode-languageserver';
 import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import SimpleTextBuffer from 'simple-text-buffer';
 import URI from 'vscode-uri';
 
+import TextDocuments from './TextDocuments';
 import {atomRangeToLSPRange, lspPositionToAtomPoint} from './utils/util';
 
 function markedJS(text: string): string {
@@ -31,11 +31,11 @@ export default class HoverSupport {
     const {position, textDocument} = params;
 
     const fileName = URI.parse(textDocument.uri).fsPath;
-    const currentContents = this.documents.get(textDocument.uri).getText();
+    const doc = this.documents.get(textDocument.uri);
 
     const typeHint = await this.flow.typeHint(
       fileName,
-      new SimpleTextBuffer(currentContents),
+      doc.buffer,
       lspPositionToAtomPoint(position),
       false,
     );

@@ -4,7 +4,6 @@
  */
 import type {
   Position,
-  TextDocumentSyncKind,
   TextDocumentChangeEvent,
   TextDocumentWillSaveEvent,
   RequestHandler,
@@ -25,13 +24,6 @@ import type {
   InitializeParams,
   InitializeResult,
   InitializedParams,
-  DidChangeConfigurationParams,
-  DidOpenTextDocumentParams,
-  DidChangeTextDocumentParams,
-  DidCloseTextDocumentParams,
-  WillSaveTextDocumentParams,
-  DidSaveTextDocumentParams,
-  PublishDiagnosticsParams,
   CompletionItem,
   CompletionList,
   SignatureHelp,
@@ -70,6 +62,15 @@ declare module 'vscode-languageserver' {
   declare var resolveModule2: typeof undefined;
 
   declare var resolveModulePath: typeof undefined;
+
+  declare var TextDocumentSyncKind: {
+    None: 0,
+    Full: 1,
+    Incremental: 2,
+  };
+
+  declare type TextDocumentSyncKindType = 0 | 1 | 2;
+
   /**
    * A manager for simple text documents
    */
@@ -1181,14 +1182,6 @@ declare module 'vscode-languageserver/lib/protocol' {
     experimental?: any,
   }
 
-  declare var TextDocumentSyncKind: {
-    None: 0,
-    Full: 1,
-    Incremental: 2,
-  };
-
-  declare type TextDocumentSyncKindType = 0 | 1 | 2;
-
   /**
    * General text document registration options.
    */
@@ -1615,14 +1608,14 @@ declare module 'vscode-languageserver/lib/protocol' {
    */
   declare interface DidSaveTextDocumentParams {
     /**
-       * The document that was closed.
-       */
+     * The document that was closed.
+     */
     textDocument: VersionedTextDocumentIdentifier,
 
     /**
-           * Optional the content when saved. Depends on the includeText value
-           * when the save notifcation was requested.
-           */
+     * Optional the content when saved. Depends on the includeText value
+     * when the save notifcation was requested.
+     */
     text?: string,
   }
   /**
