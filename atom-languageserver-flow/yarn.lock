@@ -4,7 +4,7 @@
 
 "atom-languageclient@git://github.com/atom/atom-languageclient.git":
   version "0.1.0"
-  resolved "git://github.com/atom/atom-languageclient.git#a88f59f3b785a931c4896f67881287fb24c32248"
+  resolved "git://github.com/atom/atom-languageclient.git#da64bbe93bc0e6a9d41091cfe491180781f9e84d"
   dependencies:
     postinstall-build "^3.0.0"
     vscode-jsonrpc "^3.2.0"
