@@ -1,12 +1,11 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
 /**
@@ -19,9 +18,29 @@
 import addPrepareStackTraceHook from './stacktrace';
 import invariant from 'assert';
 import singleton from '../../commons-node/singleton';
+import {
+  getDefaultConfig,
+  getPathToLogFile,
+  FileAppender,
+  getServerLogAppenderConfig,
+  addAdditionalLogFile,
+  getAdditionalLogFiles,
+} from './config';
+import type {AdditionalLogFile} from './config';
+import log4js from 'log4js';
 
 import type {LogLevel} from './rpc-types';
 import type {Logger} from './types';
+
+export {
+  getDefaultConfig,
+  getPathToLogFile,
+  FileAppender,
+  getServerLogAppenderConfig,
+  addAdditionalLogFile,
+  getAdditionalLogFiles,
+};
+export type {AdditionalLogFile};
 
 /* Listed in order of severity. */
 type Level = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -34,12 +53,10 @@ function getCategory(category: ?string): string {
 }
 
 export function flushLogsAndExit(exitCode: number): void {
-  const log4js = require('log4js');
   log4js.shutdown(() => process.exit(exitCode));
 }
 
 export function flushLogsAndAbort(): void {
-  const log4js = require('log4js');
   log4js.shutdown(() => process.abort());
 }
 
@@ -49,13 +66,11 @@ export function flushLogsAndAbort(): void {
  * see https://github.com/nomiddlename/log4js-node/blob/master/lib/log4js.js#L120 for details.
  */
 function getLog4jsLogger(category: string): Object {
-  const log4js = require('log4js');
   return log4js.getLogger(category);
 }
 
 export function updateConfig(config: any, options: any): void {
   // update config takes affect global to all existing and future loggers.
-  const log4js = require('log4js');
   log4js.configure(config, options);
 }
 
@@ -67,7 +82,7 @@ function createLazyLogger(category: string): Logger {
     return function(...args: Array<any>) {
       const logger = getLog4jsLogger(category);
       invariant(logger);
-      logger[level].apply(logger, args);
+      logger[level](...args);
     };
   }
 
@@ -103,7 +118,7 @@ export function initialUpdateConfig(): Promise<void> {
   return singleton.get(
     INITIAL_UPDATE_CONFIG_KEY,
     async () => {
-      const defaultConfig = await require('./config').getDefaultConfig();
+      const defaultConfig = await getDefaultConfig();
       updateConfig(defaultConfig);
     });
 }
@@ -123,12 +138,12 @@ export function getLogger(category: ?string): Logger {
 }
 
 export type CategoryLogger = {
-  log(message: string): void;
-  logTrace(message: string): void;
-  logInfo(message: string): void;
-  logError(message: string): void;
-  logErrorAndThrow(message: string): void;
-  setLogLevel(level: LogLevel): void;
+  log(message: string): void,
+  logTrace(message: string): void,
+  logInfo(message: string): void,
+  logError(message: string): void,
+  logErrorAndThrow(message: string): void,
+  setLogLevel(level: LogLevel): void,
 };
 
 // Utility function that returns a wrapper logger for input category.
@@ -176,8 +191,4 @@ export function getCategoryLogger(category: string): CategoryLogger {
     logErrorAndThrow,
     setLogLevel,
   };
-}
-
-export function getPathToLogFileForToday(): string {
-  return require('./config').getPathToLogFileForToday();
 }

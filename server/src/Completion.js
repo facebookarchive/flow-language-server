@@ -5,22 +5,35 @@ import type {
   CompletionList,
   CompletionItemKindType,
 } from 'vscode-languageserver-types';
-
-import URI from 'vscode-uri';
-import {CompletionItemKind} from 'vscode-languageserver-types';
 import type {
   TextDocumentPositionParams,
 } from 'vscode-languageserver/lib/protocol';
+import {
+  FlowSingleProjectLanguageService,
+} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import {flowGetAutocompleteSuggestions} from './pkg/flow-base/lib/FlowService';
+import URI from 'vscode-uri';
+import {CompletionItemKind} from 'vscode-languageserver-types';
+import SimpleTextBuffer from 'simple-text-buffer';
+
+import {lspPositionToAtomPoint} from './utils/util';
+import {getLogger} from './pkg/nuclide-logging';
+
+const logger = getLogger();
 
 export default class Completion {
   connection: IConnection;
   documents: TextDocuments;
+  flow: FlowSingleProjectLanguageService;
 
-  constructor(connection: IConnection, documents: TextDocuments) {
+  constructor(
+    connection: IConnection,
+    documents: TextDocuments,
+    flow: FlowSingleProjectLanguageService,
+  ) {
     this.connection = connection;
     this.documents = documents;
+    this.flow = flow;
   }
 
   async provideCompletionItems({
@@ -31,19 +44,20 @@ export default class Completion {
     const currentContents = this.documents.get(textDocument.uri).getText();
     const prefix = '.'; // TODO do better.
 
-    const completions = await flowGetAutocompleteSuggestions(
+    const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
-      currentContents,
-      position.line,
-      position.character,
+      new SimpleTextBuffer(currentContents),
+      lspPositionToAtomPoint(position),
+      true, // activatedManually
       prefix,
-      true,
     );
 
-    if (completions) {
+    if (autocompleteResult) {
+      const {isIncomplete, items} = autocompleteResult;
+
       return {
-        isIncomplete: false,
-        items: completions.map(atomCompletion => {
+        isIncomplete,
+        items: items.map(atomCompletion => {
           const completion: CompletionItem = {
             label: atomCompletion.displayText,
           };
@@ -57,7 +71,7 @@ export default class Completion {
             atomCompletion.description,
           );
 
-          if (completion.kind === CompletionItemKind.Function) {
+          if (atomCompletion.snippet) {
             completion.insertText = atomCompletion.snippet;
           }
 
@@ -66,6 +80,7 @@ export default class Completion {
       };
     }
 
+    logger.debug('found no autocomplete results');
     return {
       isIncomplete: true,
       items: [],

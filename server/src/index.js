@@ -6,21 +6,34 @@ import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
 import Hover from './Hover';
-import {getLogger} from './pkg/nuclide-logging/lib/main';
+import {
+  FlowExecInfoContainer,
+} from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
+import {
+  FlowSingleProjectLanguageService,
+} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
+import {getLogger} from './pkg/nuclide-logging';
 
 const logger = getLogger();
 
+const documents = new TextDocuments();
 export function createServer(connection: IConnection) {
-  const documents = new TextDocuments();
-
+  documents.listen(connection);
   connection.onInitialize(params => {
-    // TODO: Explicitly pass this through to FlowHelpers.js
-    global.workspacePath = params.rootPath;
+    logger.debug('connection initialized');
+    const flow = new FlowSingleProjectLanguageService(
+      params.rootPath,
+      new FlowExecInfoContainer(),
+    );
 
-    const diagnostics = new Diagnostics(connection, documents);
+    const diagnostics = new Diagnostics(connection, flow);
     connection.onDidChangeConfiguration(({settings}) => {
       logger.debug('config changed');
       documents.all().forEach(doc => diagnostics.validate(doc));
+    });
+
+    connection.onShutdown(() => {
+      flow.dispose();
     });
 
     documents.onDidChangeContent(({document}) => {
@@ -28,22 +41,24 @@ export function createServer(connection: IConnection) {
       diagnostics.validate(document);
     });
 
-    const completion = new Completion(connection, documents);
-    connection.onCompletion(docParams =>
-      completion.provideCompletionItems(docParams),
-    );
+    const completion = new Completion(connection, documents, flow);
+    connection.onCompletion(docParams => {
+      logger.debug('completion requested');
+      return completion.provideCompletionItems(docParams);
+    });
 
     connection.onCompletionResolve(() => {
       // for now, noop as we can't/don't need to provide any additional
       // information on resolve, but need to respond to implement completion
     });
 
-    const definition = new Definition(connection, documents);
-    connection.onDefinition(
-      async docParams => await definition.provideDefinition(docParams),
-    );
+    const definition = new Definition(connection, documents, flow);
+    connection.onDefinition(docParams => {
+      logger.debug('definition requested');
+      return definition.provideDefinition(docParams);
+    });
 
-    const hover = new Hover(connection, documents);
+    const hover = new Hover(connection, documents, flow);
     connection.onHover(docParams => {
       return hover.provideHover(docParams);
     });
@@ -65,7 +80,6 @@ export function createServer(connection: IConnection) {
   return {
     listen() {
       connection.listen();
-      documents.listen(connection);
     },
   };
 }

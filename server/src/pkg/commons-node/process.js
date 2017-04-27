@@ -1,43 +1,77 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
-import type {Observer} from 'rxjs';
-import type {ProcessMessage} from './process-types';
+import type {ProcessExitMessage, ProcessMessage, ProcessInfo} from './process-rpc-types';
 
+import {observableFromSubscribeFunction} from '../commons-node/event';
 import child_process from 'child_process';
-import spawn from 'cross-spawn';
-import nuclideUri from '../nuclide-remote-uri/lib/main';
-import {CompositeSubscription, observeStream, splitStream, takeWhileInclusive} from './stream';
+import {MultiMap} from './collection';
+import nuclideUri from './nuclideUri';
+import {splitStream, takeWhileInclusive} from './observable';
+import {observeStream} from './stream';
+import {maybeToString} from './string';
 import {Observable} from 'rxjs';
-import {PromiseQueue} from './promise-executors';
+import invariant from 'assert';
 import {quote} from 'shell-quote';
+import performanceNow from './performanceNow';
 
-export type process$asyncExecuteRet = {
+// TODO(T17266325): Replace this in favor of `atom.whenShellEnvironmentLoaded()` when it lands
+import atomWhenShellEnvironmentLoaded from './whenShellEnvironmentLoaded';
+
+// Node crashes if we allow buffers that are too large.
+const DEFAULT_MAX_BUFFER = 100 * 1024 * 1024;
+
+const MAX_LOGGED_CALLS = 100;
+const PREVERVED_HISTORY_CALLS = 50;
+
+const noopDisposable = {dispose: () => {}};
+const whenShellEnvironmentLoaded =
+  typeof atom !== 'undefined' && atomWhenShellEnvironmentLoaded && !atom.inSpecMode()
+    ? atomWhenShellEnvironmentLoaded
+    : cb => { cb(); return noopDisposable; };
+
+export const loggedCalls = [];
+function logCall(duration, command, args) {
+  // Trim the history once in a while, to avoid doing expensive array
+  // manipulation all the time after we reached the end of the history
+  if (loggedCalls.length > MAX_LOGGED_CALLS) {
+    loggedCalls.splice(
+      0,
+      loggedCalls.length - PREVERVED_HISTORY_CALLS,
+      {time: new Date(), duration: 0, command: '... history stripped ...'},
+    );
+  }
+  loggedCalls.push({
+    duration,
+    command: [command, ...args].join(' '),
+    time: new Date(),
+  });
+}
+
+export type AsyncExecuteReturn = {
   // If the process fails to even start up, exitCode will not be set
   // and errorCode / errorMessage will contain the actual error message.
   // Otherwise, exitCode will always be defined.
-  command?: string;
-  errorMessage?: string;
-  errorCode?: string;
-  exitCode?: number;
-  stderr: string;
-  stdout: string;
+  errorMessage?: string,
+  errorCode?: string,
+  exitCode?: number,
+  stderr: string,
+  stdout: string,
 };
 
 type ProcessSystemErrorOptions = {
-  command: string;
-  args: Array<string>;
-  options: Object;
-  code: string;
-  originalError: Error;
+  command: string,
+  args: Array<string>,
+  options: Object,
+  code: string,
+  originalError: Error,
 };
 
 export class ProcessSystemError extends Error {
@@ -59,29 +93,41 @@ export class ProcessSystemError extends Error {
 }
 
 type ProcessExitErrorOptions = {
-  command: string;
-  args: Array<string>;
-  options: Object;
-  code: number;
-  stdout: string;
-  stderr: string;
+  command: string,
+  args: Array<string>,
+  options: Object,
+  exitMessage: ProcessExitMessage,
+  stdout: string,
+  stderr: string,
+};
+
+export type ObserveProcessOptions = child_process$spawnOpts & {
+  killTreeOnComplete?: ?boolean,
+};
+
+export type ForkProcessOptions = child_process$forkOpts & {
+  killTreeOnComplete?: ?boolean,
 };
 
 export class ProcessExitError extends Error {
   command: string;
   args: Array<string>;
   options: Object;
-  code: number;
+  code: ?number;
+  exitMessage: ProcessExitMessage;
   stdout: string;
   stderr: string;
 
   constructor(opts: ProcessExitErrorOptions) {
-    super(`"${opts.command}" failed with code ${opts.code}\n\n${opts.stderr}`);
+    super(
+      `"${opts.command}" failed with ${exitEventToMessage(opts.exitMessage)}\n\n${opts.stderr}`,
+    );
     this.name = 'ProcessExitError';
     this.command = opts.command;
     this.args = opts.args;
     this.options = opts.options;
-    this.code = opts.code;
+    this.exitMessage = opts.exitMessage;
+    this.code = opts.exitMessage.exitCode;
     this.stdout = opts.stdout;
     this.stderr = opts.stderr;
   }
@@ -89,115 +135,24 @@ export class ProcessExitError extends Error {
 
 export type ProcessError = ProcessSystemError | ProcessExitError;
 
-export type AsyncExecuteOptions = child_process$spawnOpts & {
-  // The queue on which to block dependent calls.
-  queueName?: string;
+export type AsyncExecuteOptions = child_process$execFileOpts & {
   // The contents to write to stdin.
-  stdin?: ?string;
-  // A command to pipe output through.
-  pipedCommand?: string;
-  // Arguments to the piped command.
-  pipedArgs?: Array<string>;
-  // Timeout (in milliseconds).
-  timeout?: number;
+  stdin?: ?string,
+  dontLogInNuclide?: ?boolean,
 };
-
-let platformPathPromise: ?Promise<string>;
-
-const blockingQueues = {};
-const COMMON_BINARY_PATHS = ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin'];
-
-/**
- * Captures the value of the PATH env variable returned by Darwin's (OS X) `path_helper` utility.
- * `path_helper -s`'s return value looks like this:
- *
- *     PATH="/usr/bin"; export PATH;
- */
-const DARWIN_PATH_HELPER_REGEXP = /PATH="([^"]+)"/;
 
 const STREAM_NAMES = ['stdin', 'stdout', 'stderr'];
 
-function getPlatformPath(): Promise<string> {
-  // Do not return the cached value if we are executing under the test runner.
-  if (platformPathPromise && process.env.NODE_ENV !== 'test') {
-    // Path is being fetched, await the Promise that's in flight.
-    return platformPathPromise;
-  }
-
-  // We do not cache the result of this check because we have unit tests that temporarily redefine
-  // the value of process.platform.
-  if (process.platform === 'darwin') {
-    // OS X apps don't inherit PATH when not launched from the CLI, so reconstruct it. This is a
-    // bug, filed against Atom Linter here: https://github.com/AtomLinter/Linter/issues/150
-    // TODO(jjiaa): remove this hack when the Atom issue is closed
-    platformPathPromise = new Promise((resolve, reject) => {
-      child_process.execFile('/usr/libexec/path_helper', ['-s'], (error, stdout, stderr) => {
-        if (error) {
-          reject(error);
-        } else {
-          const match = stdout.toString().match(DARWIN_PATH_HELPER_REGEXP);
-          resolve((match && match.length > 1) ? match[1] : '');
-        }
-      });
-    });
-  } else {
-    platformPathPromise = Promise.resolve('');
-  }
-
-  return platformPathPromise;
-}
-
-/**
- * Since OS X apps don't inherit PATH when not launched from the CLI, this function creates a new
- * environment object given the original environment by modifying the env.PATH using following
- * logic:
- *  1) If originalEnv.PATH doesn't equal to process.env.PATH, which means the PATH has been
- *    modified, we shouldn't do anything.
- *  1) If we are running in OS X, use `/usr/libexec/path_helper -s` to get the correct PATH and
- *    REPLACE the PATH.
- *  2) If step 1 failed or we are not running in OS X, APPEND commonBinaryPaths to current PATH.
- */
-export async function createExecEnvironment(
-  originalEnv: Object,
-  commonBinaryPaths: Array<string>,
-): Promise<Object> {
-  const execEnv = {...originalEnv};
-
-  if (execEnv.PATH !== process.env.PATH) {
-    return execEnv;
-  }
-
-  execEnv.PATH = execEnv.PATH || '';
-
-  let platformPath = null;
-  try {
-    platformPath = await getPlatformPath();
-  } catch (error) {
-    logError('Failed to getPlatformPath', error);
-  }
-
-  // If the platform returns a non-empty PATH, use it. Otherwise use the default set of common
-  // binary paths.
-  if (platformPath) {
-    execEnv.PATH = platformPath;
-  } else if (commonBinaryPaths.length) {
-    const paths = nuclideUri.splitPathList(execEnv.PATH);
-    commonBinaryPaths.forEach(commonBinaryPath => {
-      if (paths.indexOf(commonBinaryPath) === -1) {
-        paths.push(commonBinaryPath);
-      }
-    });
-    execEnv.PATH = nuclideUri.joinPathList(paths);
-  }
-
-  return execEnv;
-}
-
 function logError(...args) {
   // Can't use nuclide-logging here to not cause cycle dependency.
-  /*eslint-disable no-console*/
+  // eslint-disable-next-line no-console
   console.error(...args);
-  /*eslint-enable no-console*/
+}
+
+function log(...args) {
+  // Can't use nuclide-logging here to not cause cycle dependency.
+  // eslint-disable-next-line no-console
+  console.log(...args);
 }
 
 function monitorStreamErrors(process: child_process$ChildProcess, command, args, options): void {
@@ -222,38 +177,41 @@ function monitorStreamErrors(process: child_process$ChildProcess, command, args,
   });
 }
 
-/**
- * Basically like spawn, except it handles and logs errors instead of crashing
- * the process. This is much lower-level than asyncExecute. Unless you have a
- * specific reason you should use asyncExecute instead.
- */
-export async function safeSpawn(
+export function safeFork(
   command: string,
   args?: Array<string> = [],
-  options?: Object = {},
-): Promise<child_process$ChildProcess> {
-  options.env = await createExecEnvironment(options.env || process.env, COMMON_BINARY_PATHS);
-  const child = spawn(command, args, options);
+  options?: child_process$forkOpts = {},
+): child_process$ChildProcess {
+  return _makeChildProcess('fork', command, args, options);
+}
+
+/**
+ * Helper type/function to create child_process by spawning/forking the process.
+ */
+type ChildProcessOpts = child_process$spawnOpts | child_process$forkOpts;
+
+function _makeChildProcess(
+  type: 'spawn' | 'fork' = 'spawn',
+  command: string,
+  args?: Array<string> = [],
+  options?: ChildProcessOpts = {},
+): child_process$ChildProcess {
+  const now = performanceNow();
+  const child = child_process[type](
+    nuclideUri.expandHomeDir(command),
+    args,
+    prepareProcessOptions(options),
+  );
   monitorStreamErrors(child, command, args, options);
   child.on('error', error => {
     logError('error with command:', command, args, options, 'error:', error);
   });
-  return child;
-}
-
-export async function forkWithExecEnvironment(
-  modulePath: string,
-  args?: Array<string> = [],
-  options?: Object = {},
-): Promise<child_process$ChildProcess> {
-  const forkOptions = {
-    ...options,
-    env: await createExecEnvironment(options.env || process.env, COMMON_BINARY_PATHS),
-  };
-  const child = child_process.fork(modulePath, args, forkOptions);
-  child.on('error', error => {
-    logError('error from module:', modulePath, args, options, 'error:', error);
-  });
+  if (!options || !options.dontLogInNuclide) {
+    child.on('close', () => {
+      logCall(Math.round(performanceNow() - now), command, args);
+    });
+  }
+  writeToStdin(child, options);
   return child;
 }
 
@@ -284,9 +242,9 @@ export function scriptSafeSpawn(
   command: string,
   args?: Array<string> = [],
   options?: Object = {},
-): Promise<child_process$ChildProcess> {
+): child_process$ChildProcess {
   const newArgs = createArgsForScriptCommand(command, args);
-  return safeSpawn('script', newArgs, options);
+  return _makeChildProcess('spawn', 'script', newArgs, options);
 }
 
 /**
@@ -297,35 +255,33 @@ export function scriptSafeSpawnAndObserveOutput(
   command: string,
   args?: Array<string> = [],
   options?: Object = {},
-): Observable<{stderr?: string; stdout?: string;}> {
-  return Observable.create((observer: Observer<any>) => {
-    let childProcess;
-    scriptSafeSpawn(command, args, options).then(proc => {
-      childProcess = proc;
+  killTreeOnComplete?: boolean = false,
+): Observable<{stderr?: string, stdout?: string}> {
+  return Observable.create((observer: rxjs$Observer<any>) => {
+    let childProcess = scriptSafeSpawn(command, args, options);
 
-      childProcess.stdout.on('data', data => {
-        observer.next({stdout: data.toString()});
-      });
+    childProcess.stdout.on('data', data => {
+      observer.next({stdout: data.toString()});
+    });
 
-      let stderr = '';
-      childProcess.stderr.on('data', data => {
-        stderr += data;
-        observer.next({stderr: data.toString()});
-      });
+    let stderr = '';
+    childProcess.stderr.on('data', data => {
+      stderr += data;
+      observer.next({stderr: data.toString()});
+    });
 
-      childProcess.on('exit', (exitCode: number) => {
-        if (exitCode !== 0) {
-          observer.error(stderr);
-        } else {
-          observer.complete();
-        }
-        childProcess = null;
-      });
+    childProcess.on('exit', (exitCode: number) => {
+      if (exitCode !== 0) {
+        observer.error(stderr);
+      } else {
+        observer.complete();
+      }
+      childProcess = null;
     });
 
     return () => {
       if (childProcess) {
-        childProcess.kill();
+        killProcess(childProcess, killTreeOnComplete);
       }
     };
   });
@@ -334,113 +290,267 @@ export function scriptSafeSpawnAndObserveOutput(
 /**
  * Creates an observable with the following properties:
  *
- * 1. It contains a process that's created using the provided factory upon subscription.
+ * 1. It contains a process that's created using the provided factory when you subscribe.
  * 2. It doesn't complete until the process exits (or errors).
- * 3. The process is killed when there are no more subscribers.
+ * 3. The process is killed when you unsubscribe.
+ *
+ * This means that a single observable instance can be used to spawn multiple processes. Indeed, if
+ * you subscribe multiple times, multiple processes *will* be spawned.
  *
  * IMPORTANT: The exit event does NOT mean that all stdout and stderr events have been received.
  */
 function _createProcessStream(
-  createProcess: () => child_process$ChildProcess | Promise<child_process$ChildProcess>,
+  createProcess: () => child_process$ChildProcess,
   throwOnError: boolean,
+  killTreeOnComplete: boolean,
 ): Observable<child_process$ChildProcess> {
-  return Observable.create(observer => {
-    const promise = Promise.resolve(createProcess());
-    let process;
-    let disposed = false;
-    let exited = false;
-    const maybeKill = () => {
-      if (process != null && disposed && !exited) {
-        process.kill();
-        process = null;
-      }
-    };
+  return observableFromSubscribeFunction(whenShellEnvironmentLoaded)
+    .take(1)
+    .switchMap(() => {
+      const process = createProcess();
+      let finished = false;
 
-    promise.then(p => {
-      process = p;
-      maybeKill();
+      // If the process returned by `createProcess()` was not created by it (or at least in the same
+      // tick), it's possible that its error event has already been dispatched. This is a bug that
+      // needs to be fixed in the caller. Generally, that would just mean refactoring your code to
+      // create the process in the function you pass. If for some reason, this is absolutely not
+      // possible, you need to make sure that the process is passed here immediately after it's
+      // created (i.e. before an ENOENT error event would be dispatched). Don't refactor your code
+      // to avoid this function; you'll have the same bug, you just won't be notified! XD
+      invariant(
+        process.exitCode == null && !process.killed,
+        'Process already exited. (This indicates a race condition in Nuclide.)',
+      );
+
+      const errors = Observable.fromEvent(process, 'error');
+      const exit = observeProcessExitMessage(process);
+
+      return Observable.of(process)
+        // Don't complete until we say so!
+        .merge(Observable.never())
+        // Get the errors.
+        .takeUntil(throwOnError ? errors.flatMap(Observable.throw) : errors)
+        .takeUntil(exit)
+        .do({
+          error: () => { finished = true; },
+          complete: () => { finished = true; },
+        })
+        .finally(() => {
+          if (!process.wasKilled && !finished) {
+            killProcess(process, killTreeOnComplete);
+          }
+        });
     });
+}
 
-    // Create a stream that contains the process but never completes. We'll use this to build the
-    // completion conditions.
-    const processStream = Observable.fromPromise(promise).merge(Observable.never());
+export function killProcess(
+  childProcess: child_process$ChildProcess,
+  killTree: boolean,
+): void {
+  log(`Ending process stream. Killing process ${childProcess.pid}`);
+  _killProcess(childProcess, killTree).then(
+    () => {},
+    error => {
+      logError(`Killing process ${childProcess.pid} failed`, error);
+    },
+  );
+}
 
-    const errors = processStream.switchMap(p => Observable.fromEvent(p, 'error'));
-    const exit = processStream
-      .flatMap(p => Observable.fromEvent(p, 'exit', (code, signal) => signal))
-      // An exit signal from SIGUSR1 doesn't actually exit the process, so skip that.
-      .filter(signal => signal !== 'SIGUSR1')
-      .do(() => { exited = true; });
-    const completion = throwOnError ? exit : exit.race(errors);
+async function _killProcess(
+  childProcess: child_process$ChildProcess & {wasKilled?: boolean},
+  killTree: boolean,
+): Promise<void> {
+  childProcess.wasKilled = true;
+  if (!killTree) {
+    childProcess.kill();
+    return;
+  }
+  if (/^win/.test(process.platform)) {
+    await killWindowsProcessTree(childProcess.pid);
+  } else {
+    await killUnixProcessTree(childProcess);
+  }
+}
 
-    return new CompositeSubscription(
-      processStream
-        .merge(throwOnError ? errors.flatMap(Observable.throw) : Observable.empty())
-        .takeUntil(completion)
-        .subscribe(observer),
-      () => { disposed = true; maybeKill(); },
-    );
+function killWindowsProcessTree(pid: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    child_process.exec(`taskkill /pid ${pid} /T /F`, error => {
+      if (error == null) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
   });
-  // TODO: We should really `.share()` this observable, but there seem to be issues with that and
-  //   `.retry()` in Rx 3 and 4. Once we upgrade to Rx5, we should share this observable and verify
-  //   that our retry logic (e.g. in adb-logcat) works.
+}
+
+export function killPid(pid: number): void {
+  try {
+    process.kill(pid);
+  } catch (err) {
+    if (err.code !== 'ESRCH') {
+      throw err;
+    }
+  }
+}
+
+
+export async function killUnixProcessTree(childProcess: child_process$ChildProcess): Promise<void> {
+  const descendants = await getDescendantsOfProcess(childProcess.pid);
+  // Kill the processes, starting with those of greatest depth.
+  for (const info of descendants.reverse()) {
+    killPid(info.pid);
+  }
 }
 
 export function createProcessStream(
-  createProcess: () => child_process$ChildProcess | Promise<child_process$ChildProcess>,
+  command: string,
+  args?: Array<string>,
+  options?: ObserveProcessOptions,
 ): Observable<child_process$ChildProcess> {
-  return _createProcessStream(createProcess, true);
+  return _createProcessStream(
+    () => _makeChildProcess('spawn', command, args, options),
+    true,
+    Boolean(options && options.killTreeOnComplete),
+  );
+}
+
+export function forkProcessStream(
+  modulePath: string,
+  args?: Array<string>,
+  options?: ForkProcessOptions,
+): Observable<child_process$ChildProcess> {
+  return _createProcessStream(
+    () => safeFork(modulePath, args, options),
+    true,
+    Boolean(options && options.killTreeOnComplete),
+  );
+}
+
+function observeProcessExitMessage(
+  process: child_process$ChildProcess,
+): Observable<ProcessExitMessage> {
+  return Observable.fromEvent(
+      process,
+      'exit',
+      (exitCode: ?number, signal: ?string) => ({kind: 'exit', exitCode, signal}))
+    // An exit signal from SIGUSR1 doesn't actually exit the process, so skip that.
+    .filter(message => message.signal !== 'SIGUSR1')
+    .take(1);
 }
 
 /**
- * Observe the stdout, stderr and exit code of a process.
- * stdout and stderr are split by newlines.
+ * Creates a stream of sensibly-ordered stdout, stdin, and exit messages from a process. Generally,
+ * you shouldn't use this function and should instead use `observeProcess()` (which makes use of
+ * this for you).
+ *
+ * IMPORTANT: If you must use this message, it's very important that the process you give it was
+ * just synchronously created. Otherwise, you can end up missing messages.
+ *
+ * This function intentionally does not close the process when you unsubscribe. It's usually used in
+ * conjunction with `createProcessStream()` which does that already.
  */
-export function observeProcessExit(
-  createProcess: () => child_process$ChildProcess | Promise<child_process$ChildProcess>,
-): Observable<number> {
-  return _createProcessStream(createProcess, false)
-    .flatMap(process => Observable.fromEvent(process, 'exit').take(1));
-}
-
 export function getOutputStream(
-  childProcess: child_process$ChildProcess | Promise<child_process$ChildProcess>,
+  process: child_process$ChildProcess,
+  splitByLines?: boolean = true,
+  _: void,
 ): Observable<ProcessMessage> {
-  return Observable.fromPromise(Promise.resolve(childProcess))
-    .flatMap(process => {
-      // We need to start listening for the exit event immediately, but defer emitting it until the
-      // output streams end.
-      const exit = Observable.fromEvent(process, 'exit')
-        .take(1)
-        .map(exitCode => ({kind: 'exit', exitCode}))
-        .publishReplay();
-      const exitSub = exit.connect();
+  const chunk = splitByLines ? splitStream : x => x;
+  return Observable.defer(() => {
+    // We need to start listening for the exit event immediately, but defer emitting it until the
+    // (buffered) output streams end.
+    const exit = observeProcessExitMessage(process).publishReplay();
+    const exitSub = exit.connect();
 
-      const error = Observable.fromEvent(process, 'error')
-        .map(errorObj => ({kind: 'error', error: errorObj}));
-      const stdout = splitStream(observeStream(process.stdout))
-        .map(data => ({kind: 'stdout', data}));
-      const stderr = splitStream(observeStream(process.stderr))
-        .map(data => ({kind: 'stderr', data}));
+    const error = Observable.fromEvent(process, 'error')
+      .map(errorObj => ({kind: 'error', error: errorObj}));
+    // It's possible for stdout and stderr to remain open (even indefinitely) after the exit event.
+    // This utility, however, treats the exit event as stream-ending, which helps us to avoid easy
+    // bugs. We give a short (100ms) timeout for the stdout and stderr streams to close.
+    const close = exit.delay(100);
+    const stdout = chunk(observeStream(process.stdout).takeUntil(close))
+      .map(data => ({kind: 'stdout', data}));
+    const stderr = chunk(observeStream(process.stderr).takeUntil(close))
+      .map(data => ({kind: 'stderr', data}));
 
-      return takeWhileInclusive(
-        Observable.merge(
-          Observable.merge(stdout, stderr).concat(exit),
-          error,
-        ),
-        event => event.kind !== 'error' && event.kind !== 'exit',
-      )
-        .finally(() => { exitSub.unsubscribe(); });
-    });
+    return takeWhileInclusive(
+      Observable.merge(
+        Observable.merge(stdout, stderr).concat(exit),
+        error,
+      ),
+      event => event.kind !== 'error' && event.kind !== 'exit',
+    )
+      .finally(() => { exitSub.unsubscribe(); });
+  });
 }
 
 /**
  * Observe the stdout, stderr and exit code of a process.
  */
 export function observeProcess(
-  createProcess: () => child_process$ChildProcess | Promise<child_process$ChildProcess>,
+  command: string,
+  args?: Array<string>,
+  options?: ObserveProcessOptions,
 ): Observable<ProcessMessage> {
-  return _createProcessStream(createProcess, false).flatMap(getOutputStream);
+  return _createProcessStream(
+    () => _makeChildProcess('spawn', command, args, options),
+    false,
+    Boolean(options && options.killTreeOnComplete),
+  )
+    .flatMap(process => getOutputStream(process));
+}
+
+/**
+ * Observe the stdout, stderr and exit code of a process.
+ */
+export function observeProcessRaw(
+  command: string,
+  args?: Array<string>,
+  options?: ObserveProcessOptions,
+): Observable<ProcessMessage> {
+  return _createProcessStream(
+    () => _makeChildProcess('spawn', command, args, options),
+    false,
+    Boolean(options && options.killTreeOnComplete),
+  )
+    .flatMap(process => getOutputStream(process, false));
+}
+
+let FB_INCLUDE_PATHS;
+try {
+  // $FlowFB
+  FB_INCLUDE_PATHS = require('./fb-config').FB_INCLUDE_PATHS;
+} catch (error) {
+  FB_INCLUDE_PATHS = [];
+}
+
+let DEFAULT_PATH_INCLUDE = [
+  ...FB_INCLUDE_PATHS,
+  '/usr/local/bin',
+];
+
+function prepareProcessOptions(
+  options: Object,
+): Object {
+  return {
+    ...options,
+    env: preparePathEnvironment(options.env),
+  };
+}
+
+function preparePathEnvironment(env: ?Object): Object {
+  const originalEnv = {
+    ...process.env,
+    ...env,
+  };
+  if (isWindowsPlatform()) {
+    return originalEnv;
+  }
+  const existingPath: string = originalEnv.PATH || '';
+  return {
+    ...originalEnv,
+    PATH: nuclideUri.joinPathList([existingPath, ...DEFAULT_PATH_INCLUDE]),
+  };
 }
 
 /**
@@ -455,151 +565,65 @@ export function observeProcess(
 export function asyncExecute(
   command: string,
   args: Array<string>,
-  options: ?AsyncExecuteOptions = {},
-): Promise<process$asyncExecuteRet> {
-  // Clone passed in options so this function doesn't modify an object it doesn't own.
-  const localOptions = {...options};
+  options?: AsyncExecuteOptions = {},
+): Promise<AsyncExecuteReturn> {
+  const now = performanceNow();
+  return new Promise((resolve, reject) => {
+    const process = child_process.execFile(
+      nuclideUri.expandHomeDir(command),
+      args,
+      prepareProcessOptions({
+        maxBuffer: DEFAULT_MAX_BUFFER,
+        ...options,
+      }),
+      // Node embeds various properties like code/errno in the Error object.
+      (err: any /* Error */, stdoutBuf, stderrBuf) => {
+        if (!options || !options.dontLogInNuclide) {
+          logCall(Math.round(performanceNow() - now), command, args);
+        }
+        const stdout = stdoutBuf.toString('utf8');
+        const stderr = stderrBuf.toString('utf8');
+        if (err == null) {
+          resolve({
+            stdout,
+            stderr,
+            exitCode: 0,
+          });
+        } else if (Number.isInteger(err.code)) {
+          resolve({
+            stdout,
+            stderr,
+            exitCode: err.code,
+          });
+        } else {
+          resolve({
+            stdout,
+            stderr,
+            errorCode: err.errno || 'EUNKNOWN',
+            errorMessage: err.message,
+          });
+        }
+      },
+    );
+    writeToStdin(process, options);
+  });
+}
 
-  const executor = (resolve, reject) => {
-    let firstChild;
-    let lastChild;
-
-    let firstChildStderr;
-    if (localOptions.pipedCommand) {
-      // If a second command is given, pipe stdout of first to stdin of second. String output
-      // returned in this function's Promise will be stderr/stdout of the second command.
-      firstChild = spawn(command, args, localOptions);
-      monitorStreamErrors(firstChild, command, args, localOptions);
-      firstChildStderr = '';
-
-      firstChild.on('error', error => {
-        // Resolve early with the result when encountering an error.
-        resolve({
-          command: [command].concat(args).join(' '),
-          errorMessage: error.message,
-          errorCode: error.code,
-          stderr: firstChildStderr,
-          stdout: '',
-        });
-      });
-
-      if (firstChild.stderr != null) {
-        firstChild.stderr.on('data', data => {
-          firstChildStderr += data;
-        });
-      }
-
-      lastChild = spawn(
-        localOptions.pipedCommand,
-        localOptions.pipedArgs,
-        localOptions
-      );
-      monitorStreamErrors(lastChild, command, args, localOptions);
-      // pipe() normally pauses the writer when the reader errors (closes).
-      // This is not how UNIX pipes work: if the reader closes, the writer needs
-      // to also close (otherwise the writer process may hang.)
-      // We have to manually close the writer in this case.
-      if (lastChild.stdin != null && firstChild.stdout != null) {
-        lastChild.stdin.on('error', () => {
-          firstChild.stdout.emit('end');
-        });
-        firstChild.stdout.pipe(lastChild.stdin);
-      }
-
-    } else {
-      lastChild = spawn(command, args, localOptions);
-      monitorStreamErrors(lastChild, command, args, localOptions);
-      firstChild = lastChild;
-    }
-
-    let stderr = '';
-    let stdout = '';
-    let timeout = null;
-    if (localOptions.timeout != null) {
-      timeout = setTimeout(() => {
-        // Prevent the other handlers from firing.
-        lastChild.removeAllListeners();
-        lastChild.kill();
-        resolve({
-          command: [command].concat(args).join(' '),
-          errorMessage: `Exceeded timeout of ${localOptions.timeout}ms`,
-          errorCode: 'ETIMEDOUT',
-          stderr,
-          stdout,
-        });
-      }, localOptions.timeout);
-    }
-
-    lastChild.on('close', exitCode => {
-      resolve({
-        exitCode,
-        stderr,
-        stdout,
-      });
-      if (timeout != null) {
-        clearTimeout(timeout);
-      }
-    });
-
-    lastChild.on('error', error => {
-      // Return early with the result when encountering an error.
-      resolve({
-        command: [command].concat(args).join(' '),
-        errorMessage: error.message,
-        errorCode: error.code,
-        stderr,
-        stdout,
-      });
-      if (timeout != null) {
-        clearTimeout(timeout);
-      }
-    });
-
-    if (lastChild.stderr != null) {
-      lastChild.stderr.on('data', data => {
-        stderr += data;
-      });
-    }
-    if (lastChild.stdout != null) {
-      lastChild.stdout.on('data', data => {
-        stdout += data;
-      });
-    }
-
-    if (typeof localOptions.stdin === 'string' && firstChild.stdin != null) {
-      // Note that the Node docs have this scary warning about stdin.end() on
-      // http://nodejs.org/api/child_process.html#child_process_child_stdin:
-      //
-      // "A Writable Stream that represents the child process's stdin. Closing
-      // this stream via end() often causes the child process to terminate."
-      //
-      // In practice, this has not appeared to cause any issues thus far.
-      firstChild.stdin.write(localOptions.stdin);
-      firstChild.stdin.end();
-    }
-  };
-
-  function makePromise(): Promise<process$asyncExecuteRet> {
-    if (localOptions.queueName === undefined) {
-      return new Promise(executor);
-    } else {
-      if (!blockingQueues[localOptions.queueName]) {
-        blockingQueues[localOptions.queueName] = new PromiseQueue();
-      }
-      return blockingQueues[localOptions.queueName].submit(executor);
-    }
+function writeToStdin(
+  childProcess: child_process$ChildProcess,
+  options: Object,
+): void {
+  if (typeof options.stdin === 'string' && childProcess.stdin != null) {
+    // Note that the Node docs have this scary warning about stdin.end() on
+    // http://nodejs.org/api/child_process.html#child_process_child_stdin:
+    //
+    // "A Writable Stream that represents the child process's stdin. Closing
+    // this stream via end() often causes the child process to terminate."
+    //
+    // In practice, this has not appeared to cause any issues thus far.
+    childProcess.stdin.write(options.stdin);
+    childProcess.stdin.end();
   }
-
-  return createExecEnvironment(localOptions.env || process.env, COMMON_BINARY_PATHS).then(
-    val => {
-      localOptions.env = val;
-      return makePromise();
-    },
-    error => {
-      localOptions.env = localOptions.env || process.env;
-      return makePromise();
-    }
-  );
 }
 
 /**
@@ -608,15 +632,15 @@ export function asyncExecute(
 export async function checkOutput(
   command: string,
   args: Array<string>,
-  options: ?AsyncExecuteOptions = {},
-): Promise<process$asyncExecuteRet> {
-  const result = await asyncExecute(command, args, options);
+  options?: AsyncExecuteOptions = {},
+): Promise<AsyncExecuteReturn> {
+  const result = await asyncExecute(nuclideUri.expandHomeDir(command), args, options);
   if (result.exitCode !== 0) {
     const reason = result.exitCode != null ? `exitCode: ${result.exitCode}` :
-      `error: ${String(result.errorMessage)}`;
+      `error: ${maybeToString(result.errorMessage)}`;
     throw new Error(
       `asyncExecute "${command}" failed with ${reason}, ` +
-      `stderr: ${String(result.stderr)}, stdout: ${String(result.stdout)}.`
+      `stderr: ${result.stderr}, stdout: ${result.stdout}.`,
     );
   }
   return result;
@@ -629,28 +653,31 @@ export async function checkOutput(
 export function runCommand(
   command: string,
   args?: Array<string> = [],
-  options?: Object = {},
+  options?: ObserveProcessOptions = {},
+  _: void,
 ): Observable<string> {
-  return observeProcess(() => safeSpawn(command, args, options))
+  const seed = {
+    error: null,
+    stdout: [],
+    stderr: [],
+    exitMessage: null,
+  };
+  return observeProcess(command, args, options)
     .reduce(
       (acc, event) => {
         switch (event.kind) {
           case 'stdout':
-            acc.stdout += event.data;
-            break;
+            return {...acc, stdout: acc.stdout.concat(event.data)};
           case 'stderr':
-            acc.stderr += event.data;
-            break;
+            return {...acc, stderr: acc.stderr.concat(event.data)};
           case 'error':
-            acc.error = event.error;
-            break;
+            return {...acc, error: event.error};
           case 'exit':
-            acc.exitCode = event.exitCode;
-            break;
+            return {...acc, exitMessage: event};
         }
         return acc;
       },
-      {error: ((null: any): Object), stdout: '', stderr: '', exitCode: ((null: any): ?number)},
+      seed,
     )
     .map(acc => {
       if (acc.error != null) {
@@ -662,20 +689,131 @@ export function runCommand(
           originalError: acc.error, // Just in case.
         });
       }
-      if (acc.exitCode != null && acc.exitCode !== 0) {
+      const stdout = acc.stdout.join('');
+      if (acc.exitMessage != null && acc.exitMessage.exitCode !== 0) {
         throw new ProcessExitError({
           command,
           args,
           options,
-          code: acc.exitCode,
-          stdout: acc.stdout,
-          stderr: acc.stderr,
+          exitMessage: acc.exitMessage,
+          stdout,
+          stderr: acc.stderr.join(''),
         });
       }
-      return acc.stdout;
+      return stdout;
     });
 }
 
-export const __test__ = {
-  DARWIN_PATH_HELPER_REGEXP,
-};
+// If provided, read the original environment from NUCLIDE_ORIGINAL_ENV.
+// This should contain the base64-encoded output of `env -0`.
+let cachedOriginalEnvironment = null;
+whenShellEnvironmentLoaded(() => {
+  // No need to include default paths now that the environment is loaded.
+  DEFAULT_PATH_INCLUDE = [];
+  cachedOriginalEnvironment = null;
+});
+
+export async function getOriginalEnvironment(): Promise<Object> {
+  await new Promise(resolve => { whenShellEnvironmentLoaded(resolve); });
+  if (cachedOriginalEnvironment != null) {
+    return cachedOriginalEnvironment;
+  }
+
+  const {NUCLIDE_ORIGINAL_ENV} = process.env;
+  if (NUCLIDE_ORIGINAL_ENV != null && NUCLIDE_ORIGINAL_ENV.trim() !== '') {
+    const envString = new Buffer(NUCLIDE_ORIGINAL_ENV, 'base64').toString();
+    cachedOriginalEnvironment = {};
+    for (const envVar of envString.split('\0')) {
+      // envVar should look like A=value_of_A
+      const equalIndex = envVar.indexOf('=');
+      if (equalIndex !== -1) {
+        cachedOriginalEnvironment[envVar.substring(0, equalIndex)] =
+          envVar.substring(equalIndex + 1);
+      }
+    }
+  } else {
+    cachedOriginalEnvironment = process.env;
+  }
+  return cachedOriginalEnvironment;
+}
+
+// Returns a string suitable for including in displayed error messages.
+export function exitEventToMessage(event: ProcessExitMessage): string {
+  if (event.exitCode != null) {
+    return `exit code ${event.exitCode}`;
+  } else {
+    invariant(event.signal != null);
+    return `signal ${event.signal}`;
+  }
+}
+
+export async function getChildrenOfProcess(
+  processId: number,
+): Promise<Array<ProcessInfo>> {
+  const processes = await psTree();
+
+  return processes.filter(processInfo =>
+    processInfo.parentPid === processId);
+}
+
+/**
+ * Get a list of descendants, sorted by increasing depth (including the one with the provided pid).
+ */
+async function getDescendantsOfProcess(pid: number): Promise<Array<ProcessInfo>> {
+  const processes = await psTree();
+  let rootProcessInfo;
+  const pidToChildren = new MultiMap();
+  processes.forEach(info => {
+    if (info.pid === pid) {
+      rootProcessInfo = info;
+    }
+    pidToChildren.add(info.parentPid, info);
+  });
+  const descendants = rootProcessInfo == null ? [] : [rootProcessInfo];
+  // Walk through the array, adding the children of the current element to the end. This
+  // breadth-first traversal means that the elements will be sorted by depth.
+  for (let i = 0; i < descendants.length; i++) {
+    const info = descendants[i];
+    const children = pidToChildren.get(info.pid);
+    descendants.push(...Array.from(children));
+  }
+  return descendants;
+}
+
+function isWindowsPlatform(): boolean {
+  return /^win/.test(process.platform);
+}
+
+export async function psTree(): Promise<Array<ProcessInfo>> {
+  let psPromise;
+  const isWindows = isWindowsPlatform();
+  if (isWindows) {
+    // See also: https://github.com/nodejs/node-v0.x-archive/issues/2318
+    psPromise = checkOutput('wmic.exe',
+      ['PROCESS', 'GET', 'ParentProcessId,ProcessId,Name']);
+  } else {
+    psPromise = checkOutput('ps',
+      ['-A', '-o', 'ppid,pid,comm']);
+  }
+  const {stdout} = await psPromise;
+  return parsePsOutput(stdout);
+}
+
+export function parsePsOutput(
+  psOutput: string,
+): Array<ProcessInfo> {
+  // Remove the first header line.
+  const lines = psOutput.split(/\n|\r\n/).slice(1);
+
+  return lines.map(line => {
+    const columns = line.trim().split(/\s+/);
+    const [parentPid, pid] = columns;
+    const command = columns.slice(2).join(' ');
+
+    return {
+      command,
+      parentPid: parseInt(parentPid, 10),
+      pid: parseInt(pid, 10),
+    };
+  });
+}

@@ -1,18 +1,16 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
-import type {node$CallSite} from './types';
 import singleton from '../../commons-node/singleton';
 
-type PrepareStackTraceFunction = (error: Error, frames: Array<node$CallSite>) => any;
+type PrepareStackTraceFunction = (error: Error, frames: Array<CallSite>) => any;
 
 const PREPARE_STACK_TRACE_HOOKED_KEY = '_nuclide_error_stack_trace_hooked';
 
@@ -58,10 +56,8 @@ export default function addPrepareStackTraceHook(): void {
       // doesn't work well with our customization of stacktrace. So here we temporarily
       // walk around this by following hack, until https://github.com/atom/atom/issues/9641
       // get addressed.
-      /* eslint-disable no-extend-native */
-      /* $FlowFixMe */
+      /* $FlowFixMe */ // eslint-disable-next-line no-extend-native
       Error.prototype.getRawStack = null;
-      /* eslint-enable no-extend-native */
       return true;
     },
   );
@@ -81,7 +77,7 @@ function createHookedPrepareStackTrace(
 
   const hookedFunction = function nuclideHookedPrepareStackTrace(
     error: Error,
-    frames: Array<node$CallSite>,
+    frames: Array<CallSite>,
   ): any {
     structuredStackTraceHook(error, frames);
     return prepareStackTrace(error, frames);
@@ -90,16 +86,18 @@ function createHookedPrepareStackTrace(
   return hookedFunction;
 }
 
-function structuredStackTraceHook(error: Error, frames: Array<node$CallSite>): void {
+function structuredStackTraceHook(error: Error, frames: Array<CallSite>): void {
   // $FlowFixMe
   error.stackTrace = frames.map(frame => {
+    const scriptNameOrUrl = frame.getScriptNameOrSourceURL();
+    const evalOrigin = scriptNameOrUrl == null ? null : frame.getEvalOrigin();
     return {
       functionName: frame.getFunctionName(),
       methodName: frame.getMethodName(),
       fileName: frame.getFileName(),
       lineNumber: frame.getLineNumber(),
       columnNumber: frame.getColumnNumber(),
-      evalOrigin: frame.getEvalOrigin(),
+      evalOrigin,
       isTopLevel: frame.isToplevel(),
       isEval: frame.isEval(),
       isNative: frame.isNative(),
@@ -108,10 +106,13 @@ function structuredStackTraceHook(error: Error, frames: Array<node$CallSite>): v
   });
 }
 
-function defaultPrepareStackTrace(error: Error, frames: Array<node$CallSite>): string {
+function defaultPrepareStackTrace(error: Error, frames: Array<CallSite>): string {
   let formattedStackTrace = error.message ? `${error.name}: ${error.message}` : `${error.name}`;
   frames.forEach(frame => {
-    formattedStackTrace += `\n    at ${frame.toString()}`;
+    // Do not use `maybeToString` here since lazily loading it (inline-imports) may
+    // result in a circular load of `babel-core` via `nuclide-node-transpiler`.
+    // https://github.com/babel/babel/blob/c2b3ea7/packages/babel-template/src/index.js#L21
+    formattedStackTrace += `\n    at ${String(frame.toString())}`;
   });
   return formattedStackTrace;
 }

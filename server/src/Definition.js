@@ -3,21 +3,30 @@ import type {Definition, Range} from 'vscode-languageserver-types';
 import type {
   TextDocumentPositionParams,
 } from 'vscode-languageserver/lib/protocol';
+import {
+  FlowSingleProjectLanguageService,
+} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
+import SimpleTextBuffer from 'simple-text-buffer';
 import URI from 'vscode-uri';
-import {flowFindDefinition} from './pkg/flow-base/lib/FlowService';
-import {getLogger} from './pkg/nuclide-logging/lib/main';
-import {lspPositionToFlowPoint} from './utils/util';
+import {getLogger} from './pkg/nuclide-logging';
+import {atomPointToLSPPosition, lspPositionToAtomPoint} from './utils/util';
 
 const logger = getLogger();
 
 export default class DefinitionSupport {
   connection: IConnection;
   documents: TextDocuments;
+  flow: FlowSingleProjectLanguageService;
 
-  constructor(connection: IConnection, documents: TextDocuments) {
+  constructor(
+    connection: IConnection,
+    documents: TextDocuments,
+    flow: FlowSingleProjectLanguageService,
+  ) {
     this.connection = connection;
     this.documents = documents;
+    this.flow = flow;
   }
 
   async provideDefinition({
@@ -27,30 +36,26 @@ export default class DefinitionSupport {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const currentContents = this.documents.get(textDocument.uri).getText();
 
-    const flowPoint = lspPositionToFlowPoint(position);
-
-    const definition = await flowFindDefinition(
+    const definitionResults = await this.flow.getDefinition(
       fileName,
-      currentContents,
-      flowPoint.line,
-      flowPoint.column,
+      new SimpleTextBuffer(currentContents),
+      lspPositionToAtomPoint(position),
     );
 
-    if (definition) {
-      const point = {
-        line: definition.point.line,
-        character: definition.point.column,
-      };
+    if (definitionResults) {
+      return definitionResults.definitions.map(def => {
+        const lspPosition = atomPointToLSPPosition(def.position);
 
-      const range: Range = {
-        start: point,
-        end: point,
-      };
+        const range: Range = {
+          start: lspPosition,
+          end: lspPosition,
+        };
 
-      return {
-        uri: URI.file(definition.file).toString(),
-        range,
-      };
+        return {
+          uri: URI.file(def.path).toString(),
+          range,
+        };
+      });
     }
 
     logger.debug('did not find definition');

@@ -1,25 +1,23 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
 
 import fs from 'fs';
 import invariant from 'assert';
 import once from './once';
 import os from 'os';
-import nuclideUri from '../nuclide-remote-uri/lib/main';
-import {checkOutput} from './process';
+import nuclideUri from './nuclideUri';
 
 const NUCLIDE_PACKAGE_JSON_PATH = require.resolve('../../../../package.json');
 const NUCLIDE_BASEDIR = nuclideUri.dirname(NUCLIDE_PACKAGE_JSON_PATH);
 
-const pkgJson = JSON.parse(fs.readFileSync(NUCLIDE_PACKAGE_JSON_PATH).toString());
+const pkgJson = JSON.parse(fs.readFileSync(NUCLIDE_PACKAGE_JSON_PATH, 'utf8'));
 
 export const OS_TYPE = {
   WIN32: 'win32',
@@ -27,18 +25,6 @@ export const OS_TYPE = {
   LINUX: 'linux',
   OSX: 'darwin',
 };
-
-// "Development" is defined as working from source - not packaged code.
-// apm/npm and internal releases don't package the base `.flowconfig`, so
-// we use this to figure if we're packaged or not.
-export const isDevelopment = once((): boolean => {
-  try {
-    fs.statSync(nuclideUri.join(NUCLIDE_BASEDIR, '.flowconfig'));
-    return true;
-  } catch (err) {
-    return false;
-  }
-});
 
 // Prior to Atom v1.7.0, `atom.inSpecMode` had a chance of performing an IPC call that could be
 // expensive depending on how much work the other process was doing. Because this value will not
@@ -95,18 +81,6 @@ export function isRunningInWindows(): boolean {
 
 export function getOsVersion(): string {
   return os.release();
-}
-
-export async function getFlowVersion(): Promise<string> {
-  // $UPFixMe: This should use nuclide-features-config
-  const flowPath = global.atom && global.atom.config.get('nuclide-flow.pathToFlow') || 'flow';
-  const {stdout} = await checkOutput(flowPath, ['--version']);
-  return stdout.trim();
-}
-
-export async function getClangVersion(): Promise<string> {
-  const {stdout} = await checkOutput('clang', ['--version']);
-  return stdout.trim();
 }
 
 export function getRuntimePath(): string {

@@ -1,13 +1,15 @@
-'use babel';
-/* @flow */
-
-/*
+/**
  * Copyright (c) 2015-present, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
+ *
+ * @flow
  */
+
+import invariant from 'assert';
+import {parse} from 'shell-quote';
 
 export function stringifyError(error: Error): string {
   return `name: ${error.name}, message: ${error.message}, stack: ${error.stack}.`;
@@ -34,7 +36,23 @@ const WEEK = 7 * DAY;
 const YEAR = DAY * 365;
 const MONTH = YEAR / 12;
 
-const formats = [
+const shortFormats = [
+  [0.7 * MINUTE, 'now'],
+  [1.5 * MINUTE, '1m'],
+  [60 * MINUTE, 'm', MINUTE],
+  [1.5 * HOUR, '1h'],
+  [DAY, 'h', HOUR],
+  [2 * DAY, '1d'],
+  [7 * DAY, 'd', DAY],
+  [1.5 * WEEK, '1w'],
+  [MONTH, 'w', WEEK],
+  [1.5 * MONTH, '1mo'],
+  [YEAR, 'mo', MONTH],
+  [1.5 * YEAR, '1y'],
+  [Number.MAX_VALUE, 'y', YEAR],
+];
+
+const longFormats = [
   [0.7 * MINUTE, 'just now'],
   [1.5 * MINUTE, 'a minute ago'],
   [60 * MINUTE, 'minutes ago', MINUTE],
@@ -51,9 +69,12 @@ const formats = [
 ];
 
 export function relativeDate(
-  input: number | Date,
-  reference?: number | Date,
+  input_: number | Date,
+  reference_?: number | Date,
+  useShortVariant?: boolean = false,
 ): string {
+  let input = input_;
+  let reference = reference_;
   if (input instanceof Date) {
     input = input.getTime();
   }
@@ -65,11 +86,11 @@ export function relativeDate(
   }
 
   const delta = reference - input;
-
+  const formats = useShortVariant ? shortFormats : longFormats;
   for (const [limit, relativeFormat, remainder] of formats) {
     if (delta < limit) {
       if (typeof remainder === 'number') {
-        return Math.round(delta / remainder) + ' ' + relativeFormat;
+        return Math.round(delta / remainder) + (useShortVariant ? '' : ' ') + relativeFormat;
       } else {
         return relativeFormat;
       }
@@ -77,4 +98,76 @@ export function relativeDate(
   }
 
   throw new Error('This should never be reached.');
+}
+
+/**
+ * Count the number of occurrences of `char` in `str`.
+ * `char` must be a string of length 1.
+ */
+export function countOccurrences(haystack: string, char: string) {
+  invariant(char.length === 1, 'char must be a string of length 1');
+
+  let count = 0;
+  const code = char.charCodeAt(0);
+  for (let i = 0; i < haystack.length; i++) {
+    if (haystack.charCodeAt(i) === code) {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
+ * shell-quote's parse allows pipe operators.
+ * Generally users don't care about this, so throw if we encounter any operators.
+ */
+export function shellParse(str: string, env?: Object): Array<string> {
+  const result = parse(str, env);
+  for (let i = 0; i < result.length; i++) {
+    if (typeof result[i] !== 'string') {
+      throw new Error(`Unexpected operator "${result[i].op}" provided to shellParse`);
+    }
+  }
+  return result;
+}
+
+export function removeCommonPrefix(a: string, b: string): [string, string] {
+  let i = 0;
+  while (a[i] === b[i] && i < a.length && i < b.length) {
+    i++;
+  }
+  return [a.substring(i), b.substring(i)];
+}
+
+export function removeCommonSuffix(a: string, b: string): [string, string] {
+  let i = 0;
+  while (a[a.length - 1 - i] === b[b.length - 1 - i] && i < a.length && i < b.length) {
+    i++;
+  }
+  return [a.substring(0, a.length - i), b.substring(0, b.length - i)];
+}
+
+export function shorten(str: string, maxLength: number, suffix?: string): string {
+  return str.length < maxLength ? str : str.slice(0, maxLength) + (suffix || '');
+}
+
+/**
+ * Like String.split, but only splits once.
+ */
+export function splitOnce(str: string, separator: string): [string, ?string] {
+  const index = str.indexOf(separator);
+  return index === -1
+    ? [str, null]
+    : [str.slice(0, index), str.slice(index + separator.length)];
+}
+
+/**
+ * Indents each line by the specified number of characters.
+ */
+export function indent(str: string, level: number = 2, char: string = ' '): string {
+  return str.replace(/^([^\n])/gm, char.repeat(level) + '$1');
+}
+
+export function pluralize(noun: string, count: number) {
+  return count === 1 ? noun : noun + 's';
 }

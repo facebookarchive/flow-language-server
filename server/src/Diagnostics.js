@@ -1,32 +1,39 @@
 // @flow
 import type {IConnection} from 'vscode-languageserver';
 import type {Diagnostic} from 'vscode-languageserver-types';
+import type {
+  FileDiagnosticMessage,
+} from './pkg/nuclide-diagnostics-common/lib/rpc-types';
 
-import entries from 'object.entries';
+import SimpleTextBuffer from 'simple-text-buffer';
 import * as path from 'path';
 import URI from 'vscode-uri';
+import invariant from 'invariant';
 
-import {flowFindDiagnostics} from './pkg/flow-base/lib/FlowService';
+import {
+  FlowSingleProjectLanguageService,
+} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {flowSeverityToLSPSeverity, hasFlowPragma, toURI} from './utils/util';
-import {getLogger} from './pkg/nuclide-logging/lib/main';
+import {getLogger} from './pkg/nuclide-logging';
+import {atomRangeToLSPRange} from './utils/util';
 
 const logger = getLogger();
 
-type InternalDiagnostics = {
-  [string]: {
-    uri: string,
-    reports: Array<Diagnostic>,
-  },
+type InternalDiagnostic = {
+  uri: string,
+  diagnostics: Array<Diagnostic>,
 };
 
-const noDiagnostics = Object.create(null);
+const noDiagnostics = [];
 const supportedLanguages = new Set(['javascript', 'javascriptreact']);
 
-class Diagnostics {
+export default class Diagnostics {
   connection: IConnection;
+  flow: FlowSingleProjectLanguageService;
 
-  constructor(connection: IConnection) {
+  constructor(connection: IConnection, flow: FlowSingleProjectLanguageService) {
     this.connection = connection;
+    this.flow = flow;
   }
 
   validate = async (textDocument: TextDocument, content: ?string) => {
@@ -53,90 +60,53 @@ class Diagnostics {
     this._reportDiagnostics(diags);
   };
 
-  _reportDiagnostics(internalDiagnostics: InternalDiagnostics) {
-    const toReport: Array<Diagnostic> = entries(internalDiagnostics).map(([
-      _,
-      {uri, diagnostics},
-    ]) => {
-      return {
+  _reportDiagnostics(internalDiagnostics: Array<InternalDiagnostic>) {
+    for (const {uri, diagnostics} of internalDiagnostics) {
+      this.connection.sendDiagnostics({
         uri: uri.toString(),
         diagnostics,
-      };
-    });
-
-    toReport.forEach(d => this.connection.sendDiagnostics(d));
+      });
+    }
   }
 
   // adapted from counterpart in flow-for-vscode
   // transforms flow's diagnostics into LSP diagnostics
   async _getFileDiagnostics(
     filePath: string,
-    content: ?string,
+    content: string,
     pathToURI: string => URI = toURI,
-  ): InternalDiagnostics {
+  ): Promise<Array<InternalDiagnostic>> {
     // flowFindDiagnostics takes the provided filePath and then walks up directories
     // until a .flowconfig is found. The diagnostics are then valid for the entire
     // flow workspace.
-    const rawDiag = await flowFindDiagnostics(filePath, content);
-    if (rawDiag && rawDiag.messages) {
-      const {flowRoot, messages} = rawDiag;
-      const diags = Object.create(null);
-
-      messages.forEach(message => {
-        const {level, messageComponents} = message;
-        if (!messageComponents.length) {
-          return;
-        }
-
-        const [baseMessage, ...other] = messageComponents;
-        const {range} = baseMessage;
-
-        if (range == null) {
-          return;
-        }
-
-        const file = path.resolve(flowRoot, range.file);
-        const uri = pathToURI(file);
-
-        const details = [];
-        other.forEach(part => {
-          const partMsg = part.descr;
-          if (partMsg && partMsg !== 'null' && partMsg !== 'undefined') {
-            details.push(partMsg);
-          }
-        });
-
-        let messageString = baseMessage.descr;
-        if (details.length) {
-          messageString = `${messageString} (${details.join(' ')})`;
-        }
-
-        const diag: Diagnostic = {
-          severity: flowSeverityToLSPSeverity(level),
-          range: {
-            start: {
-              line: Math.max(0, range.start.line - 1),
-              character: range.start.column - 1,
-            },
-            end: {
-              line: Math.max(0, range.end.line - 1),
-              character: range.end.column,
-            },
-          },
-          message: messageString,
-          source: 'Flow',
-        };
-
-        if (!diags[file]) {
-          diags[file] = {uri, diagnostics: []};
-        }
-
-        diags[file].diagnostics.push(diag);
-      });
-      return diags;
-    } else {
+    const update = await this.flow.getDiagnostics(
+      filePath,
+      new SimpleTextBuffer(content),
+    );
+    const filePathToMessages = update && update.filePathToMessages;
+    if (!filePathToMessages) {
       return noDiagnostics;
     }
+
+    const internalDiagnostics: Array<InternalDiagnostic> = [];
+    for (const [uri, diagnostics] of filePathToMessages.entries()) {
+      internalDiagnostics.push({
+        uri: pathToURI(uri),
+        diagnostics: diagnostics
+          .filter(
+            // range and message text are required for LSP
+            d => d.range != null && d.text != null,
+          )
+          .map(d => ({
+            severity: flowSeverityToLSPSeverity(d.type),
+            range: atomRangeToLSPRange(d.range),
+            message: toMessage(d),
+            source: d.providerName,
+          })),
+      });
+    }
+
+    return internalDiagnostics;
   }
 
   /*
@@ -146,13 +116,16 @@ class Diagnostics {
    * When the file is  saved properly into the Flow root, it will be
    * processed as a file instead.
    */
-  async _getBufferDiagnostics(uri: URI, content: string): InternalDiagnostics {
+  async _getBufferDiagnostics(
+    uri: URI,
+    content: string,
+  ): Promise<Array<InternalDiagnostic>> {
     if (hasFlowPragma(content)) {
       const dummyPath = path.join(__dirname, 'sandbox', 'dummy.js');
       const diags = await this._getFileDiagnostics(
         dummyPath,
         content,
-        () => uri,
+        fromPath => (fromPath === dummyPath ? uri : URI.file(uri)),
       );
       return diags;
     }
@@ -161,4 +134,21 @@ class Diagnostics {
   }
 }
 
-export default Diagnostics;
+function toMessage(diagnostic: FileDiagnosticMessage): string {
+  let message = diagnostic.text;
+  if (diagnostic.trace && diagnostic.trace.length) {
+    for (const trace of diagnostic.trace) {
+      if (trace.text != null) {
+        // put new 'sentences' on their own line
+        if (trace.text[0] === trace.text[0].toUpperCase()) {
+          message += '\n';
+        } else {
+          message += ' ';
+        }
+        message += trace.text;
+      }
+    }
+  }
+
+  return message;
+}
