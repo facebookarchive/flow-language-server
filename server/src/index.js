@@ -21,36 +21,25 @@ export function createServer(connection: IConnection) {
   connection.onInitialize(params => {
     const logger = getLogger();
 
-    logger.debug('connection initialized');
+    logger.debug('LSP connection initialized. Connecting to flow...');
     const flow = new FlowSingleProjectLanguageService(
       params.rootPath,
       new FlowExecInfoContainer(),
     );
 
     const diagnostics = new Diagnostics(connection, flow);
-    connection.onDidChangeConfiguration(({settings}) => {
-      logger.debug('config changed');
-      documents.all().forEach(doc => diagnostics.validate(doc));
-    });
+    diagnostics.observe();
 
     connection.onShutdown(() => {
       documents.dispose();
       flow.dispose();
     });
 
-    documents.onDidSave(({document}) => {
-      logger.debug(`document ${document.uri} saved, running diagnostics`);
-      diagnostics.validate(document);
-    });
-
-    documents.onDidOpenTextDocument(({textDocument}) => {
-      logger.debug('document', textDocument.uri, 'opened');
-      diagnostics.validate(textDocument);
-    });
-
     const completion = new Completion(connection, documents, flow);
     connection.onCompletion(docParams => {
-      logger.debug(`completion requested for document ${docParams.textDocument.uri} with position ${JSON.stringify(docParams.position, null, 2)}`);
+      logger.debug(
+        `completion requested for document ${docParams.textDocument.uri}`,
+      );
       return completion.provideCompletionItems(docParams);
     });
 
@@ -61,7 +50,9 @@ export function createServer(connection: IConnection) {
 
     const definition = new Definition(connection, documents, flow);
     connection.onDefinition(docParams => {
-      logger.debug('definition requested');
+      logger.debug(
+        `definition requested for document ${docParams.textDocument.uri}`,
+      );
       return definition.provideDefinition(docParams);
     });
 
