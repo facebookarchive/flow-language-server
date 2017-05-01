@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "yarn watch",
     "build": "babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
+    "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
     "test": "jest",
-    "watch": "yarn build -- --watch"
+    "watch": "yarn build -- --watch & yarn build-atom -- --watch"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -53,7 +54,8 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "flow-vscode/*",
-      "server/lib/*"
+      "server/lib/*",
+      "atom-languageserver-flow/lib/"
     ]
   }
 }

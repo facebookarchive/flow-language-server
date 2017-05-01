@@ -24,6 +24,7 @@ function getSubject(): Subject<NuclideConsoleMessage> {
   if (sub == null) {
     sub = new Subject();
   }
+
   return sub;
 }
 
