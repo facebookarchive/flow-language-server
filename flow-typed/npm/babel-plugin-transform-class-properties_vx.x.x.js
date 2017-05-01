@@ -1,4 +1,4 @@
-// flow-typed signature: 7b22b530aac8965d28bdd9dba43e1b19
+// flow-typed signature: 0207d44e6825287876eada9d1de631dd
 // flow-typed version: <<STUB>>/babel-plugin-transform-class-properties_v^6.24.1/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

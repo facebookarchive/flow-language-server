@@ -1,4 +1,4 @@
-// flow-typed signature: 2cf5e750ca982fcaffc608035fc72091
+// flow-typed signature: 5eae8ff17a1a930a815e84e16830577e
 // flow-typed version: <<STUB>>/eslint-config-fbjs-opensource_v^1.0.0/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

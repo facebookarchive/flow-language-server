@@ -1,4 +1,4 @@
-// flow-typed signature: fde6d981c24628f24de114281a16018f
+// flow-typed signature: 96117d2dcaa1e4af349d2114075298e3
 // flow-typed version: <<STUB>>/simple-text-buffer_v^9.2.11/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

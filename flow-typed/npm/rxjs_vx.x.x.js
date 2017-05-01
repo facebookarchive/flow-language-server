@@ -1,4 +1,4 @@
-// flow-typed signature: 0038828f64bf9489ee2600b53e012b22
+// flow-typed signature: 4f496676def4856393b24991207401bd
 // flow-typed version: <<STUB>>/rxjs_v^5.0.0-beta.8/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

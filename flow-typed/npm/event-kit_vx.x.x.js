@@ -1,4 +1,4 @@
-// flow-typed signature: e85ffb9ea3258ca3fa96870e547af1fa
+// flow-typed signature: 85c8d02daba65da289b6e89db985d413
 // flow-typed version: <<STUB>>/event-kit_v^2.0.0/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

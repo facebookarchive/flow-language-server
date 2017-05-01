@@ -1,4 +1,4 @@
-// flow-typed signature: 67bc972d8db7911a5a550d1c4b2fdbaa
+// flow-typed signature: 99e40a0d038d213ab01b1e5e990fb439
 // flow-typed version: <<STUB>>/shell-quote_v^1.6.0/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 
