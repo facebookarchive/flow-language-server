@@ -514,7 +514,12 @@ declare module 'vscode-languageserver-types' {
     | 17
     | 18;
 
-  declare type InsertTextFormat = 1 | 2;
+  declare var InsertTextFormat: {
+    PlainText: 1,
+    Snippet: 2,
+  };
+
+  declare type InsertTextFormatType = 1 | 2;
 
   /**
    * A completion item represents a text snippet that is
@@ -570,7 +575,7 @@ declare module 'vscode-languageserver-types' {
      * The format of the insert text. The format applies to both the `insertText` property
      * and the `newText` property of a provided `textEdit`.
      */
-    insertTextFormat?: InsertTextFormat,
+    insertTextFormat?: InsertTextFormatType,
 
     /**
      * An [edit](#TextEdit) which is applied to a document when selecting
