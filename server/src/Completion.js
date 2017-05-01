@@ -73,6 +73,7 @@ export default class Completion {
 
           if (atomCompletion.description) {
             completion.detail = atomCompletion.description;
+            completion.documentation = atomCompletion.description;
           }
 
           completion.kind = this.typeToKind(
