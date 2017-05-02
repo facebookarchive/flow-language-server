@@ -19,7 +19,8 @@ import {
   InsertTextFormat,
 } from 'vscode-languageserver-types';
 
-import getWordTextAndRange from './utils/getWordTextAndRange';
+import {wordAtPositionFromBuffer} from './pkg/commons-node/range';
+import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
 
 import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
@@ -51,14 +52,15 @@ export default class Completion {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
-    const {text} = getWordTextAndRange(doc.buffer, point);
+    const match = wordAtPositionFromBuffer(doc.buffer, point, JAVASCRIPT_WORD_REGEX);
+    let prefix = idx(match, _ => _.wordMatch[0]) || '.';
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
       doc.buffer,
       point,
       true, // activatedManually
-      text,
+      prefix,
     );
 
     if (autocompleteResult) {
