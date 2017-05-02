@@ -58,15 +58,8 @@ function treesToItems(
 ): Array<SymbolInformation> {
   const items = [];
   for (const tree of trees) {
-    if (!tree.representativeName) {
-      // if no representativeName, we can't show anything useful.
-      // descend recursively if possible, otherwise return empty
-      if (tree.children.length) {
-        items.push(...treesToItems(tree.children, null, uri));
-        continue;
-      } else {
-        continue;
-      }
+    if (!tree.representativeName && !tree.children.length) {
+      continue;
     }
 
     const name = tree.representativeName;
