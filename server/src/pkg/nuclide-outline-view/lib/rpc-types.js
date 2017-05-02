@@ -4,7 +4,6 @@
  *
  * This source code is licensed under the license found in the LICENSE file in
  * the root directory of this source tree.
- *
  * @flow
  */
 
@@ -21,6 +20,7 @@ export type OutlineTree = {
   startPosition: atom$Point,
   endPosition?: atom$Point,
   children: Array<OutlineTree>,
+  type: string,
 };
 
 export type Outline = {
