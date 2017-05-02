@@ -6,6 +6,7 @@ import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
 import Hover from './Hover';
+import SymbolSupport from './Symbol';
 import TextDocuments from './TextDocuments';
 import {
   FlowExecInfoContainer,
@@ -35,7 +36,11 @@ export function createServer(connection: IConnection) {
       flow.dispose();
     });
 
-    const completion = new Completion({clientCapabilities: capabilities, documents, flow});
+    const completion = new Completion({
+      clientCapabilities: capabilities,
+      documents,
+      flow,
+    });
     connection.onCompletion(docParams => {
       logger.debug(
         `completion requested for document ${docParams.textDocument.uri}`,
@@ -61,12 +66,21 @@ export function createServer(connection: IConnection) {
       return hover.provideHover(docParams);
     });
 
+    const symbols = new SymbolSupport({connection, documents, flow});
+    connection.onDocumentSymbol(symbolParams => {
+      logger.debug(
+        `symbols requested for document ${symbolParams.textDocument.uri}`,
+      );
+      return symbols.provideDocumentSymbol(symbolParams);
+    });
+
     logger.info('Flow language server started');
 
     return {
       capabilities: {
-        definitionProvider: true,
         textDocumentSync: documents.syncKind,
+        definitionProvider: true,
+        documentSymbolProvider: true,
         completionProvider: {
           resolveProvider: true,
         },

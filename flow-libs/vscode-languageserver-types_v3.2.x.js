@@ -837,43 +837,28 @@ declare module 'vscode-languageserver-types' {
     create: typeof DocumentHighlight$create,
   };
 
-  declare var SymbolTypeFile: 1;
+  declare var SymbolKind = {
+    File: 1,
+    Module: 2,
+    Namespace: 3,
+    Package: 4,
+    Class: 5,
+    Method: 6,
+    Property: 7,
+    Field: 8,
+    Constructor: 9,
+    Enum: 10,
+    Interface: 11,
+    Function: 12,
+    Variable: 13,
+    Constant: 14,
+    String: 15,
+    Number: 16,
+    Boolean: 17,
+    Array: 18,
+  }
 
-  declare var SymbolTypeModule: 2;
-
-  declare var SymbolTypeNamespace: 3;
-
-  declare var SymbolTypePackage: 4;
-
-  declare var SymbolTypeClass: 5;
-
-  declare var SymbolTypeMethod: 6;
-
-  declare var SymbolTypeProperty: 7;
-
-  declare var SymbolTypeField: 8;
-
-  declare var SymbolTypeConstructor: 9;
-
-  declare var SymbolTypeEnum: 10;
-
-  declare var SymbolTypeInterface: 11;
-
-  declare var SymbolTypeFunction: 12;
-
-  declare var SymbolTypeVariable: 13;
-
-  declare var SymbolTypeConstant: 14;
-
-  declare var SymbolTypeString: 15;
-
-  declare var SymbolTypeNumber: 16;
-
-  declare var SymbolTypeBoolean: 17;
-
-  declare var SymbolTypeArray: 18;
-
-  declare type SymbolKind =
+  declare type SymbolKindType =
     | 1
     | 2
     | 3
@@ -898,23 +883,23 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface SymbolInformation {
     /**
-       * The name of this symbol.
-       */
+     * The name of this symbol.
+     */
     name: string,
 
     /**
-           * The kind of this symbol.
-           */
+     * The kind of this symbol.
+     */
     kind: SymbolKind,
 
     /**
-           * The location of this symbol.
-           */
+     * The location of this symbol.
+     */
     location: Location,
 
     /**
-           * The name of the symbol containing this symbol.
-           */
+     * The name of the symbol containing this symbol.
+     */
     containerName?: string,
   }
 

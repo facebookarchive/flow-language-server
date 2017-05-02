@@ -65,6 +65,7 @@ function itemToTree(item: any): ?OutlineTree {
         representativeName = item.id.name;
       }
       return {
+        type: 'Class',
         tokenizedText,
         representativeName,
         children: itemsToTrees(item.body.body),
@@ -72,7 +73,9 @@ function itemToTree(item: any): ?OutlineTree {
       };
     case 'ClassProperty':
       let paramTokens = [];
+      let type = 'Field';
       if (item.value && item.value.type === 'ArrowFunctionExpression') {
+        type = 'Method';
         paramTokens = [
           plain('('),
           ...declarationsTokenizedText(item.value.params),
@@ -80,6 +83,7 @@ function itemToTree(item: any): ?OutlineTree {
         ];
       }
       return {
+        type,
         tokenizedText: [
           method(item.key.name),
           plain('='),
@@ -91,6 +95,7 @@ function itemToTree(item: any): ?OutlineTree {
       };
     case 'MethodDefinition':
       return {
+        type: 'Method',
         tokenizedText: [
           method(item.key.name),
           plain('('),
@@ -134,6 +139,7 @@ function exportDeclaration(
   invariant(tree.tokenizedText != null);
   tokenizedText.push(...tree.tokenizedText);
   return {
+    type: 'Module',
     tokenizedText,
     representativeName: tree.representativeName,
     children: tree.children,
@@ -197,6 +203,7 @@ function getExtent(item: any): Extent {
 
 function functionOutline(name: string, params: Array<any>, extent: Extent): OutlineTree {
   return {
+    type: 'Function',
     tokenizedText: [
       keyword('function'),
       whitespace(' '),
@@ -215,6 +222,7 @@ function typeAliasOutline(typeAliasExpression: any): OutlineTree {
   invariant(typeAliasExpression.type === 'TypeAlias');
   const name = typeAliasExpression.id.name;
   return {
+    type: 'Interface',
     tokenizedText: [
       keyword('type'),
       whitespace(' '),
@@ -251,6 +259,7 @@ function moduleExportsOutline(assignmentStatement: any): ?OutlineTree {
   }
   const properties: Array<Object> = right.properties;
   return {
+    type: 'Module',
     tokenizedText: [plain('module.exports')],
     children: arrayCompact(properties.map(moduleExportsPropertyOutline)),
     ...getExtent(assignmentStatement),
@@ -271,10 +280,12 @@ function moduleExportsPropertyOutline(property: any): ?OutlineTree {
     return null;
   }
   const propName = property.key.name;
+  const type = 'Property';
 
   if (property.shorthand) {
     // This happens when the shorthand `{ foo }` is used for `{ foo: foo }`
     return {
+      type,
       tokenizedText: [
         string(propName),
       ],
@@ -288,6 +299,7 @@ function moduleExportsPropertyOutline(property: any): ?OutlineTree {
     property.value.type === 'ArrowFunctionExpression'
   ) {
     return {
+      type,
       tokenizedText: [
         method(propName),
         plain('('),
@@ -301,6 +313,7 @@ function moduleExportsPropertyOutline(property: any): ?OutlineTree {
   }
 
   return {
+    type,
     tokenizedText: [
       string(propName),
       plain(':'),
@@ -340,6 +353,7 @@ function specOutline(expressionStatement: any, describeOnly: boolean = false): ?
       .map(item => specOutline(item)));
   }
   return {
+    type: 'Function',
     tokenizedText: [
       method(functionName),
       whitespace(' '),
@@ -465,6 +479,7 @@ function variableDeclaratorOutline(
   ];
   const representativeName = id.type === 'Identifier' ? id.name : undefined;
   return {
+    type: 'Variable',
     tokenizedText,
     representativeName,
     children: [],
