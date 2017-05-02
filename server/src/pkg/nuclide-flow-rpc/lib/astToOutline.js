@@ -73,7 +73,7 @@ function itemToTree(item: any): ?OutlineTree {
       };
     case 'ClassProperty':
       let paramTokens = [];
-      let type = 'Field';
+      let type = 'Property';
       if (item.value && item.value.type === 'ArrowFunctionExpression') {
         type = 'Method';
         paramTokens = [
@@ -139,7 +139,7 @@ function exportDeclaration(
   invariant(tree.tokenizedText != null);
   tokenizedText.push(...tree.tokenizedText);
   return {
-    type: 'Module',
+    type: tree.type,
     tokenizedText,
     representativeName: tree.representativeName,
     children: tree.children,

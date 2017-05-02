@@ -837,7 +837,7 @@ declare module 'vscode-languageserver-types' {
     create: typeof DocumentHighlight$create,
   };
 
-  declare var SymbolKind = {
+  declare var SymbolKind: {
     File: 1,
     Module: 2,
     Namespace: 3,
