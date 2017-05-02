@@ -1,4 +1,4 @@
-// flow-typed signature: 47d00a4b995d10aba929fc0aafb37da0
+// flow-typed signature: e4d151278b47995a50ebde04848b5eed
 // flow-typed version: <<STUB>>/async-to-generator_v^1.1.0/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

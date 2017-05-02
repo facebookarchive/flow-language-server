@@ -13,16 +13,18 @@ import {atomPointToLSPPosition, lspPositionToAtomPoint} from './utils/util';
 
 const logger = getLogger();
 
+type DefinitionSupportParams = {
+  connection: IConnection,
+  documents: TextDocuments,
+  flow: FlowSingleProjectLanguageService,
+};
+
 export default class DefinitionSupport {
   connection: IConnection;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor(
-    connection: IConnection,
-    documents: TextDocuments,
-    flow: FlowSingleProjectLanguageService,
-  ) {
+  constructor({connection, documents, flow}: DefinitionSupportParams) {
     this.connection = connection;
     this.documents = documents;
     this.flow = flow;

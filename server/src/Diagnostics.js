@@ -18,11 +18,16 @@ import {getLogger} from './pkg/nuclide-logging';
 
 const logger = getLogger();
 
+type DiagnosticsParams = {
+  connection: IConnection,
+  flow: FlowSingleProjectLanguageService,
+};
+
 export default class Diagnostics {
   connection: IConnection;
   flow: FlowSingleProjectLanguageService;
 
-  constructor(connection: IConnection, flow: FlowSingleProjectLanguageService) {
+  constructor({connection, flow}: DiagnosticsParams) {
     this.connection = connection;
     this.flow = flow;
   }

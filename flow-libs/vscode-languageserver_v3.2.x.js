@@ -692,17 +692,17 @@ declare module 'vscode-languageserver' {
     ): void,
 
     /**
-           * Installs a handler for the `DocumentSymbol` request.
-           * @param handler The corresponding handler.
-           */
+     * Installs a handler for the `DocumentSymbol` request.
+     * @param handler The corresponding handler.
+     */
     onDocumentSymbol(
       handler: RequestHandler<DocumentSymbolParams, SymbolInformation[], void>,
     ): void,
 
     /**
-           * Installs a handler for the `WorkspaceSymbol` request.
-           * @param handler The corresponding handler.
-           */
+     * Installs a handler for the `WorkspaceSymbol` request.
+     * @param handler The corresponding handler.
+     */
     onWorkspaceSymbol(
       handler: RequestHandler<WorkspaceSymbolParams, SymbolInformation[], void>,
     ): void,

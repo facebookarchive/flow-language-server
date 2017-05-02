@@ -1,4 +1,4 @@
-// flow-typed signature: 80d84011f28c78f9c84692e7cd3ca6ce
+// flow-typed signature: d85e9e6247e0c6be11ac59e9a8d90036
 // flow-typed version: <<STUB>>/fuzzaldrin-plus_v^0.4.1/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

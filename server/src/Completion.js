@@ -1,6 +1,6 @@
 // @flow
 
-import type {IConnection} from 'vscode-languageserver';
+import type {ClientCapabilities} from 'vscode-languageserver/lib/protocol';
 import type {
   CompletionList,
   CompletionItemKindType,
@@ -12,8 +12,15 @@ import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
+import idx from 'idx';
 import URI from 'vscode-uri';
-import {CompletionItemKind} from 'vscode-languageserver-types';
+import {
+  CompletionItemKind,
+  InsertTextFormat,
+} from 'vscode-languageserver-types';
+
+import {wordAtPositionFromBuffer} from './pkg/commons-node/range';
+import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
 
 import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
@@ -21,17 +28,19 @@ import {getLogger} from './pkg/nuclide-logging';
 
 const logger = getLogger();
 
+type CompletionParams = {
+  clientCapabilities: ClientCapabilities,
+  documents: TextDocuments,
+  flow: FlowSingleProjectLanguageService,
+};
+
 export default class Completion {
-  connection: IConnection;
+  clientCapabilities: ClientCapabilities;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor(
-    connection: IConnection,
-    documents: TextDocuments,
-    flow: FlowSingleProjectLanguageService,
-  ) {
-    this.connection = connection;
+  constructor({clientCapabilities, documents, flow}: CompletionParams) {
+    this.clientCapabilities = clientCapabilities;
     this.documents = documents;
     this.flow = flow;
   }
@@ -42,12 +51,14 @@ export default class Completion {
   }: TextDocumentPositionParams): Promise<CompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
-    const prefix = '.'; // TODO do better.
+    const point = lspPositionToAtomPoint(position);
+    const match = wordAtPositionFromBuffer(doc.buffer, point, JAVASCRIPT_WORD_REGEX);
+    let prefix = idx(match, _ => _.wordMatch[0]) || '.';
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
       doc.buffer,
-      lspPositionToAtomPoint(position),
+      point,
       true, // activatedManually
       prefix,
     );
@@ -64,6 +75,7 @@ export default class Completion {
 
           if (atomCompletion.description) {
             completion.detail = atomCompletion.description;
+            completion.documentation = atomCompletion.description;
           }
 
           completion.kind = this.typeToKind(
@@ -71,8 +83,19 @@ export default class Completion {
             atomCompletion.description,
           );
 
-          if (atomCompletion.snippet) {
+          if (
+            idx(
+              this.clientCapabilities,
+              _ => _.textDocument.completion.completionItem.snippetSupport,
+            ) &&
+            atomCompletion.snippet
+          ) {
             completion.insertText = atomCompletion.snippet;
+            completion.insertTextFormat = InsertTextFormat.Snippet;
+          } else {
+            logger.debug(
+              'Was going to return a snippet completion, but the client does not support them',
+            );
           }
 
           return completion;

@@ -1,4 +1,4 @@
-// flow-typed signature: 1f0bdef60b06045fcd6db67f786f8dbd
+// flow-typed signature: a5825482be57709f260341c0f9bed564
 // flow-typed version: <<STUB>>/log4js_v^0.6.37/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

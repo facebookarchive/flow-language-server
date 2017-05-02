@@ -1,4 +1,4 @@
-// flow-typed signature: d661d464e0a888abe559059448e976fd
+// flow-typed signature: ea3d31321e1fdd19f12c3d3153a4eb9f
 // flow-typed version: <<STUB>>/vscode-uri_v^1.0.0/flow_v0.44.1
 
 /**
@@ -8,8 +8,8 @@
  *
  * Fill this stub out by replacing all the `any` types.
  *
- * Once filled out, we encourage you to share your work with the 
- * community by sending a pull request to: 
+ * Once filled out, we encourage you to share your work with the
+ * community by sending a pull request to:
  * https://github.com/flowtype/flow-typed
  */
 

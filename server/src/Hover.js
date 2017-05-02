@@ -12,16 +12,18 @@ function markedJS(text: string): string {
   return '```js\n' + text + '\n```';
 }
 
+type HoverSupportParams = {
+  connection: IConnection,
+  documents: TextDocuments,
+  flow: FlowSingleProjectLanguageService,
+};
+
 export default class HoverSupport {
   connection: IConnection;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor(
-    connection: IConnection,
-    documents: TextDocuments,
-    flow: FlowSingleProjectLanguageService,
-  ) {
+  constructor({connection, documents, flow}: HoverSupportParams) {
     this.connection = connection;
     this.documents = documents;
     this.flow = flow;
