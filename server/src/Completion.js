@@ -53,7 +53,7 @@ export default class Completion {
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
     const match = wordAtPositionFromBuffer(doc.buffer, point, JAVASCRIPT_WORD_REGEX);
-    let prefix = idx(match, _ => _.wordMatch[0]) || '.';
+    const prefix = idx(match, _ => _.wordMatch[0]) || '.';
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
