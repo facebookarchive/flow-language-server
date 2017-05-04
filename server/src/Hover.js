@@ -8,10 +8,6 @@ import URI from 'vscode-uri';
 import TextDocuments from './TextDocuments';
 import {atomRangeToLSPRange, lspPositionToAtomPoint} from './utils/util';
 
-function markedJS(text: string): string {
-  return '```js\n' + text + '\n```';
-}
-
 type HoverSupportParams = {
   connection: IConnection,
   documents: TextDocuments,
@@ -44,7 +40,7 @@ export default class HoverSupport {
 
     if (typeHint) {
       return {
-        contents: markedJS(typeHint.hint),
+        contents: {language: 'javascript', value: typeHint.hint},
         range: atomRangeToLSPRange(typeHint.range),
       };
     }
