@@ -15,7 +15,7 @@ import type {
 import type {NuclideUri} from './pkg/commons-node/nuclideUri';
 import type {TextDocumentItem} from 'vscode-languageserver-types';
 
-import invariant from 'invariant';
+import invariant from 'assert';
 import TextDocument from './TextDocument';
 import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
 import {Emitter} from 'event-kit';

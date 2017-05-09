@@ -9,7 +9,7 @@ import type {
 import {Point} from 'simple-text-buffer';
 
 import {DiagnosticSeverity} from 'vscode-languageserver-types';
-import invariant from 'invariant';
+import invariant from 'assert';
 import nullthrows from 'nullthrows';
 import URI from 'vscode-uri';
 

@@ -24,7 +24,7 @@ export function createServer(connection: IConnection) {
 
     logger.debug('LSP connection initialized. Connecting to flow...');
     const flow = new FlowSingleProjectLanguageService(
-      rootPath,
+      rootPath || process.cwd(),
       new FlowExecInfoContainer(),
     );
 
