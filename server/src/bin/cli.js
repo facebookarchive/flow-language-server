@@ -2,7 +2,7 @@
 // @flow
 /* eslint-disable no-console */
 
-import invariant from 'invariant';
+import invariant from 'assert';
 import patchNuclideLogger from '../patchNuclideLogger';
 import {createConnection} from 'vscode-languageserver';
 

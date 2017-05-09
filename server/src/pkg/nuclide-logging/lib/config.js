@@ -10,7 +10,6 @@
 
 import type {LoggingAppender} from './types';
 import ScribeProcess from '../../commons-node/ScribeProcess';
-import {isRunningInTest, isRunningInClient} from '../../commons-node/system-info';
 import fsPromise from '../../commons-node/fsPromise';
 
 import os from 'os';
@@ -70,43 +69,7 @@ export const FileAppender: Object = {
 };
 
 export async function getDefaultConfig(): Promise<LoggingAppender> {
-  if (!logDirectoryInitialized) {
-    await fsPromise.mkdirp(LOG_DIRECTORY);
-    logDirectoryInitialized = true;
-  }
-
-  const config = {
-    appenders: [
-      {
-        type: 'logLevelFilter',
-        level: 'ALL',
-        appender: {
-          type: nuclideUri.join(__dirname, './nuclideConsoleAppender'),
-        },
-      },
-      FileAppender,
-    ],
-  };
-
-  // Do not print server logs to stdout/stderr.
-  // These are normally just piped to a .nohup.out file, so doing this just causes
-  // the log files to be duplicated.
-  if (isRunningInTest() || isRunningInClient()) {
-    config.appenders.push({
-      type: 'logLevelFilter',
-      level: 'WARN',
-      appender: {
-        type: nuclideUri.join(__dirname, './consoleAppender'),
-      },
-    });
-  } else {
-    const serverLogAppenderConfig = await getServerLogAppenderConfig();
-    if (serverLogAppenderConfig) {
-      config.appenders.push(serverLogAppenderConfig);
-    }
-  }
-
-  return config;
+  return {appenders: []};
 }
 
 export function addAdditionalLogFile(title: string, filename: string) {

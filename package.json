@@ -1,7 +1,7 @@
 {
   "name": "flow-language-server",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.3",
+  "main": "server/lib/index.js",
   "license": "MIT",
   "scripts": {
     "dev": "yarn watch",
@@ -9,6 +9,9 @@
     "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
     "test": "jest",
     "watch": "yarn build -- --watch & yarn build-atom -- --watch"
+  },
+  "bin": {
+    "flow-language-server": "./server/lib/bin/cli.js"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -26,26 +29,22 @@
   },
   "dependencies": {
     "async-to-generator": "^1.1.0",
-    "cross-spawn": "^4.0.0",
-    "dequeue": "^1.0.5",
-    "elegant-spinner": "^1.0.1",
     "event-kit": "^2.0.0",
-    "flow-bin": "^0.44.1",
+    "flow-bin": "^0.45.0",
     "fs-plus": "^2.8.2",
-    "fuzzaldrin": "^2.1.0",
     "fuzzaldrin-plus": "^0.4.1",
     "idx": "^1.5.0",
     "log4js": "^0.6.37",
     "lru-cache": "^4.0.1",
     "mkdirp": "^0.5.1",
     "nullthrows": "^1.0.0",
-    "regenerator-runtime": "^0.10.3",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.0-beta.8",
     "semver": "^5.3.0",
     "shell-quote": "^1.6.0",
     "simple-text-buffer": "^9.2.11",
     "temp": "^0.8.3",
+    "through": "^2.3.6",
     "vscode-languageserver": "^3.2.0",
     "vscode-uri": "^1.0.0"
   },
@@ -59,5 +58,8 @@
       "server/lib/*",
       "atom-languageserver-flow/lib/"
     ]
-  }
+  },
+  "files": [
+    "server/lib"
+  ]
 }

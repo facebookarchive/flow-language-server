@@ -2,7 +2,7 @@
 import type {TextDocumentContentChangeEvent} from 'vscode-languageserver-types';
 import type {NuclideUri} from './pkg/commons-node/nuclideUri';
 
-import invariant from 'invariant';
+import invariant from 'assert';
 import SimpleTextBuffer from 'simple-text-buffer';
 import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
 import {Emitter} from 'event-kit';
