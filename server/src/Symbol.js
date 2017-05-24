@@ -10,9 +10,9 @@ import {
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import TextDocuments from './TextDocuments';
 import {atomPointToLSPPosition} from './utils/util';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
-const logger = getLogger();
+const logger = getLogger('Symbol');
 
 type SymbolSupportParams = {
   connection: IConnection,

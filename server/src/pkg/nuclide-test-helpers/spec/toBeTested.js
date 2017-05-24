@@ -6,14 +6,11 @@
  * the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
-export type LogLevel =
-  'ALL' |
-  'TRACE' |
-  'DEBUG' |
-  'INFO' |
-  'WARN' |
-  'ERROR' |
-  'FATAL' |
-  'OFF';
+import {importedFunction} from './toBeMocked';
+
+export function functionToTest(): any {
+  return importedFunction(42);
+}

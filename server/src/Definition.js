@@ -8,10 +8,10 @@ import {
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import URI from 'vscode-uri';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 import {atomPointToLSPPosition, lspPositionToAtomPoint} from './utils/util';
 
-const logger = getLogger();
+const logger = getLogger('Definition');
 
 type DefinitionSupportParams = {
   connection: IConnection,

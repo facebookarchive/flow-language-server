@@ -537,7 +537,7 @@ declare module 'vscode-languageserver-types' {
            * The kind of this completion item. Based of the kind
            * an icon is chosen by the editor.
            */
-    kind?: CompletionItemKind,
+    kind?: CompletionItemKindType,
 
     /**
      * A human-readable string with additional information
@@ -890,7 +890,7 @@ declare module 'vscode-languageserver-types' {
     /**
      * The kind of this symbol.
      */
-    kind: SymbolKind,
+    kind: SymbolKindType,
 
     /**
      * The location of this symbol.

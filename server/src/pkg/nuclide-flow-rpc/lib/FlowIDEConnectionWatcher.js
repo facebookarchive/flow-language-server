@@ -11,7 +11,7 @@
 import {FlowIDEConnection} from './FlowIDEConnection';
 
 import {sleep} from '../../commons-node/promise';
-import {getLogger} from '../../nuclide-logging';
+import {getLogger} from 'log4js';
 import {Observable} from 'rxjs';
 
 const defaultIDEConnectionFactory = proc => new FlowIDEConnection(proc);
@@ -99,18 +99,18 @@ export class FlowIDEConnectionWatcher {
       if (proc != null || attemptEndTime > endTimeMS) {
         break;
       } else {
-        getLogger().info('Failed to start Flow IDE connection... retrying');
+        getLogger('nuclide-flow-rpc').info('Failed to start Flow IDE connection... retrying');
         const attemptWallTime = attemptEndTime - attemptStartTime;
         const additionalWaitTime = IDE_CONNECTION_MIN_INTERVAL_MS - attemptWallTime;
         if (additionalWaitTime > 0) {
-          getLogger().info(`Waiting an additional ${additionalWaitTime} ms before retrying`);
+          getLogger('nuclide-flow-rpc').info(`Waiting an additional ${additionalWaitTime} ms before retrying`);
           // eslint-disable-next-line no-await-in-loop
           await this._sleep(additionalWaitTime);
         }
       }
     }
     if (proc == null) {
-      getLogger().error('Failed to start Flow IDE connection too many times... giving up');
+      getLogger('nuclide-flow-rpc').error('Failed to start Flow IDE connection too many times... giving up');
       return;
     }
     const connectionStartTime = this._getTimeMS();
@@ -123,7 +123,7 @@ export class FlowIDEConnectionWatcher {
         if (connectionAliveTime < IDE_CONNECTION_HEALTHY_THRESHOLD_MS) {
           this._consecutiveUnhealthyConnections++;
           if (this._consecutiveUnhealthyConnections >= MAX_UNHEALTHY_CONNECTIONS) {
-            getLogger().error('Too many consecutive unhealthy Flow IDE connections... giving up');
+            getLogger('nuclide-flow-rpc').error('Too many consecutive unhealthy Flow IDE connections... giving up');
             return;
           }
         } else {

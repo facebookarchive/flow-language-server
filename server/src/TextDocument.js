@@ -11,9 +11,9 @@ import {
   lspPositionToAtomPoint,
   lspRangeToAtomRange,
 } from './utils/util';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
-const logger = getLogger();
+const logger = getLogger('TextDocument');
 
 export default class TextDocument {
   buffer: SimpleTextBuffer;
