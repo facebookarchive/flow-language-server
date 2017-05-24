@@ -1,19 +1,16 @@
 // @flow
 
 import type {
-  IConnection,
-  TextDocumentSyncKindType,
-} from 'vscode-languageserver';
-
-import type {
   DidChangeTextDocumentParams,
   DidCloseTextDocumentParams,
   DidOpenTextDocumentParams,
   DidSaveTextDocumentParams,
-} from 'vscode-languageserver/lib/protocol';
+  IConnection,
+  TextDocumentSyncKindType,
+} from 'vscode-languageserver';
 
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
-import type {TextDocumentItem} from 'vscode-languageserver-types';
+import type {ITextDocumentItem} from 'vscode-languageserver-types';
 
 import invariant from 'assert';
 import TextDocument from './TextDocument';
@@ -24,7 +21,7 @@ import {getLogger} from 'log4js';
 
 const logger = getLogger('TextDocuments');
 
-function textDocumentFromLSPTextDocument(textDocument: TextDocumentItem) {
+function textDocumentFromLSPTextDocument(textDocument: ITextDocumentItem) {
   return new TextDocument(
     textDocument.uri,
     textDocument.languageId,

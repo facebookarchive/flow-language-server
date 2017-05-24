@@ -2,7 +2,7 @@
 
 import type {ClientCapabilities} from 'vscode-languageserver/lib/protocol';
 import type {
-  CompletionList,
+  ICompletionList,
   CompletionItemKindType,
 } from 'vscode-languageserver-types';
 import type {
@@ -47,7 +47,7 @@ export default class Completion {
   async provideCompletionItems({
     textDocument,
     position,
-  }: TextDocumentPositionParams): Promise<CompletionList> {
+  }: TextDocumentPositionParams): Promise<ICompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);

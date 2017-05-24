@@ -20,20 +20,9 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {getLogger} from 'log4js';
 const logger = getLogger('nuclide-flow-rpc');
 
-<<<<<<< HEAD
 import {runCommandDetailed, spawn} from 'nuclide-commons/process';
 import {sleep} from 'nuclide-commons/promise';
 import {niceSafeSpawn} from 'nuclide-commons/nice';
-=======
-import {track} from '../../nuclide-analytics';
-
-import {
-  asyncExecute,
-  createProcessStream,
-} from '../../commons-node/process';
-import {sleep} from 'nuclide-commons/promise';
-import {niceSafeSpawn} from '../../commons-node/nice';
->>>>>>> Use upstream nuclide-commons
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 
 import {getStopFlowOnExit} from './FlowHelpers';
@@ -135,10 +124,6 @@ export class FlowProcess {
       .subscribe(() => {
         this._pingServer();
       });
-
-    this._serverStatus.filter(status => status === ServerStatus.FAILED).subscribe(() => {
-      track('flow-server-failed');
-    });
   }
 
   dispose(): void {
@@ -493,7 +478,7 @@ export class FlowProcess {
     }
   }
 
-  _pingServerOnce(): Promise<void> {
+  _pingServerOnce(): Promise<?FlowExecResult> {
     return this._rawExecFlow(['status']).catch(() => null);
   }
 

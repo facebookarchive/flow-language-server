@@ -1,5 +1,5 @@
 // @flow
-import type {TextDocumentContentChangeEvent} from 'vscode-languageserver-types';
+import type {ITextDocumentContentChangeEvent} from 'vscode-languageserver-types';
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 
 import invariant from 'assert';

@@ -16,7 +16,6 @@ import * as rpc from 'vscode-jsonrpc';
 import through from 'through';
 
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
-import {track} from '../../nuclide-analytics';
 import {getLogger} from 'log4js';
 
 // TODO put these in flow-typed when they are fleshed out better
@@ -143,7 +142,6 @@ export class FlowIDEConnection {
         getLogger('nuclide-flow-rpc').error(
           'Did not receive diagnostics after subscribe request -- retrying...',
         );
-        track('nuclide-flow.missing-push-diagnostics');
         subscribe();
       });
 

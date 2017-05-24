@@ -9,11 +9,10 @@
  */
 
 import log4js from 'log4js';
+import nuclideUri from 'nuclide-commons/nuclideUri';
 import os from 'os';
 import path from 'path';
 import {IConnection} from 'vscode-languageserver';
-
-import nuclideUri from 'nuclide-commons/nuclideUri';
 
 const MAX_LOG_SIZE = 1024 * 1024;
 const MAX_LOG_BACKUPS = 10;

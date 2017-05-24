@@ -18,4 +18,8 @@ export default class ConnectionMock {
   onDidOpenTextDocument(handler) {
     this._emitter.on('didOpen', handler);
   }
+
+  onDidSaveTextDocument(handler) {
+    this._emitter.on('didChange', handler);
+  }
 }
