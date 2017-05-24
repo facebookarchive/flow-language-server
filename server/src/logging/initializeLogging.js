@@ -15,6 +15,8 @@ import {IConnection} from 'vscode-languageserver';
 
 import nuclideUri from '../pkg/commons-node/nuclideUri';
 
+const MAX_LOG_SIZE = 1024 * 1024;
+const MAX_LOG_BACKUPS = 10;
 const LOG_FILE_PATH = nuclideUri.join(os.tmpdir(), 'flow-language-server.log');
 
 // Configure log4js to not log to console, since
@@ -32,6 +34,14 @@ export default function initializeLogging(connection: IConnection) {
         appender: {
           type: path.join(__dirname, 'fileAppender'),
           filename: LOG_FILE_PATH,
+          maxLogSize: MAX_LOG_SIZE,
+          backups: MAX_LOG_BACKUPS,
+          layout: {
+            type: 'pattern',
+            // Format log in following pattern:
+            // yyyy-MM-dd HH:mm:ss.mil $Level (pid:$pid) $categroy - $message.
+            pattern: `%d{ISO8601} %p (pid:${process.pid}) %c - %m`,
+          },
         },
       },
       {
