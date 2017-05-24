@@ -10,7 +10,7 @@
 
 import type {ConnectableObservable} from 'rxjs';
 
-import type {NuclideUri} from '../../commons-node/nuclideUri';
+import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import type {
   AutocompleteResult,
   SymbolResult,

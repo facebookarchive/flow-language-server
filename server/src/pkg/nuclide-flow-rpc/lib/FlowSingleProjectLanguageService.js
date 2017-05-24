@@ -8,8 +8,8 @@
  * @flow
  */
 
-import type {NuclideUri} from '../../commons-node/nuclideUri';
-import {wordAtPositionFromBuffer} from '../../commons-node/range';
+import type {NuclideUri} from 'nuclide-commons/nuclideUri';
+import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
 import type {Outline} from '../../nuclide-outline-view/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {

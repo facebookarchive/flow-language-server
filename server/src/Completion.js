@@ -18,11 +18,10 @@ import {
   CompletionItemKind,
   InsertTextFormat,
 } from 'vscode-languageserver-types';
-
-import {wordAtPositionFromBuffer} from './pkg/commons-node/range';
-import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
+import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
 
 import TextDocuments from './TextDocuments';
+import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
 import {lspPositionToAtomPoint} from './utils/util';
 import {getLogger} from 'log4js';
 

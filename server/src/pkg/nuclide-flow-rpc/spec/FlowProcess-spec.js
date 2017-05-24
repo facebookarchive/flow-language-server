@@ -46,10 +46,10 @@ describe('FlowProcess', () => {
   beforeEach(() => {
     resetModules();
 
-    const processModule = require('../../commons-node/process');
-    const checkOutput = processModule.checkOutput;
+    const processModule = require('nuclide-commons/process');
+    const runCommand = processModule.runCommand;
 
-    spyOn(processModule, 'checkOutput')
+    spyOn(processModule, 'runCommand')
       .andCallFake(async function(command, args, options) {
         if (args && args[0] === 'version' && args[1] === '--json') {
           return new Promise(resolve => resolve({
@@ -58,7 +58,7 @@ describe('FlowProcess', () => {
             exitCode: 0,
           }));
         }
-        return checkOutput.call(this, command, args, options);
+        return runCommand.call(this, command, args, options);
       });
 
     spyOn(processModule, 'asyncExecute')
@@ -73,13 +73,13 @@ describe('FlowProcess', () => {
       kill() {},
     };
 
-    const niceModule = require('../../commons-node/nice');
+    const niceModule = require('nuclide-commons/nice');
     niceSpy = spyOn(niceModule, 'niceSafeSpawn')
       .andCallFake(() => {
         return childSpy;
       });
 
-    const nuclideUri = require('../../commons-node/nuclideUri').default;
+    const nuclideUri = require('nuclide-commons/nuclideUri').default;
     root = nuclideUri.join(__dirname, 'fixtures/with-flow-bin');
     binary = nuclideUri.join(root, 'node_modules/.bin/flow');
 

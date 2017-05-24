@@ -172,6 +172,10 @@ async-each@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
 
+async-to-generator@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/async-to-generator/-/async-to-generator-1.0.0.tgz#2124f1c736e56e5d7086c0a45167a0f06dc48b55"
+
 async-to-generator@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/async-to-generator/-/async-to-generator-1.1.0.tgz#1e20ed31df00eebded93a1469516f036213134c6"
@@ -2630,6 +2634,15 @@ npmlog@^4.0.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
+nuclide-commons@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.0.tgz#2a11f028506c5fc683907bc23e8e7b58c8343036"
+  dependencies:
+    async-to-generator "1.0.0"
+    event-kit "2.2.0"
+    rxjs "5.3.1"
+    shell-quote "1.6.1"
+
 nullthrows@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/nullthrows/-/nullthrows-1.0.0.tgz#34715e53b9debe0750a77233fd494a5835a2d999"
@@ -3076,7 +3089,7 @@ rx-lite@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-3.1.2.tgz#19ce502ca572665f3b647b10939f97fd1615f102"
 
-rxjs@^5.0.0-beta.8:
+rxjs@5.3.1, rxjs@^5.0.0-beta.8:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.3.1.tgz#9ecc9e722247e4f4490d30a878577a3740fd0cb7"
   dependencies:
@@ -3114,7 +3127,7 @@ set-immediate-shim@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
 
-shell-quote@^1.6.0:
+shell-quote@1.6.1, shell-quote@^1.6.0:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.6.1.tgz#f4781949cce402697127430ea3b3c5476f481767"
   dependencies:

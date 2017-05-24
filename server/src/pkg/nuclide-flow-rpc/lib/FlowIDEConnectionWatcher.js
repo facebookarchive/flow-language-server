@@ -10,7 +10,7 @@
 
 import {FlowIDEConnection} from './FlowIDEConnection';
 
-import {sleep} from '../../commons-node/promise';
+import {sleep} from 'nuclide-commons/promise';
 import {getLogger} from 'log4js';
 import {Observable} from 'rxjs';
 

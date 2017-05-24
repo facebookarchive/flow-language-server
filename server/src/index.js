@@ -1,5 +1,6 @@
 // @flow
 
+import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import {IConnection} from 'vscode-languageserver';
 
 import Completion from './Completion';
@@ -17,7 +18,14 @@ import {
 import {getLogger} from 'log4js';
 
 export function createServer(connection: IConnection) {
+  const disposable = new UniversalDisposable();
   const documents = new TextDocuments();
+  disposable.add(documents);
+
+  connection.onShutdown(() => {
+    console.log('SHUTTING DOWN');
+    disposable.dispose();
+  });
 
   connection.onInitialize(({capabilities, rootPath}) => {
     const logger = getLogger('index');
@@ -27,14 +35,11 @@ export function createServer(connection: IConnection) {
       rootPath || process.cwd(),
       new FlowExecInfoContainer(),
     );
+    disposable.add(flow);
 
     const diagnostics = new Diagnostics({connection, flow});
+    disposable.add(diagnostics);
     diagnostics.observe();
-
-    connection.onShutdown(() => {
-      documents.dispose();
-      flow.dispose();
-    });
 
     const completion = new Completion({
       clientCapabilities: capabilities,

@@ -12,12 +12,12 @@ import type {
   DidSaveTextDocumentParams,
 } from 'vscode-languageserver/lib/protocol';
 
-import type {NuclideUri} from './pkg/commons-node/nuclideUri';
+import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import type {TextDocumentItem} from 'vscode-languageserver-types';
 
 import invariant from 'assert';
 import TextDocument from './TextDocument';
-import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
+import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import {Emitter} from 'event-kit';
 import {TextDocumentSyncKind} from 'vscode-languageserver';
 import {getLogger} from 'log4js';

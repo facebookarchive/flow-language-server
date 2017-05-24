@@ -12,9 +12,9 @@ import type {Outline, OutlineTree} from '../../nuclide-outline-view/lib/rpc-type
 
 import {Point} from 'simple-text-buffer';
 
-import {arrayCompact} from '../../commons-node/collection';
+import {arrayCompact} from 'nuclide-commons/collection';
 
-import type {TokenizedText} from '../../commons-node/tokenizedText-rpc-types';
+import type {TokenizedText} from 'nuclide-commons/tokenized-text-rpc-types';
 import {
   keyword,
   className,
@@ -24,7 +24,7 @@ import {
   whitespace,
   plain,
   type,
-} from '../../commons-node/tokenizedText';
+} from 'nuclide-commons/tokenized-text';
 
 import invariant from 'assert';
 
