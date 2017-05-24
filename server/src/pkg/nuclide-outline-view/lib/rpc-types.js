@@ -20,7 +20,7 @@ export type OutlineTree = {
   startPosition: atom$Point,
   endPosition?: atom$Point,
   children: Array<OutlineTree>,
-  type: string,
+  type?: string,
 };
 
 export type Outline = {
