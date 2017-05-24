@@ -15,9 +15,15 @@ import LRU from 'lru-cache';
 import {CompositeDisposable} from 'event-kit';
 
 import nuclideUri from 'nuclide-commons/nuclideUri';
+<<<<<<< HEAD
 import which from 'nuclide-commons/which';
 import {runCommand} from 'nuclide-commons/process';
 import {ConfigCache} from 'nuclide-commons/ConfigCache';
+=======
+import which from '../../commons-node/which';
+import {checkOutput} from '../../commons-node/process';
+import {ConfigCache} from '../../commons-node/ConfigCache';
+>>>>>>> Use upstream nuclide-commons
 
 const FLOW_BIN_PATH = 'node_modules/.bin/flow';
 

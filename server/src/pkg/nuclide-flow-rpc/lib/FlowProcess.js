@@ -20,9 +20,20 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {getLogger} from 'log4js';
 const logger = getLogger('nuclide-flow-rpc');
 
+<<<<<<< HEAD
 import {runCommandDetailed, spawn} from 'nuclide-commons/process';
 import {sleep} from 'nuclide-commons/promise';
 import {niceSafeSpawn} from 'nuclide-commons/nice';
+=======
+import {track} from '../../nuclide-analytics';
+
+import {
+  asyncExecute,
+  createProcessStream,
+} from '../../commons-node/process';
+import {sleep} from 'nuclide-commons/promise';
+import {niceSafeSpawn} from '../../commons-node/nice';
+>>>>>>> Use upstream nuclide-commons
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 
 import {getStopFlowOnExit} from './FlowHelpers';
