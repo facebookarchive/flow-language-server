@@ -54,6 +54,7 @@ function fileDiagnosticUpdateToLSPDiagnostic(
       )
       .map(message => ({
         severity: flowSeverityToLSPSeverity(message.type),
+        // $FlowFixMe messages without ranges filtered out above
         range: atomRangeToLSPRange(message.range),
         message: toMessage(message),
         source: message.providerName,
@@ -62,11 +63,12 @@ function fileDiagnosticUpdateToLSPDiagnostic(
 }
 
 function toMessage(diagnostic: FileDiagnosticMessage): string {
-  let message = diagnostic.text;
+  let message = diagnostic.text || '';
   if (diagnostic.trace && diagnostic.trace.length) {
     for (const trace of diagnostic.trace) {
       if (trace.text != null) {
         // put new 'sentences' on their own line
+        // $FlowFixMe text presence is asserted above
         if (trace.text[0] && trace.text[0] === trace.text[0].toUpperCase()) {
           message += '\n';
         } else {
