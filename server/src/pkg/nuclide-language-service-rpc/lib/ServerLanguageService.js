@@ -31,7 +31,6 @@ import type {
 import type {FileNotifier} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {ConnectableObservable} from 'rxjs';
 import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
-import type {CategoryLogger} from '../../nuclide-logging';
 
 import invariant from 'assert';
 import {getBufferAtVersion} from '../../nuclide-open-files-rpc';
@@ -311,7 +310,7 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
 (((null: any): ServerLanguageService<>): LanguageService);
 
 export function ensureInvalidations(
-  logger: CategoryLogger,
+  logger: log4js$Logger,
   diagnostics: Observable<FileDiagnosticUpdate>,
 ): Observable<FileDiagnosticUpdate> {
   const filesWithErrors = new Set();

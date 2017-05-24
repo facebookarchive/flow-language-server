@@ -32,6 +32,7 @@ import type {
 import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 
 import invariant from 'assert';
+import {getLogger} from 'log4js';
 
 import {setConfig} from './config';
 import {
@@ -39,8 +40,6 @@ import {
   MultiProjectLanguageService,
 } from '../../nuclide-language-service-rpc';
 import {FileCache, getBufferAtVersion} from '../../nuclide-open-files-rpc';
-
-import {getCategoryLogger} from '../../nuclide-logging';
 
 export type Loc = {
   file: NuclideUri,
@@ -99,7 +98,7 @@ export async function initialize(
 class FlowLanguageService
     extends MultiProjectLanguageService<ServerLanguageService<FlowSingleProjectLanguageService>> {
   constructor(fileCache: FileCache, config: FlowSettings) {
-    const logger = getCategoryLogger('Flow');
+    const logger = getLogger('Flow');
     super(
       logger,
       fileCache,

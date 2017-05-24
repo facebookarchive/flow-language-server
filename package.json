@@ -34,7 +34,7 @@
     "fs-plus": "^2.8.2",
     "fuzzaldrin-plus": "^0.4.1",
     "idx": "^1.5.0",
-    "log4js": "^0.6.37",
+    "log4js": "^1.1.1",
     "lru-cache": "^4.0.1",
     "mkdirp": "^0.5.1",
     "nullthrows": "^1.0.0",
