@@ -20,9 +20,9 @@ import TextDocument from './TextDocument';
 import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
 import {Emitter} from 'event-kit';
 import {TextDocumentSyncKind} from 'vscode-languageserver';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
-const logger = getLogger();
+const logger = getLogger('TextDocuments');
 
 function textDocumentFromLSPTextDocument(textDocument: TextDocumentItem) {
   return new TextDocument(

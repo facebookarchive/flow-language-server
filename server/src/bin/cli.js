@@ -3,9 +3,9 @@
 /* eslint-disable no-console */
 
 import invariant from 'assert';
-import patchNuclideLogger from '../patchNuclideLogger';
 import {createConnection} from 'vscode-languageserver';
 
+import initializeLogging from '../logging/initializeLogging';
 import {createServer} from '../index';
 
 async function init() {
@@ -18,15 +18,8 @@ async function init() {
   }
   invariant(connection, 'for flow; program should have excited otherwise');
 
-  if (process.argv.includes('--node-ipc')) {
-    // Unfortunately VSCode with node ipc disconnects immediately if the server
-    // is not created right away, so patch the logger afterwards
-    createServer(connection).listen();
-    patchNuclideLogger(connection);
-  } else {
-    await patchNuclideLogger(connection);
-    createServer(connection).listen();
-  }
+  createServer(connection).listen();
+  initializeLogging(connection);
 }
 
 init();

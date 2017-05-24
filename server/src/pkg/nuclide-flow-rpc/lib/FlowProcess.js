@@ -18,8 +18,8 @@ import os from 'os';
 import invariant from 'assert';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
 
-import {getLogger} from '../../nuclide-logging';
-const logger = getLogger();
+import {getLogger} from 'log4js';
+const logger = getLogger('nuclide-flow-rpc');
 
 import {track} from '../../nuclide-analytics';
 

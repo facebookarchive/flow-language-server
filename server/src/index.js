@@ -14,13 +14,13 @@ import {
 import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
 export function createServer(connection: IConnection) {
   const documents = new TextDocuments();
 
   connection.onInitialize(({capabilities, rootPath}) => {
-    const logger = getLogger();
+    const logger = getLogger('index');
 
     logger.debug('LSP connection initialized. Connecting to flow...');
     const flow = new FlowSingleProjectLanguageService(

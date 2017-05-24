@@ -24,9 +24,9 @@ import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
 
 import TextDocuments from './TextDocuments';
 import {lspPositionToAtomPoint} from './utils/util';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
-const logger = getLogger();
+const logger = getLogger('Completion');
 
 type CompletionParams = {
   clientCapabilities: ClientCapabilities,

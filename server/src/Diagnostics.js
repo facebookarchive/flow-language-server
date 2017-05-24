@@ -14,9 +14,9 @@ import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {atomRangeToLSPRange, flowSeverityToLSPSeverity} from './utils/util';
-import {getLogger} from './pkg/nuclide-logging';
+import {getLogger} from 'log4js';
 
-const logger = getLogger();
+const logger = getLogger('Diagnostics');
 
 type DiagnosticsParams = {
   connection: IConnection,
