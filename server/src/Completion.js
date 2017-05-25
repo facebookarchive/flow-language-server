@@ -12,6 +12,7 @@ import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
+import {Point, Range} from 'simple-text-buffer';
 import idx from 'idx';
 import URI from 'vscode-uri';
 import {
@@ -53,13 +54,20 @@ export default class Completion {
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
     const match = wordAtPositionFromBuffer(doc.buffer, point, JAVASCRIPT_WORD_REGEX);
-    const prefix = idx(match, _ => _.wordMatch[0]) || '.';
+    let prefix = idx(match, _ => _.wordMatch[0]) || '';
+    // Ensure that we also trigger on object properties (".").
+    if (
+      point.column !== 0 &&
+      doc.buffer.getTextInRange(new Range(point.traverse([0, -1]), point)) === '.'
+    ) {
+      prefix = '.';
+    }
 
     const autocompleteResult = await this.flow.getAutocompleteSuggestions(
       fileName,
       doc.buffer,
       point,
-      true, // activatedManually
+      false, // activatedManually
       prefix,
     );
 
