@@ -52,5 +52,8 @@
         "0.0.0": "provideFindReferences"
       }
     }
-  }
+  },
+  "activationHooks": [
+    "core:loaded-shell-environment"
+  ]
 }
