@@ -8,6 +8,8 @@ import UniversalDisposable from './pkg/commons-node/UniversalDisposable';
 import {Emitter} from 'event-kit';
 import {
   atomPointToLSPPosition,
+  compareLspPosition,
+  compareLspRange,
   lspPositionToAtomPoint,
   lspRangeToAtomRange,
 } from './utils/util';
@@ -104,6 +106,16 @@ export default class TextDocument {
 
     this.isDirty = true;
     this.version = version;
+
+    // Ensure that ranged changes are sorted in reverse order.
+    // Otherwise, the changes can't be applied cleanly.
+    changes.sort((a, b) => {
+      invariant(
+        a.range != null && b.range != null,
+        'There should only be one full-text update.',
+      );
+      return compareLspRange(b.range, a.range);
+    });
 
     for (const change of changes) {
       if (change.range != null) {
