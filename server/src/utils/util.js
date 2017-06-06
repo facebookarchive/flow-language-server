@@ -2,8 +2,8 @@
 
 import type {
   DiagnosticSeverityType,
-  Position,
-  Range,
+  IPosition,
+  IRange,
 } from 'vscode-languageserver-types';
 
 import {Point} from 'simple-text-buffer';
@@ -51,25 +51,25 @@ export function flowSeverityToLSPSeverity(
   return nullthrows(flowSeverityToLSPSeverityMap[flowSeverity]);
 }
 
-export function lspPositionToAtomPoint(lspPosition: Position): atom$Point {
+export function lspPositionToAtomPoint(lspPosition: IPosition): atom$Point {
   return new Point(lspPosition.line, lspPosition.character);
 }
 
-export function atomPointToLSPPosition(atomPoint: atom$PointObject): Position {
+export function atomPointToLSPPosition(atomPoint: atom$PointObject): IPosition {
   return {
     line: atomPoint.row,
     character: atomPoint.column,
   };
 }
 
-export function atomRangeToLSPRange(atomRange: atom$Range): Range {
+export function atomRangeToLSPRange(atomRange: atom$Range): IRange {
   return {
     start: atomPointToLSPPosition(atomRange.start),
     end: atomPointToLSPPosition(atomRange.end),
   };
 }
 
-export function lspRangeToAtomRange(lspRange: Range): atom$RangeObject {
+export function lspRangeToAtomRange(lspRange: IRange): atom$RangeObject {
   return {
     start: lspPositionToAtomPoint(lspRange.start),
     end: lspPositionToAtomPoint(lspRange.end),

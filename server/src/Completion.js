@@ -2,7 +2,7 @@
 
 import type {ClientCapabilities} from 'vscode-languageserver/lib/protocol';
 import type {
-  CompletionList,
+  ICompletionList,
   CompletionItemKindType,
 } from 'vscode-languageserver-types';
 import type {
@@ -19,11 +19,10 @@ import {
   CompletionItemKind,
   InsertTextFormat,
 } from 'vscode-languageserver-types';
-
-import {wordAtPositionFromBuffer} from './pkg/commons-node/range';
-import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
+import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
 
 import TextDocuments from './TextDocuments';
+import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
 import {lspPositionToAtomPoint} from './utils/util';
 import {getLogger} from 'log4js';
 
@@ -49,7 +48,7 @@ export default class Completion {
   async provideCompletionItems({
     textDocument,
     position,
-  }: TextDocumentPositionParams): Promise<CompletionList> {
+  }: TextDocumentPositionParams): Promise<ICompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);

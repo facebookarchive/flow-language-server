@@ -1,6 +1,9 @@
 [ignore]
 ; annotated with `@flow` but have errors
 <PROJECT_ROOT>/node_modules/fbjs/lib/.*
+<PROJECT_ROOT>/node_modules/.*/test/.*
+<PROJECT_ROOT>/atom-languageserver-flow/node_modules/.*/test/.*
+<PROJECT_ROOT>/atom-languageserver-flow/node_modules/atom-languageclient
 
 [include]
 
@@ -18,3 +21,6 @@ suppress_comment=.*\\$FlowFixMe.*
 suppress_comment=.*\\$FlowIssue.*
 suppress_comment=.*\\$FlowIgnore.*
 suppress_comment=.*\\$FlowFB.*
+
+[version]
+0.46.0

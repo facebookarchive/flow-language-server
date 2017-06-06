@@ -9,6 +9,7 @@ import type {
 } from './pkg/nuclide-diagnostics-common/lib/rpc-types';
 
 import URI from 'vscode-uri';
+import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 
 import {
   FlowSingleProjectLanguageService,
@@ -26,19 +27,25 @@ type DiagnosticsParams = {
 export default class Diagnostics {
   connection: IConnection;
   flow: FlowSingleProjectLanguageService;
+  _disposable: UniversalDisposable = new UniversalDisposable();
 
   constructor({connection, flow}: DiagnosticsParams) {
     this.connection = connection;
     this.flow = flow;
   }
 
+  dispose() {
+    this._disposable.dispose();
+  }
+
   observe() {
     logger.info('Beginning to observe diagnostics');
 
-    this.flow
+    this._disposable.add(this.flow
       .observeDiagnostics()
       .map(fileDiagnosticUpdateToLSPDiagnostic)
-      .forEach(d => this.connection.sendDiagnostics(d));
+      .subscribe(d => this.connection.sendDiagnostics(d))
+    );
   }
 }
 
