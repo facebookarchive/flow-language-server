@@ -6,9 +6,13 @@
  * the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
-import type {Outline, OutlineTree} from '../../nuclide-outline-view/lib/rpc-types';
+import type {
+  Outline,
+  OutlineTree,
+} from '../../nuclide-outline-view/lib/rpc-types';
 
 import {Point} from 'simple-text-buffer';
 
@@ -65,7 +69,6 @@ function itemToTree(item: any): ?OutlineTree {
         representativeName = item.id.name;
       }
       return {
-        type: 'Class',
         tokenizedText,
         representativeName,
         children: itemsToTrees(item.body.body),
@@ -73,9 +76,7 @@ function itemToTree(item: any): ?OutlineTree {
       };
     case 'ClassProperty':
       let paramTokens = [];
-      let type = 'Property';
       if (item.value && item.value.type === 'ArrowFunctionExpression') {
-        type = 'Method';
         paramTokens = [
           plain('('),
           ...declarationsTokenizedText(item.value.params),
@@ -83,19 +84,13 @@ function itemToTree(item: any): ?OutlineTree {
         ];
       }
       return {
-        type,
-        tokenizedText: [
-          method(item.key.name),
-          plain('='),
-          ...paramTokens,
-        ],
+        tokenizedText: [method(item.key.name), plain('='), ...paramTokens],
         representativeName: item.key.name,
         children: [],
         ...extent,
       };
     case 'MethodDefinition':
       return {
-        type: 'Method',
         tokenizedText: [
           method(item.key.name),
           plain('('),
@@ -139,7 +134,6 @@ function exportDeclaration(
   invariant(tree.tokenizedText != null);
   tokenizedText.push(...tree.tokenizedText);
   return {
-    type: tree.type,
     tokenizedText,
     representativeName: tree.representativeName,
     children: tree.children,
@@ -159,7 +153,9 @@ function declarationReducer(
       break;
     case 'ObjectPattern':
       textElements.push(plain('{'));
-      textElements.push(...declarationsTokenizedText(p.properties.map(obj => obj.key)));
+      textElements.push(
+        ...declarationsTokenizedText(p.properties.map(obj => obj.key)),
+      );
       textElements.push(plain('}'));
       break;
     case 'ArrayPattern':
@@ -194,16 +190,16 @@ function getExtent(item: any): Extent {
       item.loc.start.line - 1,
       item.loc.start.column,
     ),
-    endPosition: new Point(
-      item.loc.end.line - 1,
-      item.loc.end.column,
-    ),
+    endPosition: new Point(item.loc.end.line - 1, item.loc.end.column),
   };
 }
 
-function functionOutline(name: string, params: Array<any>, extent: Extent): OutlineTree {
+function functionOutline(
+  name: string,
+  params: Array<any>,
+  extent: Extent,
+): OutlineTree {
   return {
-    type: 'Function',
     tokenizedText: [
       keyword('function'),
       whitespace(' '),
@@ -222,12 +218,7 @@ function typeAliasOutline(typeAliasExpression: any): OutlineTree {
   invariant(typeAliasExpression.type === 'TypeAlias');
   const name = typeAliasExpression.id.name;
   return {
-    type: 'Interface',
-    tokenizedText: [
-      keyword('type'),
-      whitespace(' '),
-      type(name),
-    ],
+    tokenizedText: [keyword('type'), whitespace(' '), type(name)],
     representativeName: name,
     children: [],
     ...getExtent(typeAliasExpression),
@@ -259,7 +250,6 @@ function moduleExportsOutline(assignmentStatement: any): ?OutlineTree {
   }
   const properties: Array<Object> = right.properties;
   return {
-    type: 'Module',
     tokenizedText: [plain('module.exports')],
     children: arrayCompact(properties.map(moduleExportsPropertyOutline)),
     ...getExtent(assignmentStatement),
@@ -267,11 +257,13 @@ function moduleExportsOutline(assignmentStatement: any): ?OutlineTree {
 }
 
 function isModuleExports(left: Object): boolean {
-  return left.type === 'MemberExpression' &&
+  return (
+    left.type === 'MemberExpression' &&
     left.object.type === 'Identifier' &&
     left.object.name === 'module' &&
     left.property.type === 'Identifier' &&
-    left.property.name === 'exports';
+    left.property.name === 'exports'
+  );
 }
 
 function moduleExportsPropertyOutline(property: any): ?OutlineTree {
@@ -280,26 +272,22 @@ function moduleExportsPropertyOutline(property: any): ?OutlineTree {
     return null;
   }
   const propName = property.key.name;
-  const type = 'Property';
 
   if (property.shorthand) {
     // This happens when the shorthand `{ foo }` is used for `{ foo: foo }`
     return {
-      type,
-      tokenizedText: [
-        string(propName),
-      ],
+      tokenizedText: [string(propName)],
       representativeName: propName,
       children: [],
       ...getExtent(property),
     };
   }
 
-  if (property.value.type === 'FunctionExpression' ||
+  if (
+    property.value.type === 'FunctionExpression' ||
     property.value.type === 'ArrowFunctionExpression'
   ) {
     return {
-      type,
       tokenizedText: [
         method(propName),
         plain('('),
@@ -313,18 +301,17 @@ function moduleExportsPropertyOutline(property: any): ?OutlineTree {
   }
 
   return {
-    type,
-    tokenizedText: [
-      string(propName),
-      plain(':'),
-    ],
+    tokenizedText: [string(propName), plain(':')],
     representativeName: propName,
     children: [],
     ...getExtent(property),
   };
 }
 
-function specOutline(expressionStatement: any, describeOnly: boolean = false): ?OutlineTree {
+function specOutline(
+  expressionStatement: any,
+  describeOnly: boolean = false,
+): ?OutlineTree {
   const expression = expressionStatement.expression;
   if (expression.type !== 'CallExpression') {
     return null;
@@ -349,16 +336,12 @@ function specOutline(expressionStatement: any, describeOnly: boolean = false): ?
   } else {
     children = arrayCompact(
       specBody
-      .filter(item => item.type === 'ExpressionStatement')
-      .map(item => specOutline(item)));
+        .filter(item => item.type === 'ExpressionStatement')
+        .map(item => specOutline(item)),
+    );
   }
   return {
-    type: 'Function',
-    tokenizedText: [
-      method(functionName),
-      whitespace(' '),
-      string(description),
-    ],
+    tokenizedText: [method(functionName), whitespace(' '), string(description)],
     representativeName: description,
     children,
     ...getExtent(expressionStatement),
@@ -372,7 +355,10 @@ function getFunctionName(callee: any): ?string {
     case 'Identifier':
       return callee.name;
     case 'MemberExpression':
-      if (callee.object.type !== 'Identifier' || callee.property.type !== 'Identifier') {
+      if (
+        callee.object.type !== 'Identifier' ||
+        callee.property.type !== 'Identifier'
+      ) {
         return null;
       }
       return `${callee.object.name}.${callee.property.name}`;
@@ -444,7 +430,10 @@ function getFunctionBody(fn: ?any): ?Array<any> {
   if (fn == null) {
     return null;
   }
-  if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {
+  if (
+    fn.type !== 'ArrowFunctionExpression' &&
+    fn.type !== 'FunctionExpression'
+  ) {
     return null;
   }
   return fn.body.body;
@@ -453,10 +442,10 @@ function getFunctionBody(fn: ?any): ?Array<any> {
 function variableDeclarationOutline(declaration: any): ?OutlineTree {
   // If there are multiple var declarations in one line, just take the first.
   return variableDeclaratorOutline(
-           declaration.declarations[0],
-           declaration.kind,
-           getExtent(declaration),
-         );
+    declaration.declarations[0],
+    declaration.kind,
+    getExtent(declaration),
+  );
 }
 
 function variableDeclaratorOutline(
@@ -464,13 +453,15 @@ function variableDeclaratorOutline(
   kind: string,
   extent: Extent,
 ): ?OutlineTree {
-  if (declarator.init != null && (declarator.init.type === 'FunctionExpression'
-      || declarator.init.type === 'ArrowFunctionExpression')) {
+  if (
+    declarator.init != null &&
+    (declarator.init.type === 'FunctionExpression' ||
+      declarator.init.type === 'ArrowFunctionExpression')
+  ) {
     return functionOutline(declarator.id.name, declarator.init.params, extent);
   }
 
   const {id} = declarator;
-
 
   const tokenizedText = [
     keyword(kind),
@@ -479,7 +470,6 @@ function variableDeclaratorOutline(
   ];
   const representativeName = id.type === 'Identifier' ? id.name : undefined;
   return {
-    type: 'Variable',
     tokenizedText,
     representativeName,
     children: [],

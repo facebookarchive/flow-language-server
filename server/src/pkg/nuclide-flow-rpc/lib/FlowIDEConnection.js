@@ -6,9 +6,12 @@
  * the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
-import type {FlowStatusOutput} from './flowOutputTypes';
+import type {NuclideUri} from 'nuclide-commons/nuclideUri';
+
+import type {FlowStatusOutput, FlowAutocompleteOutput} from './flowOutputTypes';
 
 import {Disposable} from 'event-kit';
 import {Observable} from 'rxjs';
@@ -25,21 +28,26 @@ type MessageHandler = (...args: any) => mixed;
 type RpcConnection = {
   onNotification(methodName: string, handler: MessageHandler): void,
   sendNotification(methodName: string, ...args: any): void,
+  sendRequest(methodName: string, ...args: any): Promise<any>,
   // TODO requests
   listen(): void,
   dispose(): void,
 };
 
-export type PushDiagnosticsMessage = RecheckBookend | {
-  kind: 'errors',
-  errors: FlowStatusOutput,
-};
+export type PushDiagnosticsMessage =
+  | RecheckBookend
+  | {
+      kind: 'errors',
+      errors: FlowStatusOutput,
+    };
 
-export type RecheckBookend = {
-  kind: 'start-recheck',
-} | {
-  kind: 'end-recheck',
-};
+export type RecheckBookend =
+  | {
+      kind: 'start-recheck',
+    }
+  | {
+      kind: 'end-recheck',
+    };
 
 const SUBSCRIBE_METHOD_NAME = 'subscribeToDiagnostics';
 
@@ -63,16 +71,17 @@ export class FlowIDEConnection {
   _diagnostics: Observable<FlowStatusOutput>;
   _recheckBookends: Observable<RecheckBookend>;
 
-  constructor(
-    process: child_process$ChildProcess,
-  ) {
+  constructor(process: child_process$ChildProcess) {
     this._disposables = new UniversalDisposable();
     this._ideProcess = process;
-    this._ideProcess.stderr.pipe(through(
-      msg => {
-        getLogger('nuclide-flow-rpc').info('Flow IDE process stderr: ', msg.toString());
-      },
-    ));
+    this._ideProcess.stderr.pipe(
+      through(msg => {
+        getLogger('nuclide-flow-rpc').info(
+          'Flow IDE process stderr: ',
+          msg.toString(),
+        );
+      }),
+    );
     this._connection = rpc.createMessageConnection(
       new rpc.StreamMessageReader(this._ideProcess.stdout),
       new rpc.StreamMessageWriter(this._ideProcess.stdin),
@@ -84,9 +93,13 @@ export class FlowIDEConnection {
 
     this._diagnostics = Observable.fromEventPattern(
       handler => {
-        this._connection.onNotification(NOTIFICATION_METHOD_NAME, (errors: FlowStatusOutput) => {
-          handler(errors);
-        });
+        this._connection.onNotification(
+          NOTIFICATION_METHOD_NAME,
+          (errors: FlowStatusOutput) => {
+            // $FlowFixMe
+            handler(errors);
+          },
+        );
       },
       // no-op: vscode-jsonrpc offers no way to unsubscribe
       () => {},
@@ -96,9 +109,11 @@ export class FlowIDEConnection {
     this._recheckBookends = Observable.fromEventPattern(
       handler => {
         this._connection.onNotification('startRecheck', () => {
+          // $FlowFixMe
           handler({kind: 'start-recheck'});
         });
         this._connection.onNotification('endRecheck', () => {
+          // $FlowFixMe
           handler({kind: 'end-recheck'});
         });
       },
@@ -129,10 +144,6 @@ export class FlowIDEConnection {
   observeDiagnostics(): Observable<PushDiagnosticsMessage> {
     const subscribe = () => {
       this._connection.sendNotification(SUBSCRIBE_METHOD_NAME);
-      // This is a temporary hack used to simplify the temporary vscode-jsonrpc implementation in
-      // Flow: D4659335
-      // TODO remove this hack sometime after Flow v0.44 is released (D4798007)
-      this._ideProcess.stdin.write('\r\n');
     };
 
     const retrySubscription = Observable.interval(SUBSCRIBE_RETRY_INTERVAL)
@@ -161,5 +172,20 @@ export class FlowIDEConnection {
   // will never emit any items unless observeDiagnostics() is called.
   observeRecheckBookends(): Observable<RecheckBookend> {
     return this._recheckBookends;
+  }
+
+  getAutocompleteSuggestions(
+    filePath: NuclideUri,
+    line: number,
+    column: number,
+    contents: string,
+  ): Promise<FlowAutocompleteOutput> {
+    return this._connection.sendRequest(
+      'autocomplete',
+      filePath,
+      line,
+      column,
+      contents,
+    );
   }
 }

@@ -6,6 +6,7 @@
  * the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
 import type {ConnectableObservable} from 'rxjs';
@@ -15,24 +16,33 @@ import type {
   AutocompleteResult,
   SymbolResult,
 } from '../../nuclide-language-service/lib/LanguageService';
-import type {FileVersion, FileNotifier} from '../../nuclide-open-files-rpc/lib/rpc-types';
+import type {
+  HostServices,
+} from '../../nuclide-language-service-rpc/lib/rpc-types';
+import type {
+  FileVersion,
+  FileNotifier,
+} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {Outline} from '../../nuclide-outline-view/lib/rpc-types';
-import type {TextEdit} from '../../nuclide-textedit/lib/rpc-types';
+import type {TextEdit} from 'nuclide-commons-atom/text-edit-rpc-types';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
 import type {
   Definition,
   DefinitionQueryResult,
 } from '../../nuclide-definition-service/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
-import type {FindReferencesReturn} from '../../nuclide-find-references/lib/rpc-types';
+import type {
+  FindReferencesReturn,
+} from '../../nuclide-find-references/lib/rpc-types';
 import type {
   DiagnosticProviderUpdate,
   FileDiagnosticUpdate,
-} from '../../nuclide-diagnostics-common/lib/rpc-types';
-import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
+} from 'atom-ide-ui/pkg/atom-ide-diagnostics/lib/rpc-types';
+import type {
+  NuclideEvaluationExpression,
+} from '../../nuclide-debugger-interfaces/rpc-types';
 
 import invariant from 'assert';
-import {getLogger} from 'log4js';
 
 import {setConfig} from './config';
 import {
@@ -40,6 +50,8 @@ import {
   MultiProjectLanguageService,
 } from '../../nuclide-language-service-rpc';
 import {FileCache, getBufferAtVersion} from '../../nuclide-open-files-rpc';
+
+import {getLogger} from 'log4js';
 
 export type Loc = {
   file: NuclideUri,
@@ -49,13 +61,13 @@ export type Loc = {
 // If types are added here, make sure to also add them to FlowConstants.js. This needs to be the
 // canonical type definition so that we can use these in the service framework.
 export type ServerStatusType =
-  'failed' |
-  'unknown' |
-  'not running' |
-  'not installed' |
-  'busy' |
-  'init' |
-  'ready';
+  | 'failed'
+  | 'unknown'
+  | 'not running'
+  | 'not installed'
+  | 'busy'
+  | 'init'
+  | 'ready';
 
 export type ServerStatusUpdate = {
   pathToRoot: NuclideUri,
@@ -65,9 +77,12 @@ export type ServerStatusUpdate = {
 export type FlowSettings = {
   functionSnippetShouldIncludeArguments: boolean,
   stopFlowOnExit: boolean,
+  lazyServer: boolean,
 };
 
-import {FlowSingleProjectLanguageService} from './FlowSingleProjectLanguageService';
+import {
+  FlowSingleProjectLanguageService,
+} from './FlowSingleProjectLanguageService';
 import {FlowServiceState} from './FlowServiceState';
 
 let state: ?FlowServiceState = null;
@@ -88,26 +103,37 @@ export function dispose(): void {
 
 export async function initialize(
   fileNotifier: FileNotifier,
+  host: HostServices,
   config: FlowSettings,
 ): Promise<FlowLanguageServiceType> {
   invariant(fileNotifier instanceof FileCache);
   const fileCache: FileCache = fileNotifier;
-  return new FlowLanguageService(fileCache, config);
+  return new FlowLanguageService(fileCache, host, config);
 }
 
 class FlowLanguageService
-    extends MultiProjectLanguageService<ServerLanguageService<FlowSingleProjectLanguageService>> {
-  constructor(fileCache: FileCache, config: FlowSettings) {
+  extends MultiProjectLanguageService<
+    ServerLanguageService<FlowSingleProjectLanguageService>,
+  > {
+  constructor(fileCache: FileCache, host: HostServices, config: FlowSettings) {
     const logger = getLogger('Flow');
-    super(
+    super();
+    this.initialize(
       logger,
       fileCache,
+      host,
       '.flowconfig',
       ['.js', '.jsx'],
       projectDir => {
         const execInfoContainer = getState().getExecInfoContainer();
-        const singleProjectLS = new FlowSingleProjectLanguageService(projectDir, execInfoContainer);
-        const languageService = new ServerLanguageService(fileCache, singleProjectLS);
+        const singleProjectLS = new FlowSingleProjectLanguageService(
+          projectDir,
+          execInfoContainer,
+        );
+        const languageService = new ServerLanguageService(
+          fileCache,
+          singleProjectLS,
+        );
         return Promise.resolve(languageService);
       },
     );
@@ -116,9 +142,7 @@ class FlowLanguageService
     }
   }
 
-  async getOutline(
-    fileVersion: FileVersion,
-  ): Promise<?Outline> {
+  async getOutline(fileVersion: FileVersion): Promise<?Outline> {
     const ls = await this.getLanguageServiceForFile(fileVersion.filePath);
     if (ls != null) {
       return ls.getOutline(fileVersion);
@@ -137,28 +161,29 @@ class FlowLanguageService
   }
 
   getServerStatusUpdates(): ConnectableObservable<ServerStatusUpdate> {
-    return this.observeLanguageServices().mergeMap(languageService => {
-      const singleProjectLS: FlowSingleProjectLanguageService =
-          languageService.getSingleFileLanguageService();
-      const pathToRoot = singleProjectLS.getPathToRoot();
-      return singleProjectLS
-        .getServerStatusUpdates()
-        .map(status => ({pathToRoot, status}));
-    }).publish();
+    return this.observeLanguageServices()
+      .mergeMap(languageService => {
+        const singleProjectLS: FlowSingleProjectLanguageService = languageService.getSingleFileLanguageService();
+        const pathToRoot = singleProjectLS.getPathToRoot();
+        return singleProjectLS
+          .getServerStatusUpdates()
+          .map(status => ({pathToRoot, status}));
+      })
+      .publish();
   }
 
   async allowServerRestart(): Promise<void> {
     const languageServices = await this.getAllLanguageServices();
-    const flowLanguageServices = languageServices.map(ls => ls.getSingleFileLanguageService());
+    const flowLanguageServices = languageServices.map(ls =>
+      ls.getSingleFileLanguageService(),
+    );
     flowLanguageServices.forEach(ls => ls.allowServerRestart());
   }
 }
 
 // Unfortunately we have to duplicate a lot of things here to make FlowLanguageService remotable.
 export interface FlowLanguageServiceType {
-  getDiagnostics(
-    fileVersion: FileVersion,
-  ): Promise<?DiagnosticProviderUpdate>,
+  getDiagnostics(fileVersion: FileVersion): Promise<?DiagnosticProviderUpdate>,
 
   observeDiagnostics(): ConnectableObservable<FileDiagnosticUpdate>,
 
@@ -174,23 +199,16 @@ export interface FlowLanguageServiceType {
     position: atom$Point,
   ): Promise<?DefinitionQueryResult>,
 
-  getDefinitionById(
-    file: NuclideUri,
-    id: string,
-  ): Promise<?Definition>,
+  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition>,
 
   findReferences(
     fileVersion: FileVersion,
     position: atom$Point,
   ): Promise<?FindReferencesReturn>,
 
-  getCoverage(
-    filePath: NuclideUri,
-  ): Promise<?CoverageResult>,
+  getCoverage(filePath: NuclideUri): Promise<?CoverageResult>,
 
-  getOutline(
-    fileVersion: FileVersion,
-  ): Promise<?Outline>,
+  getOutline(fileVersion: FileVersion): Promise<?Outline>,
 
   typeHint(fileVersion: FileVersion, position: atom$Point): Promise<?TypeHint>,
 
@@ -204,19 +222,26 @@ export interface FlowLanguageServiceType {
     range: atom$Range,
   ): Promise<?Array<TextEdit>>,
 
-  formatEntireFile(fileVersion: FileVersion, range: atom$Range): Promise<?{
+  formatEntireFile(
+    fileVersion: FileVersion,
+    range: atom$Range,
+  ): Promise<?{
     newCursor?: number,
     formatted: string,
   }>,
+
+  formatAtPosition(
+    fileVersion: FileVersion,
+    position: atom$Point,
+    triggerCharacter: string,
+  ): Promise<?Array<TextEdit>>,
 
   getEvaluationExpression(
     fileVersion: FileVersion,
     position: atom$Point,
   ): Promise<?NuclideEvaluationExpression>,
 
-  supportsSymbolSearch(
-    directories: Array<NuclideUri>,
-  ): Promise<boolean>,
+  supportsSymbolSearch(directories: Array<NuclideUri>): Promise<boolean>,
 
   symbolSearch(
     query: string,
