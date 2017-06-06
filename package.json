@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf server/lib",
     "dev": "yarn watch",
-    "build": "babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
+    "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
     "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
     "test": "jest",
     "watch": "yarn build -- --watch & yarn build-atom -- --watch"
@@ -15,6 +15,7 @@
     "flow-language-server": "./server/lib/bin/cli.js"
   },
   "devDependencies": {
+    "atom-ide-ui": "^0.1.4",
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
     "babel-plugin-idx": "^1.5.1",
