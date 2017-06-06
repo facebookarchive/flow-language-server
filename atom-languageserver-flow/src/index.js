@@ -7,6 +7,10 @@ import * as path from 'path';
 const SERVER_HOME = path.join(__dirname, '..', '..', 'server', 'lib', 'bin');
 
 class FlowLanguageServer extends AutoLanguageClient {
+  getConnectionType() {
+    return 'ipc';
+  }
+
   getGrammarScopes() {
     return ['source.js', 'source.js.jsx'];
   }
@@ -20,7 +24,13 @@ class FlowLanguageServer extends AutoLanguageClient {
   }
 
   startServerProcess() {
-    return Promise.resolve(spawn('./cli.js', ['--stdio'], {cwd: SERVER_HOME}));
+    return Promise.resolve(
+      spawn('./cli.js', ['--node-ipc'],
+      {
+        cwd: SERVER_HOME,
+        stdio: [null, null, null, 'ipc'],
+      },
+    ));
   }
 }
 
