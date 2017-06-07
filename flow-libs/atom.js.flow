@@ -75,7 +75,13 @@ declare class atom$Package {
  * Essential Classes
  */
 
-type atom$CommandCallback = (event: Event) => mixed;
+declare class atom$CustomEvent extends Event {
+  constructor(type: string, eventInitDict?: CustomEvent$Init): void;
+  detail: any;
+  originalEvent: ?Event;
+}
+
+type atom$CommandCallback = (event: atom$CustomEvent) => mixed;
 
 declare class atom$CommandRegistry {
   // Methods
@@ -331,6 +337,7 @@ declare class atom$PackageManager {
   activate(): Promise<any>,
   deactivatePackages(): void,
   deactivatePackage(name: string, suppressSerialization?: boolean): void,
+  emitter: atom$Emitter,
   loadPackage(name: string): void,
   loadPackages(): void,
   serializePackage(pkg: atom$Package): void,
@@ -399,7 +406,7 @@ declare class atom$Pane {
   activateItem(item: Object): ?Object,
   activateItemAtIndex(index: number): void,
   moveItemToPane(item: Object, pane: atom$Pane, index: number): void,
-  destroyItem(item: Object): boolean,
+  destroyItem(item: Object, force?: boolean): boolean,
   itemForURI(uri: string): Object,
 
   // Event subscriptions.
@@ -407,7 +414,8 @@ declare class atom$Pane {
   onDidRemoveItem(cb: (event: {item: Object, index: number}) => void): IDisposable,
   onWillRemoveItem(cb: (event: {item: Object, index: number}) => void): IDisposable,
   onDidDestroy(cb: () => void): IDisposable,
-  onDidChangeFlexScale(cb: () => void): IDisposable,
+  onDidChangeFlexScale(cb: (newFlexScale: number) => void): IDisposable,
+  onWillDestroy(cb: () => void): IDisposable,
   observeActiveItem(cb: (item: ?Object) => void): IDisposable,
 
   // Lifecycle
@@ -435,6 +443,8 @@ declare class atom$Pane {
   setActiveItem(item: Object): Object,
   setFlexScale(flexScale: number): number,
   getContainer(): atom$PaneContainer,
+
+  element: HTMLElement,
 }
 
 declare type atom$PaneItem = {
@@ -954,7 +964,11 @@ declare class atom$TextEditorComponent {
   domNode: HTMLElement,
   scrollViewNode: HTMLElement,
   presenter: atom$TextEditorPresenter,
+  refs: atom$TextEditorComponentRefs,
   linesComponent: atom$LinesComponent,
+  // NOTE: This is typed as a property to allow overwriting.
+  startCursorBlinking: () => void,
+  stopCursorBlinking(): void,
   pixelPositionForScreenPosition(
     screenPosition: atom$Point,
     clip?: boolean,
@@ -984,6 +998,14 @@ declare class atom$TextEditorPresenter {
 declare class atom$LinesComponent {
   domNode: HTMLElement,
   getDomNode(): HTMLElement,
+}
+
+/**
+ * This is not part of the official Atom 1.0 API. Nevertheless, we need it to access
+ * the deepest dom element receiving DOM events.
+ */
+declare class atom$TextEditorComponentRefs {
+  lineTiles: HTMLElement,
 }
 
 /**
