@@ -52,6 +52,7 @@ export default class Completion {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
+    // $FlowFixMe: Add to defs
     const prevPoint = point.traverse([0, -1]);
     const match = wordAtPositionFromBuffer(doc.buffer, prevPoint, JAVASCRIPT_WORD_REGEX);
     let prefix = idx(match, _ => _.wordMatch[0]) || '';
