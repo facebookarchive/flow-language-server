@@ -6,23 +6,28 @@
  * the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import type {FileVersion} from '../../nuclide-open-files-rpc/lib/rpc-types';
-import type {TextEdit} from '../../nuclide-textedit/lib/rpc-types';
+import type {TextEdit} from 'nuclide-commons-atom/text-edit-rpc-types';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
 import type {
   Definition,
   DefinitionQueryResult,
 } from '../../nuclide-definition-service/lib/rpc-types';
-import type {Outline} from '../../nuclide-outline-view/lib/rpc-types';
+import type {
+  Outline,
+} from 'atom-ide-ui/pkg/atom-ide-outline-view/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
-import type {FindReferencesReturn} from '../../nuclide-find-references/lib/rpc-types';
+import type {
+  FindReferencesReturn,
+} from '../../nuclide-find-references/lib/rpc-types';
 import type {
   DiagnosticProviderUpdate,
   FileDiagnosticUpdate,
-} from '../../nuclide-diagnostics-common/lib/rpc-types';
+} from 'atom-ide-ui/pkg/atom-ide-diagnostics/lib/rpc-types';
 import type {
   AutocompleteResult,
   SymbolResult,
@@ -30,7 +35,9 @@ import type {
 } from '../../nuclide-language-service/lib/LanguageService';
 import type {FileNotifier} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {ConnectableObservable} from 'rxjs';
-import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {
+  NuclideEvaluationExpression,
+} from '../../nuclide-debugger-interfaces/rpc-types';
 
 import invariant from 'assert';
 import {getBufferAtVersion} from '../../nuclide-open-files-rpc';
@@ -63,10 +70,7 @@ export type SingleFileLanguageService = {
     position: atom$Point,
   ): Promise<?DefinitionQueryResult>,
 
-  getDefinitionById(
-    file: NuclideUri,
-    id: string,
-  ): Promise<?Definition>,
+  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition>,
 
   findReferences(
     filePath: NuclideUri,
@@ -74,9 +78,7 @@ export type SingleFileLanguageService = {
     position: atom$Point,
   ): Promise<?FindReferencesReturn>,
 
-  getCoverage(
-    filePath: NuclideUri,
-  ): Promise<?CoverageResult>,
+  getCoverage(filePath: NuclideUri): Promise<?CoverageResult>,
 
   getOutline(
     filePath: NuclideUri,
@@ -110,6 +112,13 @@ export type SingleFileLanguageService = {
     formatted: string,
   }>,
 
+  formatAtPosition(
+    filePath: NuclideUri,
+    buffer: simpleTextBuffer$TextBuffer,
+    position: atom$Point,
+    triggerCharacter: string,
+  ): Promise<?Array<TextEdit>>,
+
   getEvaluationExpression(
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
@@ -123,7 +132,9 @@ export type SingleFileLanguageService = {
   dispose(): void,
 };
 
-export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLanguageService> {
+export class ServerLanguageService<
+  T: SingleFileLanguageService = SingleFileLanguageService,
+> {
   _fileCache: FileCache;
   _service: T;
 
@@ -184,10 +195,7 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
     return this._service.getDefinition(filePath, buffer, position);
   }
 
-  getDefinitionById(
-    file: NuclideUri,
-    id: string,
-  ): Promise<?Definition> {
+  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition> {
     return this._service.getDefinitionById(file, id);
   }
 
@@ -203,15 +211,11 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
     return this._service.findReferences(filePath, buffer, position);
   }
 
-  getCoverage(
-    filePath: NuclideUri,
-  ): Promise<?CoverageResult> {
+  getCoverage(filePath: NuclideUri): Promise<?CoverageResult> {
     return this._service.getCoverage(filePath);
   }
 
-  async getOutline(
-    fileVersion: FileVersion,
-  ): Promise<?Outline> {
+  async getOutline(fileVersion: FileVersion): Promise<?Outline> {
     const filePath = fileVersion.filePath;
     const buffer = await getBufferAtVersion(fileVersion);
     if (buffer == null) {
@@ -220,7 +224,10 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
     return this._service.getOutline(filePath, buffer);
   }
 
-  async typeHint(fileVersion: FileVersion, position: atom$Point): Promise<?TypeHint> {
+  async typeHint(
+    fileVersion: FileVersion,
+    position: atom$Point,
+  ): Promise<?TypeHint> {
     const filePath = fileVersion.filePath;
     const buffer = await getBufferAtVersion(fileVersion);
     if (buffer == null) {
@@ -253,7 +260,10 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
     return this._service.formatSource(filePath, buffer, range);
   }
 
-  async formatEntireFile(fileVersion: FileVersion, range: atom$Range): Promise<?{
+  async formatEntireFile(
+    fileVersion: FileVersion,
+    range: atom$Range,
+  ): Promise<?{
     newCursor?: number,
     formatted: string,
   }> {
@@ -263,6 +273,24 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
       return null;
     }
     return this._service.formatEntireFile(filePath, buffer, range);
+  }
+
+  async formatAtPosition(
+    fileVersion: FileVersion,
+    position: atom$Point,
+    triggerCharacter: string,
+  ): Promise<?Array<TextEdit>> {
+    const filePath = fileVersion.filePath;
+    const buffer = await getBufferAtVersion(fileVersion);
+    if (buffer == null) {
+      return null;
+    }
+    return this._service.formatAtPosition(
+      filePath,
+      buffer,
+      position,
+      triggerCharacter,
+    );
   }
 
   async getEvaluationExpression(
@@ -277,9 +305,7 @@ export class ServerLanguageService<T: SingleFileLanguageService = SingleFileLang
     return this._service.getEvaluationExpression(filePath, buffer, position);
   }
 
-  supportsSymbolSearch(
-    directories: Array<NuclideUri>,
-  ): Promise<boolean> {
+  supportsSymbolSearch(directories: Array<NuclideUri>): Promise<boolean> {
     return Promise.resolve(false);
     // A single-file language service by definition cannot offer
     // "project-wide symbol search". If you want your language to offer
@@ -314,30 +340,33 @@ export function ensureInvalidations(
   diagnostics: Observable<FileDiagnosticUpdate>,
 ): Observable<FileDiagnosticUpdate> {
   const filesWithErrors = new Set();
-  const trackedDiagnostics: Observable<FileDiagnosticUpdate> =
-    diagnostics
-    .do((diagnostic: FileDiagnosticUpdate) => {
-      const filePath = diagnostic.filePath;
-      if (diagnostic.messages.length === 0) {
-        logger.log(`Removing ${filePath} from files with errors`);
-        filesWithErrors.delete(filePath);
-      } else {
-        logger.log(`Adding ${filePath} to files with errors`);
-        filesWithErrors.add(filePath);
-      }
-    });
+  const trackedDiagnostics: Observable<
+    FileDiagnosticUpdate,
+  > = diagnostics.do((diagnostic: FileDiagnosticUpdate) => {
+    const filePath = diagnostic.filePath;
+    if (diagnostic.messages.length === 0) {
+      logger.debug(`Removing ${filePath} from files with errors`);
+      filesWithErrors.delete(filePath);
+    } else {
+      logger.debug(`Adding ${filePath} to files with errors`);
+      filesWithErrors.add(filePath);
+    }
+  });
 
-  const fileInvalidations: Observable<FileDiagnosticUpdate> =
-    Observable.defer(() => {
-      logger.log('Clearing errors after stream closed');
-      return Observable.from(Array.from(filesWithErrors).map(file => {
-        logger.log(`Clearing errors for ${file} after connection closed`);
+  const fileInvalidations: Observable<
+    FileDiagnosticUpdate,
+  > = Observable.defer(() => {
+    logger.debug('Clearing errors after stream closed');
+    return Observable.from(
+      Array.from(filesWithErrors).map(file => {
+        logger.debug(`Clearing errors for ${file} after connection closed`);
         return {
           filePath: file,
           messages: [],
         };
-      }));
-    });
+      }),
+    );
+  });
 
   return trackedDiagnostics.concat(fileInvalidations);
 }
