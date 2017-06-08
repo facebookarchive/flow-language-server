@@ -32,19 +32,19 @@
         "2.0.0": "provideAutocomplete"
       }
     },
-    "nuclide-outline-view": {
+    "atom-ide-definitions": {
       "versions": {
-        "0.0.0": "provideOutlines"
+        "0.1.0": "provideDefinitions"
       }
     },
-    "nuclide-definition-provider": {
+    "atom-ide-outline-view": {
       "versions": {
-        "0.0.0": "provideDefinitions"
+        "0.1.0": "provideOutlines"
       }
     },
-    "hyperclick.provider": {
+    "hyperclick": {
       "versions": {
-        "0.0.0": "provideHyperclick"
+        "0.1.0": "provideHyperclick"
       }
     },
     "nuclide-find-references.provider": {
