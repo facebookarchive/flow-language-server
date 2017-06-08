@@ -60,6 +60,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "flow-vscode/*",
+      "server/src/pkg/*",
       "server/lib/*",
       "atom-languageserver-flow/lib/"
     ]
