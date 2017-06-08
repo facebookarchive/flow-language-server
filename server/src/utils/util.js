@@ -80,6 +80,6 @@ export function compareLspPosition(a: Position, b: Position): number {
   return a.line - b.line || a.character - b.character;
 }
 
-export function compareLspRange(a: Range, b: Range): number {
+export function compareLspRange(a: IRange, b: IRange): number {
   return compareLspPosition(a.start, b.start) || compareLspPosition(a.end, b.end);
 }

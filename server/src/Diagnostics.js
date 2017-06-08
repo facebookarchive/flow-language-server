@@ -6,7 +6,7 @@ import type {
 import type {
   FileDiagnosticMessage,
   FileDiagnosticUpdate,
-} from './pkg/nuclide-diagnostics-common/lib/rpc-types';
+} from 'atom-ide-ui';
 
 import URI from 'vscode-uri';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';

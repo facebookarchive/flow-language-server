@@ -23,4 +23,4 @@ suppress_comment=.*\\$FlowIgnore.*
 suppress_comment=.*\\$FlowFB.*
 
 [version]
-0.46.0
+0.47.0

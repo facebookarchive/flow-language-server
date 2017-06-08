@@ -52,12 +52,14 @@ export default class Completion {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
-    const match = wordAtPositionFromBuffer(doc.buffer, point, JAVASCRIPT_WORD_REGEX);
+    // $FlowFixMe: Add to defs
+    const prevPoint = point.traverse([0, -1]);
+    const match = wordAtPositionFromBuffer(doc.buffer, prevPoint, JAVASCRIPT_WORD_REGEX);
     let prefix = idx(match, _ => _.wordMatch[0]) || '';
     // Ensure that we also trigger on object properties (".").
     if (
       point.column !== 0 &&
-      doc.buffer.getTextInRange(new Range(point.traverse([0, -1]), point)) === '.'
+      doc.buffer.getTextInRange(new Range(prevPoint, point)) === '.'
     ) {
       prefix = '.';
     }
