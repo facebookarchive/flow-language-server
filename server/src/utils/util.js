@@ -17,7 +17,6 @@ const FlowSeverity = {
   Error: 'Error',
   Warning: 'Warning',
 };
-type FlowSeverityValue = 'Error' | 'Warning';
 
 const flowSeverityToLSPSeverityMap: {
   [string]: DiagnosticSeverityType,
