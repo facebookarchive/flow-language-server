@@ -3,6 +3,7 @@
   "plugins": ["import"],
   "rules": {
     "no-duplicate-imports": 0,
-    "import/no-duplicates": 1
+    "import/no-duplicates": 1,
+    "license-header": 2
   }
 }

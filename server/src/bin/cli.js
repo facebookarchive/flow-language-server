@@ -1,6 +1,14 @@
-#!/usr/bin/env node
-// @flow
-/* eslint-disable no-console */
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the LICENSE file in
+ * the root directory of this source tree.
+ *
+ * @flow
+ * @format
+ */
+// #!/usr/bin/env node
 
 import invariant from 'assert';
 import {createConnection} from 'vscode-languageserver';
@@ -12,6 +20,7 @@ let connection;
 try {
   connection = createConnection();
 } catch (e) {
+  // eslint-disable-next-line no-console
   console.error(e.message);
   process.exit(1);
 }
