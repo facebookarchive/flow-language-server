@@ -1638,10 +1638,6 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flow-bin@^0.45.0:
-  version "0.45.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.45.0.tgz#009dd0f577a3f665c74ca8be827ae8c2dd8fd6b5"
-
 for-in@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
