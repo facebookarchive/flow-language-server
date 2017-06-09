@@ -18,17 +18,17 @@ import {
 import {getLogger} from 'log4js';
 
 export function createServer(connection: IConnection) {
+  const logger = getLogger('index');
   const disposable = new UniversalDisposable();
   const documents = new TextDocuments();
   disposable.add(documents);
 
   connection.onShutdown(() => {
-    console.log('SHUTTING DOWN');
+    logger.debug('LSP server connection shutting down');
     disposable.dispose();
   });
 
   connection.onInitialize(({capabilities, rootPath}) => {
-    const logger = getLogger('index');
 
     logger.debug('LSP connection initialized. Connecting to flow...');
     const flow = new FlowSingleProjectLanguageService(

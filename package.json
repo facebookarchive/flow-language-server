@@ -9,7 +9,7 @@
     "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
     "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
     "prepare": "yarn build",
-    "test": "jest",
+    "test": "eslint server/src && jest",
     "watch": "yarn build -- --watch & yarn build-atom -- --watch"
   },
   "bin": {
@@ -27,6 +27,7 @@
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
+    "eslint-plugin-import": "^2.3.0",
     "fs-extra": "^3.0.1",
     "jest": "^19.0.2",
     "vscode-languageserver-types": "^3.2.0"

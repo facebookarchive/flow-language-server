@@ -41,10 +41,11 @@ export default class Diagnostics {
   observe() {
     logger.info('Beginning to observe diagnostics');
 
-    this._disposable.add(this.flow
-      .observeDiagnostics()
-      .map(fileDiagnosticUpdateToLSPDiagnostic)
-      .subscribe(d => this.connection.sendDiagnostics(d))
+    this._disposable.add(
+      this.flow
+        .observeDiagnostics()
+        .map(fileDiagnosticUpdateToLSPDiagnostic)
+        .subscribe(d => this.connection.sendDiagnostics(d)),
     );
   }
 }

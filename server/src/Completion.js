@@ -1,18 +1,18 @@
 // @flow
 
-import type {ClientCapabilities} from 'vscode-languageserver/lib/protocol';
+import type {
+  ClientCapabilities,
+  TextDocumentPositionParams,
+} from 'vscode-languageserver/lib/protocol';
 import type {
   ICompletionList,
   CompletionItemKindType,
 } from 'vscode-languageserver-types';
-import type {
-  TextDocumentPositionParams,
-} from 'vscode-languageserver/lib/protocol';
 import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import {Point, Range} from 'simple-text-buffer';
+import {Range} from 'simple-text-buffer';
 import idx from 'idx';
 import URI from 'vscode-uri';
 import {

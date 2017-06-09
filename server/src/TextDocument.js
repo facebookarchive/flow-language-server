@@ -1,5 +1,4 @@
 // @flow
-import type {ITextDocumentContentChangeEvent} from 'vscode-languageserver-types';
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 
 import invariant from 'assert';
@@ -8,7 +7,6 @@ import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import {Emitter} from 'event-kit';
 import {
   atomPointToLSPPosition,
-  compareLspPosition,
   compareLspRange,
   lspPositionToAtomPoint,
   lspRangeToAtomRange,

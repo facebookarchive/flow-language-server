@@ -14,6 +14,7 @@ import {layouts} from 'log4js';
 function appender(config: {connection: IConnection}) {
   const {connection} = config;
 
+  // eslint-disable-next-line flowtype/no-weak-types
   return (loggingEvent: any): void => {
     connection.console.log(layouts.basicLayout(loggingEvent));
   };
