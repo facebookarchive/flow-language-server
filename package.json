@@ -8,6 +8,7 @@
     "dev": "yarn watch",
     "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
     "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
+    "prepare": "yarn build",
     "test": "jest",
     "watch": "yarn build -- --watch & yarn build-atom -- --watch"
   },
