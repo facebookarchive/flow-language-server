@@ -77,6 +77,14 @@ class FlowLanguageServer extends AutoLanguageClient {
     });
   }
 
+  // Have our autocompletion results take priority.
+  provideAutocomplete() {
+    return {
+      ...super.provideAutocomplete(),
+      suggestionPriority: 5,
+    };
+  }
+
   consumeBusySignal(busySignalService: BusySignalService) {
     this._busySignalService = busySignalService;
     this._disposable.add(busySignalService);
