@@ -1,6 +1,9 @@
+// @flow
+
 import type {IConnection} from 'vscode-languageserver';
 import type {DocumentSymbolParams} from 'vscode-languageserver-types';
-import type {OutlineTree} from './pkg/nuclide-outline-view/lib/rpc-types';
+// $FlowFixMe: coming soon
+import type {OutlineTree} from 'atom-ide-ui';
 
 import URI from 'vscode-uri';
 import {SymbolKind} from 'vscode-languageserver-types';
