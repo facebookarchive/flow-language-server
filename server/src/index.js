@@ -29,13 +29,22 @@ export function createServer(connection: IConnection) {
   });
 
   connection.onInitialize(({capabilities, rootPath}) => {
+    const root = rootPath || process.cwd();
 
     logger.debug('LSP connection initialized. Connecting to flow...');
     const flow = new FlowSingleProjectLanguageService(
-      rootPath || process.cwd(),
+      root,
       new FlowExecInfoContainer(),
     );
     disposable.add(flow);
+
+    disposable.add(
+      flow.getServerStatusUpdates()
+        .distinctUntilChanged()
+        .subscribe(statusType => {
+          connection.console.info(`Flow status: ${statusType}`);
+        }),
+    );
 
     const diagnostics = new Diagnostics({connection, flow});
     disposable.add(diagnostics);
