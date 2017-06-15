@@ -1,8 +1,11 @@
-import type {IConnection, TextDocuments} from 'vscode-languageserver';
-import type {Definition, Range} from 'vscode-languageserver-types';
+// @flow
+
+import type {IConnection} from 'vscode-languageserver';
+import type {Definition, IRange} from 'vscode-languageserver-types';
 import type {
   TextDocumentPositionParams,
 } from 'vscode-languageserver/lib/protocol';
+import type TextDocuments from './TextDocuments';
 import {
   FlowSingleProjectLanguageService,
 } from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
@@ -47,7 +50,7 @@ export default class DefinitionSupport {
       return definitionResults.definitions.map(def => {
         const lspPosition = atomPointToLSPPosition(def.position);
 
-        const range: Range = {
+        const range: IRange = {
           start: lspPosition,
           end: lspPosition,
         };

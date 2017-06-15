@@ -48,7 +48,7 @@ declare module 'vscode-languageserver-types' {
   /**
    * A range in a text document expressed as (zero-based) start and end positions.
    */
-  declare interface IRange {
+  declare export interface IRange {
     /**
      * The range's start position
      */
@@ -793,7 +793,7 @@ declare module 'vscode-languageserver-types' {
    * For most programming languages there is only one location at which a symbol is
    * defined.
    */
-  declare type Definition = ILocation | ILocation[];
+  declare export type Definition = ILocation | ILocation[];
 
   /**
    * Value-object that contains additional information when
@@ -934,7 +934,7 @@ declare module 'vscode-languageserver-types' {
   /**
    * Parameters for a [DocumentSymbolRequest](#DocumentSymbolRequest).
    */
-  declare interface DocumentSymbolParams {
+  declare export interface DocumentSymbolParams {
     /**
        * The text document.
        */

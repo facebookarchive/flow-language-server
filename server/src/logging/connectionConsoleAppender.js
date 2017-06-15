@@ -9,6 +9,7 @@
  */
 
 import {IConnection} from 'vscode-languageserver';
+// $FlowFixMe: type layouts
 import {layouts} from 'log4js';
 
 function appender(config: {connection: IConnection}) {

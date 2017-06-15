@@ -1,3 +1,5 @@
+// @flow
+
 import type {IConnection} from 'vscode-languageserver';
 import {
   FlowSingleProjectLanguageService,
@@ -35,7 +37,6 @@ export default class HoverSupport {
       fileName,
       doc.buffer,
       lspPositionToAtomPoint(position),
-      false,
     );
 
     if (typeHint) {
