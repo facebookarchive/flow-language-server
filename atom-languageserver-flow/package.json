@@ -7,7 +7,7 @@
     "atom": ">=1.13.0"
   },
   "dependencies": {
-    "atom-languageclient": "git://github.com/atom/atom-languageclient.git#master"
+    "atom-languageclient": "^0.1.2"
   },
   "consumedServices": {
     "status-bar": {

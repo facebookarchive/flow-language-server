@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"atom-languageclient@git://github.com/atom/atom-languageclient.git#master":
+atom-languageclient@^0.1.2:
   version "0.1.2"
-  resolved "git://github.com/atom/atom-languageclient.git#74000eb18f93bed5ac14ca9428aff2ad6a373c70"
+  resolved "https://registry.yarnpkg.com/atom-languageclient/-/atom-languageclient-0.1.2.tgz#b6ed526996962c64114093e119a08f31cb843f00"
   dependencies:
     postinstall-build "^3.0.0"
     vscode-jsonrpc "^3.2.0"
