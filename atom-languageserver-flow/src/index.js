@@ -1,6 +1,5 @@
 // @flow
 
-// $FlowFixMe: coming soon
 import type {BusySignalService} from 'atom-ide-ui';
 
 import {Disposable} from 'atom';

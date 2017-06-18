@@ -2,9 +2,9 @@
 
 import type {IConnection} from 'vscode-languageserver';
 import type {DocumentSymbolParams} from 'vscode-languageserver-types';
-// $FlowFixMe: coming soon
 import type {OutlineTree} from 'atom-ide-ui';
 
+import nullthrows from 'nullthrows';
 import URI from 'vscode-uri';
 import {SymbolKind} from 'vscode-languageserver-types';
 
@@ -69,13 +69,13 @@ function treesToItems(
     items.push(
       {
         name,
-        kind: SymbolKind[tree.type] || SymbolKind.Variable,
+        kind: /* TODO */ SymbolKind.Variable,
         containerName,
         location: {
           uri,
           range: {
             start: atomPointToLSPPosition(tree.startPosition),
-            end: atomPointToLSPPosition(tree.endPosition),
+            end: atomPointToLSPPosition(nullthrows(tree.endPosition)),
           },
         },
       },

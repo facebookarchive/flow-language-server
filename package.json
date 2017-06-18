@@ -16,7 +16,7 @@
     "flow-language-server": "./server/lib/bin/cli.js"
   },
   "devDependencies": {
-    "atom-ide-ui": "^0.1.4",
+    "atom-ide-ui": "0.1.6",
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
     "babel-plugin-idx": "^1.5.1",

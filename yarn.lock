@@ -202,16 +202,19 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-atom-ide-ui@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.1.4.tgz#b785dc91e28fb531ebde5997189a46b6981a34f4"
+atom-ide-ui@0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.1.6.tgz#087b3b4b688e95860069d681df905f47f9f8ee24"
   dependencies:
     async-to-generator "1.0.0"
     classnames "2.2.5"
+    fuzzaldrin-plus "0.4.1"
+    idx "1.2.0"
     log4js "1.1.1"
-    nuclide-commons "0.1.4"
-    nuclide-commons-atom "0.1.4"
-    nuclide-commons-ui "0.1.4"
+    marked "0.3.6"
+    nuclide-commons "0.1.6"
+    nuclide-commons-atom "0.1.6"
+    nuclide-commons-ui "0.1.6"
     react "15.3.1"
     react-dom "15.3.1"
     rxjs "5.3.1"
@@ -1766,7 +1769,7 @@ function-bind@^1.0.2, function-bind@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.0.tgz#16176714c801798e4e8f2cf7f7529467bb4a5771"
 
-fuzzaldrin-plus@^0.4.1:
+fuzzaldrin-plus@0.4.1, fuzzaldrin-plus@^0.4.1:
   version "0.4.1"
   resolved "https://registry.yarnpkg.com/fuzzaldrin-plus/-/fuzzaldrin-plus-0.4.1.tgz#979595024aab74184942307d631d7aa441eee379"
 
@@ -2590,9 +2593,29 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
+lodash._getnative@^3.0.0:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz#570bc7dede46d61cdcde687d65d3eecbaa3aaff5"
+
 lodash.cond@^4.3.0:
   version "4.5.2"
   resolved "https://registry.yarnpkg.com/lodash.cond/-/lodash.cond-4.5.2.tgz#f471a1da486be60f6ab955d17115523dd1d255d5"
+
+lodash.isarguments@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
+
+lodash.isarray@^3.0.0:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/lodash.isarray/-/lodash.isarray-3.0.4.tgz#79e4eb88c36a8122af86f844aa9bcd851b5fbb55"
+
+lodash.keys@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/lodash.keys/-/lodash.keys-3.1.2.tgz#4dbc0472b156be50a0b286855d1bd0b0c656098a"
+  dependencies:
+    lodash._getnative "^3.0.0"
+    lodash.isarguments "^3.0.0"
+    lodash.isarray "^3.0.0"
 
 lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.2.0, lodash@^4.3.0:
   version "4.17.4"
@@ -2628,6 +2651,10 @@ makeerror@1.0.x:
   resolved "https://registry.yarnpkg.com/makeerror/-/makeerror-1.0.11.tgz#e01a5c9109f2af79660e4e8b9587790184f5a96c"
   dependencies:
     tmpl "1.0.x"
+
+marked@0.3.6:
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.3.6.tgz#b2c6c618fccece4ef86c4fc6cb8a7cbf5aeda8d7"
 
 merge@^1.1.3:
   version "1.2.0"
@@ -2770,29 +2797,46 @@ npmlog@^4.0.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nuclide-commons-atom@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.1.4.tgz#37db8b5e6afdc2fcf828ec7a184498809fc5f7f0"
+nuclide-commons-atom@0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.1.6.tgz#ba80b0f7673fc745872ed15143bb1e6436f4e575"
   dependencies:
     async-to-generator "1.0.0"
     log4js "1.1.1"
-    nuclide-commons "0.1.4"
+    nuclide-commons "0.1.6"
     rxjs "5.3.1"
     semver "5.3.0"
+    shallowequal "0.2.2"
 
-nuclide-commons-ui@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.1.4.tgz#804d996cdafe4575b43445c4d520f40820638f0c"
+nuclide-commons-ui@0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.1.6.tgz#98dd64cd0e0e1913cee55363485a22393341607b"
   dependencies:
     async-to-generator "1.0.0"
     classnames "2.2.5"
-    nuclide-commons "0.1.4"
-    nuclide-commons-atom "0.1.4"
+    nuclide-commons "0.1.6"
+    nuclide-commons-atom "0.1.6"
     react "15.3.1"
     react-dom "15.3.1"
     rxjs "5.3.1"
 
-nuclide-commons@0.1.4, nuclide-commons@^0.1.4:
+nuclide-commons@0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.6.tgz#7a640d7bcbdebe5007ec1360e435a4c3822db271"
+  dependencies:
+    async-to-generator "1.0.0"
+    event-kit "2.2.0"
+    fs-plus "2.9.3"
+    glob "7.1.1"
+    idx "1.2.0"
+    lru-cache "4.0.2"
+    mkdirp "0.5.1"
+    rimraf "2.5.4"
+    rxjs "5.3.1"
+    shell-quote "1.6.1"
+    temp "0.8.3"
+
+nuclide-commons@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.4.tgz#e471116f591d7f57d6398a63bc7c56b5b21fd5b4"
   dependencies:
@@ -3346,6 +3390,12 @@ set-immediate-shim@^1.0.1:
 setimmediate@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
+
+shallowequal@0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-0.2.2.tgz#1e32fd5bcab6ad688a4812cb0cc04efc75c7014e"
+  dependencies:
+    lodash.keys "^3.1.2"
 
 shell-quote@1.6.1, shell-quote@^1.6.0:
   version "1.6.1"
