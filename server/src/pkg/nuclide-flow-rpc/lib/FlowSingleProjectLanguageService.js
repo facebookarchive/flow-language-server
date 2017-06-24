@@ -11,21 +11,19 @@
 
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
-import type {Outline} from 'atom-ide-ui/pkg/atom-ide-outline-view/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   AutocompleteResult,
   Completion,
 } from '../../nuclide-language-service/lib/LanguageService';
 import type {
+  DefinitionQueryResult,
   DiagnosticProviderUpdate,
   FileDiagnosticUpdate,
   FileDiagnosticMessage,
-} from 'atom-ide-ui/pkg/atom-ide-diagnostics/lib/rpc-types';
-import type {
-  Definition,
-  DefinitionQueryResult,
-} from '../../nuclide-definition-service/lib/rpc-types';
+  FindReferencesReturn,
+  Outline,
+} from 'atom-ide-ui';
 import type {
   SingleFileLanguageService,
 } from '../../nuclide-language-service-rpc';
@@ -34,9 +32,6 @@ import type {
 } from '../../nuclide-debugger-interfaces/rpc-types';
 import type {TextEdit} from 'nuclide-commons-atom/text-edit';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
-import type {
-  FindReferencesReturn,
-} from '../../nuclide-find-references/lib/rpc-types';
 
 import type {PushDiagnosticsMessage} from './FlowIDEConnection';
 
@@ -63,7 +58,7 @@ import {
 import {getLogger} from 'log4js';
 const logger = getLogger('nuclide-flow-rpc');
 
-import {flowCoordsToAtomCoords} from './FlowHelpers';
+import {flowCoordsToAtomCoords} from '../../nuclide-flow-common';
 
 import {FlowProcess} from './FlowProcess';
 import {FlowVersion} from './FlowVersion';
@@ -170,10 +165,6 @@ export class FlowSingleProjectLanguageService {
     } catch (e) {
       return null;
     }
-  }
-
-  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition> {
-    throw new Error('Not Yet Implemented');
   }
 
   async highlight(
@@ -284,7 +275,7 @@ export class FlowSingleProjectLanguageService {
     };
   }
 
-  observeDiagnostics(): Observable<FileDiagnosticUpdate> {
+  observeDiagnostics(): Observable<Array<FileDiagnosticUpdate>> {
     const ideConnections = this._process.getIDEConnections();
     return ideConnections
       .switchMap(ideConnection => {
@@ -333,24 +324,33 @@ export class FlowSingleProjectLanguageService {
       return null;
     }
 
-    const options = {};
-
     // Note that Atom coordinates are 0-indexed whereas Flow's are 1-indexed, so we must add 1.
-    const args = [
-      'autocomplete',
-      '--json',
-      filePath,
-      position.row + 1,
-      position.column + 1,
-    ];
-
-    options.input = buffer.getText();
+    const line = position.row + 1;
+    const column = position.column + 1;
+    const contents = buffer.getText();
     try {
-      const result = await this._process.execFlow(args, options);
-      if (!result) {
-        return {isIncomplete: false, items: []};
+      let json: FlowAutocompleteOutput;
+      const ideConnection = this._process.getCurrentIDEConnection();
+      if (
+        ideConnection != null &&
+        (await this._version.satisfies('>=0.48.0'))
+      ) {
+        json = await ideConnection.getAutocompleteSuggestions(
+          filePath,
+          line,
+          column,
+          contents,
+        );
+      } else {
+        const args = ['autocomplete', '--json', filePath, line, column];
+        const options = {input: contents};
+
+        const result = await this._process.execFlow(args, options);
+        if (!result) {
+          return {isIncomplete: false, items: []};
+        }
+        json = (parseJSON(args, result.stdout): FlowAutocompleteOutput);
       }
-      const json: FlowAutocompleteOutput = parseJSON(args, result.stdout);
       const resultsArray: Array<FlowAutocompleteItem> = json.result;
       const completions = resultsArray.map(item =>
         processAutocompleteItem(replacementPrefix, item),
@@ -822,7 +822,7 @@ export function updateDiagnostics(
 // Exported only for testing
 export function getDiagnosticUpdates(
   state: DiagnosticsState,
-): Observable<FileDiagnosticUpdate> {
+): Observable<Array<FileDiagnosticUpdate>> {
   const updates = [];
   for (const file of state.filesToUpdate) {
     const messages = [
@@ -831,7 +831,7 @@ export function getDiagnosticUpdates(
     ];
     updates.push({filePath: file, messages});
   }
-  return Observable.from(updates);
+  return Observable.of(updates);
 }
 
 function collateDiagnostics(

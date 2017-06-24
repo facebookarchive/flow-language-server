@@ -9,16 +9,13 @@
  * @format
  */
 
-import type {
-  Outline,
-  OutlineTree,
-} from 'atom-ide-ui/pkg/atom-ide-outline-view/lib/rpc-types';
+import type {Outline, OutlineTree} from 'atom-ide-ui';
 
 import {Point} from 'simple-text-buffer';
 
 import {arrayCompact} from 'nuclide-commons/collection';
 
-import type {TokenizedText} from 'nuclide-commons/tokenized-text-rpc-types';
+import type {TokenizedText} from 'nuclide-commons/tokenized-text';
 import {
   keyword,
   className,

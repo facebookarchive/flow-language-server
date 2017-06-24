@@ -20,6 +20,8 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {getLogger} from 'log4js';
 const logger = getLogger('nuclide-flow-rpc');
 
+import {track} from '../../nuclide-analytics';
+
 import {runCommandDetailed, spawn} from 'nuclide-commons/process';
 import {sleep} from 'nuclide-commons/promise';
 import {niceSafeSpawn} from 'nuclide-commons/nice';
@@ -123,6 +125,12 @@ export class FlowProcess {
       .filter(({shouldStartPinging}) => shouldStartPinging)
       .subscribe(() => {
         this._pingServer();
+      });
+
+    this._serverStatus
+      .filter(status => status === ServerStatus.FAILED)
+      .subscribe(() => {
+        track('flow-server-failed');
       });
   }
 

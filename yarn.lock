@@ -202,9 +202,9 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-atom-ide-ui@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.1.6.tgz#087b3b4b688e95860069d681df905f47f9f8ee24"
+atom-ide-ui@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.1.7.tgz#1bd4ebb4cd58721b52c47e93922fd36224ecf204"
   dependencies:
     async-to-generator "1.0.0"
     classnames "2.2.5"
@@ -212,9 +212,9 @@ atom-ide-ui@0.1.6:
     idx "1.2.0"
     log4js "1.1.1"
     marked "0.3.6"
-    nuclide-commons "0.1.6"
-    nuclide-commons-atom "0.1.6"
-    nuclide-commons-ui "0.1.6"
+    nuclide-commons "0.1.7"
+    nuclide-commons-atom "0.1.7"
+    nuclide-commons-ui "0.1.7"
     react "15.3.1"
     react-dom "15.3.1"
     rxjs "5.3.1"
@@ -2797,48 +2797,32 @@ npmlog@^4.0.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nuclide-commons-atom@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.1.6.tgz#ba80b0f7673fc745872ed15143bb1e6436f4e575"
+nuclide-commons-atom@0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.1.7.tgz#07060b9af9043071b3b86faa6b94d93d06d57f30"
   dependencies:
     async-to-generator "1.0.0"
     log4js "1.1.1"
-    nuclide-commons "0.1.6"
+    nuclide-commons "0.1.7"
     rxjs "5.3.1"
     semver "5.3.0"
     shallowequal "0.2.2"
 
-nuclide-commons-ui@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.1.6.tgz#98dd64cd0e0e1913cee55363485a22393341607b"
+nuclide-commons-ui@0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.1.7.tgz#34c6ba9512035d40540ccdac2f80edf7ef22e3b4"
   dependencies:
     async-to-generator "1.0.0"
     classnames "2.2.5"
-    nuclide-commons "0.1.6"
-    nuclide-commons-atom "0.1.6"
+    nuclide-commons "0.1.7"
+    nuclide-commons-atom "0.1.7"
     react "15.3.1"
     react-dom "15.3.1"
     rxjs "5.3.1"
 
-nuclide-commons@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.6.tgz#7a640d7bcbdebe5007ec1360e435a4c3822db271"
-  dependencies:
-    async-to-generator "1.0.0"
-    event-kit "2.2.0"
-    fs-plus "2.9.3"
-    glob "7.1.1"
-    idx "1.2.0"
-    lru-cache "4.0.2"
-    mkdirp "0.5.1"
-    rimraf "2.5.4"
-    rxjs "5.3.1"
-    shell-quote "1.6.1"
-    temp "0.8.3"
-
-nuclide-commons@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.4.tgz#e471116f591d7f57d6398a63bc7c56b5b21fd5b4"
+nuclide-commons@0.1.7, nuclide-commons@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.7.tgz#912ba8d22339eb8b0deca8f1d8fa0c1b0619044c"
   dependencies:
     async-to-generator "1.0.0"
     event-kit "2.2.0"

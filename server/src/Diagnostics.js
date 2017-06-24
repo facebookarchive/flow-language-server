@@ -44,8 +44,8 @@ export default class Diagnostics {
     this._disposable.add(
       this.flow
         .observeDiagnostics()
-        .map(fileDiagnosticUpdateToLSPDiagnostic)
-        .subscribe(d => this.connection.sendDiagnostics(d)),
+        .map(diagnostics => diagnostics.map(fileDiagnosticUpdateToLSPDiagnostic))
+        .subscribe(diagnostics => diagnostics.forEach(this.connection.sendDiagnostics)),
     );
   }
 }

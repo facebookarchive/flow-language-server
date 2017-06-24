@@ -13,21 +13,14 @@ import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import type {FileVersion} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {TextEdit} from 'nuclide-commons-atom/text-edit';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
-import type {
-  Definition,
-  DefinitionQueryResult,
-} from '../../nuclide-definition-service/lib/rpc-types';
-import type {
-  Outline,
-} from 'atom-ide-ui/pkg/atom-ide-outline-view/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
-  FindReferencesReturn,
-} from '../../nuclide-find-references/lib/rpc-types';
-import type {
+  DefinitionQueryResult,
   DiagnosticProviderUpdate,
   FileDiagnosticUpdate,
-} from 'atom-ide-ui/pkg/atom-ide-diagnostics/lib/rpc-types';
+  FindReferencesReturn,
+  Outline,
+} from 'atom-ide-ui';
 import type {
   AutocompleteResult,
   SymbolResult,
@@ -216,7 +209,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return this._observeDiagnosticsPromise;
   }
 
-  observeDiagnostics(): ConnectableObservable<FileDiagnosticUpdate> {
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>> {
     this._observeDiagnosticsPromiseResolver();
 
     return this.observeLanguageServices()
@@ -225,7 +218,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
         return ensureInvalidations(
           this._logger,
           process.observeDiagnostics().refCount().catch(error => {
-            this._logger.error(`Error: observeDiagnostics ${error}`);
+            this._logger.error('Error: observeDiagnostics', error);
             return Observable.empty();
           }),
         );
@@ -256,13 +249,6 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
     )).getDefinition(fileVersion, position);
-  }
-
-  async getDefinitionById(file: NuclideUri, id: string): Promise<?Definition> {
-    return (await this._getLanguageServiceForFile(file)).getDefinitionById(
-      file,
-      id,
-    );
   }
 
   async findReferences(
