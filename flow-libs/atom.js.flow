@@ -49,6 +49,8 @@ type atom$Octicon = 'alert' | 'alignment-align' | 'alignment-aligned-to' | 'alig
   'trashcan' | 'triangle-down' | 'triangle-left' | 'triangle-right' | 'triangle-up' | 'unfold' |
   'unmute' | 'unverified' | 'verified' | 'versions' | 'watch' | 'x' | 'zap';
 
+type atom$ItemLocation = 'left' | 'right' | 'bottom' | 'center';
+
 declare class atom$Model {
   destroy(): void,
   isDestroyed(): boolean,
@@ -720,12 +722,10 @@ type MarkerOptions = {|
 
 declare class atom$TextEditor extends atom$Model {
   id: number,
-  firstVisibleScreenRow: number,
-  rowsPerPage: number,
 
   // Event Subscription
   onDidChange(callback: () => void): IDisposable,
-  onDidChangePath(callback: () => mixed): IDisposable,
+  onDidChangePath(callback: (newPath: string) => mixed): IDisposable,
   onDidStopChanging(callback: () => void): IDisposable,
   onDidChangeCursorPosition(callback: (event: ChangeCursorPositionEvent) => mixed):
     IDisposable,
@@ -943,9 +943,6 @@ declare class atom$TextEditor extends atom$Model {
   isFoldedAtBufferRow(row: number): boolean,
   getLastBufferRow(): number,
 
-  // Undocumented properties
-  presenter: ?atom$TextEditorPresenter,
-
   // Undocumented Methods
   getDefaultCharWidth(): number,
   getLineHeightInPixels(): number,
@@ -1148,6 +1145,8 @@ declare class atom$Workspace {
   handleGrammarUsed?: (grammar: atom$Grammar) => void,
   reopenItem(): Promise<?atom$TextEditor>,
   addOpener(callback: (uri: string) => any): IDisposable,
+  hide(uriOrItem: string | Object): void,
+  toggle(uriOrItem: string | Object): void,
 
   // Pane Items
   getPaneItems(): Array<Object>,
@@ -1175,13 +1174,10 @@ declare class atom$Workspace {
   getModalPanels(): Array<atom$Panel>,
   addModalPanel(options: atom$WorkspaceAddPanelOptions): atom$Panel,
 
-  // Docks. These became available in Atom 1.17.0, so uses should currently be guarded by a null
-  // check. Once we no longer want to support versions less than Atom 1.17 these typedefs can be
-  // changed to non-optional.
-  getLeftDock?: () => atom$Dock,
-  getRightDock?: () => atom$Dock,
-  getBottomDock?: () => atom$Dock,
-  getCenter?: () => atom$WorkspaceCenter,
+  getLeftDock(): atom$Dock,
+  getRightDock(): atom$Dock,
+  getBottomDock(): atom$Dock,
+  getCenter(): atom$WorkspaceCenter,
 
   // Searching and Replacing
 
@@ -1189,21 +1185,30 @@ declare class atom$Workspace {
   destroyActivePaneItem(): void,
 }
 
-declare class atom$AbastractPaneContainer {
+declare class atom$AbstractPaneContainer {
   isVisible(): boolean,
   show(): void,
   hide(): void,
   getActivePane(): atom$Pane,
   getPanes(): Array<atom$Pane>,
+  onDidAddPaneItem((item: {item: Object}) => void): IDisposable,
 }
 
-declare class atom$Dock extends atom$AbastractPaneContainer {
+declare class atom$Dock extends atom$AbstractPaneContainer {
   // This is a woefully incomplete list, items can be added as needed from
   // https://github.com/atom/atom/blob/master/src/dock.js
   toggle(): void,
 }
 
-declare class atom$WorkspaceCenter extends atom$AbastractPaneContainer {
+declare class atom$WorkspaceCenter extends atom$AbstractPaneContainer {
+  activate(): void;
+
+  // Pane Items
+  getPaneItems(): Array<atom$PaneItem>,
+  getActivePaneItem(): ?atom$PaneItem,
+  getTextEditors(): Array<atom$TextEditor>,
+  getActiveTextEditor(): ?atom$TextEditor,
+
   observeActivePaneItem(callback: atom$PaneItem => mixed): IDisposable;
   onDidChangeActivePaneItem(callback: (item: mixed) => mixed): IDisposable;
   // This should be removed soon anyway, it's currently deprecated.
@@ -1504,6 +1509,7 @@ declare class atom$TextBuffer {
   }): atom$TextBuffer,
 
   file: ?atom$File,
+  changeCount: number,
 
   // Mixin
   static deserialize: (state: Object, params: Object) => mixed,
@@ -1606,7 +1612,6 @@ declare class atom$TextBuffer {
   emitter: atom$Emitter,
   refcount: number,
   loaded: boolean,
-  changeCount: number,
   wasModifiedBeforeRemove: boolean,
   finishLoading(): atom$TextBuffer,
   updateCachedDiskContents(flushCache?: boolean, callback?: () => mixed): Promise<void>,

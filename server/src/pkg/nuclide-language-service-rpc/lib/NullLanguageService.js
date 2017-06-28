@@ -17,14 +17,12 @@ import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   DefinitionQueryResult,
   DiagnosticProviderUpdate,
-  FileDiagnosticUpdate,
+  FileDiagnosticMessages,
   FindReferencesReturn,
   Outline,
 } from 'atom-ide-ui';
 import type {ConnectableObservable} from 'rxjs';
-import type {
-  NuclideEvaluationExpression,
-} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 import type {
   AutocompleteResult,
   SymbolResult,
@@ -39,7 +37,7 @@ export class NullLanguageService {
     return Promise.resolve(null);
   }
 
-  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>> {
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticMessages>> {
     return Observable.empty().publish();
   }
 

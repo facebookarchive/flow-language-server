@@ -17,14 +17,12 @@ import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   DefinitionQueryResult,
   DiagnosticProviderUpdate,
-  FileDiagnosticUpdate,
+  FileDiagnosticMessages,
   FindReferencesReturn,
   Outline,
 } from 'atom-ide-ui';
 import type {ConnectableObservable} from 'rxjs';
-import type {
-  NuclideEvaluationExpression,
-} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 
 // Subtype of atom$AutocompleteSuggestion.
 export type Completion = {
@@ -66,7 +64,7 @@ export type SymbolResult = {
 export interface LanguageService {
   getDiagnostics(fileVersion: FileVersion): Promise<?DiagnosticProviderUpdate>,
 
-  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>>,
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticMessages>>,
 
   getAutocompleteSuggestions(
     fileVersion: FileVersion,
