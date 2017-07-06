@@ -13,21 +13,14 @@ import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import type {FileVersion} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {TextEdit} from 'nuclide-commons-atom/text-edit';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
-import type {
-  Definition,
-  DefinitionQueryResult,
-} from '../../nuclide-definition-service/lib/rpc-types';
-import type {
-  Outline,
-} from 'atom-ide-ui/pkg/atom-ide-outline-view/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
-  FindReferencesReturn,
-} from '../../nuclide-find-references/lib/rpc-types';
-import type {
+  DefinitionQueryResult,
   DiagnosticProviderUpdate,
   FileDiagnosticUpdate,
-} from 'atom-ide-ui/pkg/atom-ide-diagnostics/lib/rpc-types';
+  FindReferencesReturn,
+  Outline,
+} from 'atom-ide-ui';
 import type {
   AutocompleteResult,
   SymbolResult,
@@ -54,7 +47,7 @@ export type SingleFileLanguageService = {
     buffer: simpleTextBuffer$TextBuffer,
   ): Promise<?DiagnosticProviderUpdate>,
 
-  observeDiagnostics(): Observable<FileDiagnosticUpdate>,
+  observeDiagnostics(): Observable<Array<FileDiagnosticUpdate>>,
 
   getAutocompleteSuggestions(
     filePath: NuclideUri,
@@ -69,8 +62,6 @@ export type SingleFileLanguageService = {
     buffer: simpleTextBuffer$TextBuffer,
     position: atom$Point,
   ): Promise<?DefinitionQueryResult>,
-
-  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition>,
 
   findReferences(
     filePath: NuclideUri,
@@ -159,7 +150,7 @@ export class ServerLanguageService<
     return this._service.getDiagnostics(filePath, buffer);
   }
 
-  observeDiagnostics(): ConnectableObservable<FileDiagnosticUpdate> {
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>> {
     return this._service.observeDiagnostics().publish();
   }
 
@@ -193,10 +184,6 @@ export class ServerLanguageService<
       return null;
     }
     return this._service.getDefinition(filePath, buffer, position);
-  }
-
-  getDefinitionById(file: NuclideUri, id: string): Promise<?Definition> {
-    return this._service.getDefinitionById(file, id);
   }
 
   async findReferences(
@@ -337,27 +324,29 @@ export class ServerLanguageService<
 
 export function ensureInvalidations(
   logger: log4js$Logger,
-  diagnostics: Observable<FileDiagnosticUpdate>,
-): Observable<FileDiagnosticUpdate> {
+  diagnostics: Observable<Array<FileDiagnosticUpdate>>,
+): Observable<Array<FileDiagnosticUpdate>> {
   const filesWithErrors = new Set();
   const trackedDiagnostics: Observable<
-    FileDiagnosticUpdate,
-  > = diagnostics.do((diagnostic: FileDiagnosticUpdate) => {
-    const filePath = diagnostic.filePath;
-    if (diagnostic.messages.length === 0) {
-      logger.debug(`Removing ${filePath} from files with errors`);
-      filesWithErrors.delete(filePath);
-    } else {
-      logger.debug(`Adding ${filePath} to files with errors`);
-      filesWithErrors.add(filePath);
+    Array<FileDiagnosticUpdate>,
+  > = diagnostics.do((diagnosticArray: Array<FileDiagnosticUpdate>) => {
+    for (const diagnostic of diagnosticArray) {
+      const filePath = diagnostic.filePath;
+      if (diagnostic.messages.length === 0) {
+        logger.debug(`Removing ${filePath} from files with errors`);
+        filesWithErrors.delete(filePath);
+      } else {
+        logger.debug(`Adding ${filePath} to files with errors`);
+        filesWithErrors.add(filePath);
+      }
     }
   });
 
   const fileInvalidations: Observable<
-    FileDiagnosticUpdate,
+    Array<FileDiagnosticUpdate>,
   > = Observable.defer(() => {
     logger.debug('Clearing errors after stream closed');
-    return Observable.from(
+    return Observable.of(
       Array.from(filesWithErrors).map(file => {
         logger.debug(`Clearing errors for ${file} after connection closed`);
         return {

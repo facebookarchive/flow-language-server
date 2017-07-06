@@ -16,7 +16,7 @@
     "flow-language-server": "./server/lib/bin/cli.js"
   },
   "devDependencies": {
-    "atom-ide-ui": "0.1.6",
+    "atom-ide-ui": "^0.1.7",
     "babel-cli": "^6.24.1",
     "babel-jest": "^19.0.0",
     "babel-plugin-idx": "^1.5.1",
@@ -41,7 +41,7 @@
     "log4js": "^1.1.1",
     "lru-cache": "^4.0.1",
     "mkdirp": "^0.5.1",
-    "nuclide-commons": "^0.1.4",
+    "nuclide-commons": "^0.1.7",
     "nullthrows": "^1.0.0",
     "rimraf": "^2.5.4",
     "rxjs": "^5.0.0",
@@ -51,7 +51,8 @@
     "temp": "^0.8.3",
     "through": "^2.3.6",
     "vscode-languageserver": "^3.2.0",
-    "vscode-uri": "^1.0.0"
+    "vscode-uri": "^1.0.0",
+    "yargs": "^8.0.2"
   },
   "jest": {
     "testMatch": [
