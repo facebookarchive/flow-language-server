@@ -25,7 +25,7 @@
         "0.1.0": "consumeBusySignal"
       }
     },
-    "atom-ide-datatip": {
+    "datatip": {
       "versions": {
         "0.1.0": "consumeDatatip"
       }
@@ -37,12 +37,12 @@
         "2.0.0": "provideAutocomplete"
       }
     },
-    "atom-ide-definitions": {
+    "definitions": {
       "versions": {
         "0.1.0": "provideDefinitions"
       }
     },
-    "atom-ide-outline-view": {
+    "outline-view": {
       "versions": {
         "0.1.0": "provideOutlines"
       }
@@ -50,11 +50,6 @@
     "hyperclick": {
       "versions": {
         "0.1.0": "provideHyperclick"
-      }
-    },
-    "nuclide-find-references.provider": {
-      "versions": {
-        "0.0.0": "provideFindReferences"
       }
     }
   },
