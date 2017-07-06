@@ -54,7 +54,7 @@ export default function initializeLogging(connection: IConnection) {
     ],
   });
 
-  const logger = log4js.getLogger();
+  const logger = log4js.getLogger('flow-language-server');
   process.on('uncaughtException', e => logger.error('uncaughtException', e));
   process.on('unhandledRejection', e => logger.error('unhandledRejection', e));
 
