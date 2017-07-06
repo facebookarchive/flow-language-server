@@ -7,10 +7,9 @@
     "clean": "rimraf server/lib",
     "dev": "yarn watch",
     "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
-    "build-atom": "babel -s --copy-files --ignore node_modules,spec ./atom-languageserver-flow/src -d ./atom-languageserver-flow/lib",
     "prepare": "yarn build",
     "test": "eslint server/src && jest",
-    "watch": "yarn build -- --watch & yarn build-atom -- --watch"
+    "watch": "yarn build -- --watch"
   },
   "bin": {
     "flow-language-server": "./server/lib/bin/cli.js"
@@ -61,8 +60,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "flow-vscode/*",
-      "server/lib/*",
-      "atom-languageserver-flow/lib/"
+      "server/lib/*"
     ]
   },
   "files": [
