@@ -16,9 +16,7 @@ import type {
   AutocompleteResult,
   SymbolResult,
 } from '../../nuclide-language-service/lib/LanguageService';
-import type {
-  HostServices,
-} from '../../nuclide-language-service-rpc/lib/rpc-types';
+import type {HostServices} from '../../nuclide-language-service-rpc/lib/rpc-types';
 import type {
   FileVersion,
   FileNotifier,
@@ -29,13 +27,11 @@ import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   DefinitionQueryResult,
   DiagnosticProviderUpdate,
-  FileDiagnosticUpdate,
+  FileDiagnosticMessages,
   FindReferencesReturn,
   Outline,
 } from 'atom-ide-ui';
-import type {
-  NuclideEvaluationExpression,
-} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 
 import invariant from 'assert';
 
@@ -77,9 +73,7 @@ export type FlowSettings = {
 
 export type {FlowLocNoSource} from './flowOutputTypes';
 
-import {
-  FlowSingleProjectLanguageService,
-} from './FlowSingleProjectLanguageService';
+import {FlowSingleProjectLanguageService} from './FlowSingleProjectLanguageService';
 import {FlowServiceState} from './FlowServiceState';
 
 let state: ?FlowServiceState = null;
@@ -108,10 +102,9 @@ export async function initialize(
   return new FlowLanguageService(fileCache, host, config);
 }
 
-class FlowLanguageService
-  extends MultiProjectLanguageService<
-    ServerLanguageService<FlowSingleProjectLanguageService>,
-  > {
+class FlowLanguageService extends MultiProjectLanguageService<
+  ServerLanguageService<FlowSingleProjectLanguageService>,
+> {
   constructor(fileCache: FileCache, host: HostServices, config: FlowSettings) {
     const logger = getLogger('Flow');
     super();
@@ -182,7 +175,7 @@ class FlowLanguageService
 export interface FlowLanguageServiceType {
   getDiagnostics(fileVersion: FileVersion): Promise<?DiagnosticProviderUpdate>,
 
-  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>>,
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticMessages>>,
 
   getAutocompleteSuggestions(
     fileVersion: FileVersion,

@@ -17,7 +17,7 @@ import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   DefinitionQueryResult,
   DiagnosticProviderUpdate,
-  FileDiagnosticUpdate,
+  FileDiagnosticMessages,
   FindReferencesReturn,
   Outline,
 } from 'atom-ide-ui';
@@ -26,12 +26,8 @@ import type {
   SymbolResult,
   LanguageService,
 } from '../../nuclide-language-service/lib/LanguageService';
-import type {
-  HostServices,
-} from '../../nuclide-language-service-rpc/lib/rpc-types';
-import type {
-  NuclideEvaluationExpression,
-} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {HostServices} from '../../nuclide-language-service-rpc/lib/rpc-types';
+import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
 import type {ConnectableObservable} from 'rxjs';
 
 import {FileCache, ConfigObserver} from '../../nuclide-open-files-rpc';
@@ -169,7 +165,9 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   // new LanguageServices for any paths in configPaths.
   _ensureProcesses(configPaths: Set<NuclideUri>): void {
     this._logger.info(
-      `MultiProjectLanguageService ensureProcesses. ${Array.from(configPaths).join(', ')}`,
+      `MultiProjectLanguageService ensureProcesses. ${Array.from(
+        configPaths,
+      ).join(', ')}`,
     );
     this._processes.setKeys(configPaths);
   }
@@ -209,7 +207,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return this._observeDiagnosticsPromise;
   }
 
-  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticUpdate>> {
+  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticMessages>> {
     this._observeDiagnosticsPromiseResolver();
 
     return this.observeLanguageServices()

@@ -5,7 +5,7 @@ import type {
 } from 'vscode-languageserver';
 import type {
   FileDiagnosticMessage,
-  FileDiagnosticUpdate,
+  FileDiagnosticMessages,
 } from 'atom-ide-ui';
 
 import URI from 'vscode-uri';
@@ -51,7 +51,7 @@ export default class Diagnostics {
 }
 
 function fileDiagnosticUpdateToLSPDiagnostic(
-  diagnostic: FileDiagnosticUpdate,
+  diagnostic: FileDiagnosticMessages,
 ): PublishDiagnosticsParams {
   return {
     uri: URI.file(diagnostic.filePath).toString(),
@@ -61,9 +61,9 @@ function fileDiagnosticUpdateToLSPDiagnostic(
         d => d.range != null && d.text != null,
       )
       .map(message => ({
-        severity: flowSeverityToLSPSeverity(message.type),
-        // $FlowFixMe messages without ranges filtered out above
+        // $FlowFixMe Diagnostics without range filtered out above
         range: atomRangeToLSPRange(message.range),
+        severity: flowSeverityToLSPSeverity(message.type),
         message: toMessage(message),
         source: message.providerName,
       })),

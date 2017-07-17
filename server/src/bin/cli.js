@@ -9,10 +9,7 @@ import initializeLogging from '../logging/initializeLogging';
 import {createServer} from '../index';
 
 const cli = yargs
-  .usage(
-    'Flow Language Service Command-Line Interface.\n' +
-    'Usage: $0 [args]',
-  )
+  .usage('Flow Language Service Command-Line Interface.\n' + 'Usage: $0 [args]')
   .help('h')
   .alias('h', 'help')
   .option('node-ipc', {
@@ -30,6 +27,20 @@ const cli = yargs
   .option('socket', {
     describe: 'Use a socket (with a port number like --socket=5051) to communicate with the server',
     type: 'number',
+  })
+  .option('flow-path', {
+    describe: 'An absolute path to a specific flow binary to use for the server',
+    type: 'string',
+  })
+  .option('try-flow-bin', {
+    describe: "Attempt to use flow-bin inside the $PROJECT_ROOT's node_modules directory",
+    type: 'boolean',
+    default: false,
+  })
+  .option('no-auto-download', {
+    describe: "Don't automatically download and manage flow binaries",
+    type: 'boolean',
+    default: false,
   });
 
 const argv = cli.argv;
@@ -38,7 +49,7 @@ const methods = ['node-ipc', 'stdio', 'pipe', 'socket'];
 
 cliInvariant(
   methods.filter(m => argv[m] != null).length === 1,
-  'flow-language-server requires exactly one valid option.',
+  'flow-language-server requires exactly one valid connection option (node-ipc, stdio, pipe, or socket).',
 );
 const method = methods.find(m => argv[m] != null);
 
@@ -51,9 +62,15 @@ if (method === 'socket') {
   options.pipeName = argv.pipe;
 }
 
+const flowOptions = {
+  flowPath: argv['path-to-flow'],
+  tryFlowBin: argv['try-flow-bin'],
+  autoDownloadFlow: !argv['no-auto-download'],
+};
+
 const connection = connectionFromOptions(options);
 initializeLogging(connection);
-createServer(connection).listen();
+createServer(connection, flowOptions).listen();
 
 // Exit the process when stream closes from remote end.
 process.stdin.on('close', () => {
@@ -62,7 +79,7 @@ process.stdin.on('close', () => {
 
 function cliInvariant(condition, ...msgs) {
   if (!condition) {
-    console.error(...msgs);
+    console.error('ERROR:', ...msgs);
     console.error();
     cli.showHelp();
     process.exit(1);
