@@ -74,7 +74,7 @@ if (method === 'socket') {
 }
 
 const flowOptions = {
-  flowPath: argv['path-to-flow'],
+  flowPath: argv['flow-path'],
   tryFlowBin: argv['try-flow-bin'],
   autoDownloadFlow: !argv['no-auto-download'],
 };

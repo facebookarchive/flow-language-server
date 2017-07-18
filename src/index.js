@@ -128,9 +128,9 @@ async function getFlowVersionInfo(
 ): Promise<?VersionInfo> {
   const versionLogger = getLogger('flow-versions');
 
-  if (flowOptions.pathToFlow != null) {
-    connection.window.showInformationMessage('path to flow ' + flowOptions.pathToFlow);
-    if (!nuclideUri.isAbsolute(flowOptions.pathToFlow)) {
+  if (flowOptions.flowPath != null) {
+    connection.window.showInformationMessage('path to flow ' + flowOptions.flowPath);
+    if (!nuclideUri.isAbsolute(flowOptions.flowPath)) {
       connection.window.showErrorMessage(
         'Supplied path to flow was not absolute. Specify a complete path to ' +
           'the flow binary or leave the option empty for Flow to be managed ' +
@@ -139,11 +139,11 @@ async function getFlowVersionInfo(
       return;
     }
 
-    const flowVersionInfo = await versionInfoForPath(rootPath, flowOptions.pathToFlow);
+    const flowVersionInfo = await versionInfoForPath(rootPath, flowOptions.flowPath);
     if (!flowVersionInfo) {
       connection.window.showErrorMessage('Invalid path to flow binary.');
     }
-    versionLogger.info(`Using the provided path to flow binary at ${flowOptions.pathToFlow}`);
+    versionLogger.info(`Using the provided path to flow binary at ${flowOptions.flowPath}`);
 
     return flowVersionInfo;
   }
