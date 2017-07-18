@@ -12,24 +12,23 @@
 
 import type {IConnection} from 'vscode-languageserver';
 
-import {
-  IPCMessageReader,
-  IPCMessageWriter,
-} from 'vscode-jsonrpc';
+import {IPCMessageReader, IPCMessageWriter} from 'vscode-jsonrpc';
 import {createConnection} from 'vscode-languageserver';
 
 import net from 'net';
 import stream from 'stream';
 
-type Options = {
-  method: string,
-} | {
-  method: 'port',
-  port: number,
-} | {
-  method: 'pipe',
-  pipeName: string,
-};
+type Options =
+  | {
+      method: 'socket',
+      port: number,
+    }
+  | {
+      method: 'stdio',
+    }
+  | {
+      method: 'node-ipc',
+    };
 
 export default function connectionFromOptions(options: Options): ?IConnection {
   let reader: stream$Readable;

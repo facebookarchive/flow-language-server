@@ -32,12 +32,7 @@ import {getLogger} from 'log4js';
 const logger = getLogger('TextDocuments');
 
 function textDocumentFromLSPTextDocument(textDocument: ITextDocumentItem) {
-  return new TextDocument(
-    textDocument.uri,
-    textDocument.languageId,
-    textDocument.version,
-    textDocument.text,
-  );
+  return new TextDocument(textDocument.uri, textDocument.languageId, textDocument.version, textDocument.text);
 }
 
 export default class TextDocuments {
@@ -64,10 +59,7 @@ export default class TextDocuments {
   get(uri: string): TextDocument {
     const document = this._documents.get(uri);
 
-    invariant(
-      document != null,
-      `TextDocuments: asked for document with uri ${uri}, but no buffer was loaded`,
-    );
+    invariant(document != null, `TextDocuments: asked for document with uri ${uri}, but no buffer was loaded`);
     return document;
   }
 

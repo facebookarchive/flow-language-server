@@ -16,12 +16,7 @@ import invariant from 'assert';
 import SimpleTextBuffer from 'simple-text-buffer';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import {Emitter} from 'event-kit';
-import {
-  atomPointToLSPPosition,
-  compareLspRange,
-  lspPositionToAtomPoint,
-  lspRangeToAtomRange,
-} from './utils/util';
+import {atomPointToLSPPosition, compareLspRange, lspPositionToAtomPoint, lspRangeToAtomRange} from './utils/util';
 import {getLogger} from 'log4js';
 
 const logger = getLogger('TextDocument');
@@ -43,16 +38,11 @@ export default class TextDocument {
     this.buffer = new SimpleTextBuffer(text);
 
     this._disposables.add(this._emitter);
-    this._disposables.add(
-      this.buffer.onDidStopChanging(this._handleDidStopChanging),
-    );
+    this._disposables.add(this.buffer.onDidStopChanging(this._handleDidStopChanging));
   }
 
   assertNotDisposed() {
-    invariant(
-      !this.disposed,
-      `TextDocument with uri ${this.uri} was already disposed`,
-    );
+    invariant(!this.disposed, `TextDocument with uri ${this.uri} was already disposed`);
   }
 
   dispose() {
@@ -76,9 +66,7 @@ export default class TextDocument {
 
   offsetAt(position: Position): number {
     this.assertNotDisposed();
-    return this.buffer.characterIndexForPosition(
-      lspPositionToAtomPoint(position),
-    );
+    return this.buffer.characterIndexForPosition(lspPositionToAtomPoint(position));
   }
 
   onDidStopChanging(handler: (document: TextDocument) => void): IDisposable {
@@ -93,9 +81,7 @@ export default class TextDocument {
 
   positionAt(offset: number): Position {
     this.assertNotDisposed();
-    return atomPointToLSPPosition(
-      this.buffer.positionForCharacterIndex(offset),
-    );
+    return atomPointToLSPPosition(this.buffer.positionForCharacterIndex(offset));
   }
 
   save(version: number, text: ?string) {
@@ -119,20 +105,14 @@ export default class TextDocument {
     // Ensure that ranged changes are sorted in reverse order.
     // Otherwise, the changes can't be applied cleanly.
     changes.sort((a, b) => {
-      invariant(
-        a.range != null && b.range != null,
-        'There should only be one full-text update.',
-      );
+      invariant(a.range != null && b.range != null, 'There should only be one full-text update.');
       return compareLspRange(b.range, a.range);
     });
 
     for (const change of changes) {
       if (change.range != null) {
         // Incremental update
-        this.buffer.setTextInRange(
-          lspRangeToAtomRange(change.range),
-          change.text,
-        );
+        this.buffer.setTextInRange(lspRangeToAtomRange(change.range), change.text);
       } else {
         // Full text update
         this.buffer.setText(change.text);

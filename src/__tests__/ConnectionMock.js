@@ -12,24 +12,25 @@
 
 import {Emitter} from 'event-kit';
 
-export default class ConnectionMock {
-  constructor() {
-    this._emitter = new Emitter();
-  }
+type ChangeHandler = ((e: TextDocumentChangeEvent) => void) => void;
 
-  onDidChangeTextDocument(handler) {
+// used only in test
+export default class ConnectionMock {
+  _emitter: Emitter = new Emitter();
+
+  onDidChangeTextDocument(handler: ChangeHandler) {
     this._emitter.on('didChange', handler);
   }
 
-  onDidCloseTextDocument(handler) {
+  onDidCloseTextDocument(handler: ChangeHandler) {
     this._emitter.on('didClose', handler);
   }
 
-  onDidOpenTextDocument(handler) {
+  onDidOpenTextDocument(handler: ChangeHandler) {
     this._emitter.on('didOpen', handler);
   }
 
-  onDidSaveTextDocument(handler) {
+  onDidSaveTextDocument(handler: ChangeHandler) {
     this._emitter.on('didChange', handler);
   }
 }

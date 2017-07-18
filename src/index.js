@@ -26,7 +26,6 @@ import TextDocuments from './TextDocuments';
 import {FlowExecInfoContainer} from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {getLogger} from 'log4js';
-import {ServerStatus} from './pkg/nuclide-flow-rpc/lib/FlowConstants';
 import {flowBinForPath} from './flow-versions/flowBinForRoot';
 import {downloadSemverFromGitHub} from './flow-versions/githubSemverDownloader';
 import {versionInfoForPath} from './flow-versions/utils';
@@ -136,7 +135,7 @@ async function getFlowVersionInfo(
           'the flow binary or leave the option empty for Flow to be managed ' +
           'for you.',
       );
-      return;
+      return null;
     }
 
     const flowVersionInfo = await versionInfoForPath(rootPath, flowOptions.flowPath);

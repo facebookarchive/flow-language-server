@@ -15,7 +15,6 @@ import type {Reporter, VersionInfo} from './types';
 import fetch from 'node-fetch';
 import path from 'path';
 import semver from 'semver';
-import invariant from 'invariant';
 import mkdirp from 'mkdirp';
 import Zip from 'adm-zip';
 import URL from 'url';
@@ -25,19 +24,19 @@ const FLOW_RELEASES_ENDPOINT = 'https://api.github.com/repos/facebook/flow/relea
 export async function downloadSemverFromGitHub(
   semversion: ?string,
   binsDir: string,
-  reporter: Reporter
+  reporter: Reporter,
 ): Promise<?VersionInfo> {
   let versionsResponse;
   try {
     versionsResponse = await fetch(FLOW_RELEASES_ENDPOINT);
   } catch (e) {
     reporter.error('There was a problem reaching GitHub to download Flow.');
-    return;
+    return null;
   }
 
   if (!versionsResponse.ok) {
     reporter.error('There was a problem downloading the list of flow versions from GitHub.');
-    return;
+    return null;
   }
 
   const versions = await versionsResponse.json();
@@ -50,25 +49,26 @@ export async function downloadSemverFromGitHub(
 
   if (!bestMatch) {
     reporter.error('The version of flow you requested does not exist on GitHub');
-    return;
+    return null;
   }
 
-  const platformString = process.platform === 'darwin' ? 'osx' : process.platform; // flow release names include 'win32' and 'linux' in their names;
+  // flow release names include 'win32' and 'linux' in their names;
+  const platformString = process.platform === 'darwin' ? 'osx' : process.platform;
   const bestAsset = bestMatch.assets.find(a => a.name.includes(platformString));
   if (!bestAsset) {
     reporter.error('Unable to find a download for the desired version of flow');
-    return;
+    return null;
   }
 
   const url = bestAsset.browser_download_url;
   if (!url) {
-    reporter.error('unable to find a flow download for this platform')
-    return;
+    reporter.error('unable to find a flow download for this platform');
+    return null;
   }
   if (URL.parse(url).protocol !== 'https:') {
     // should "never" happen
     reporter.error(`Flow must be downloaded over a secure connection, but was told to download ${url}`);
-    return;
+    return null;
   }
 
   reporter.info(
@@ -79,7 +79,7 @@ export async function downloadSemverFromGitHub(
   if (archiveResponse.ok) {
     const zipBuffer = await archiveResponse.buffer();
     // $FlowFixMe https://github.com/flowtype/flow-typed/pull/1049
-    const version = semver.clean(bestMatch.tag_name);
+    const version = (semver.clean(bestMatch.tag_name): string);
     const destDir = path.join(binsDir, version);
 
     try {
@@ -92,10 +92,10 @@ export async function downloadSemverFromGitHub(
       );
     } catch (e) {
       reporter.error(
-        `Failed to write flow binary to disk. Please ensure write access ` +
+        'Failed to write flow binary to disk. Please ensure write access ' +
         `to ${destDir}.`,
-      )
-      return;
+      );
+      return null;
     }
 
     reporter.info(

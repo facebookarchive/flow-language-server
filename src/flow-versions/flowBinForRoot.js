@@ -20,7 +20,6 @@ import fs from 'nuclide-commons/fsPromise';
 import path from 'path';
 import semver from 'semver';
 import idx from 'idx';
-import os from 'os';
 import which from 'nuclide-commons/which';
 import {downloadSemverFromGitHub} from './githubSemverDownloader';
 import {getFlowDataDir, versionInfoForPath} from './utils';
@@ -36,7 +35,7 @@ const FLOW_BIN_PATH = process.platform === 'win32' ? 'node_modules/.bin/flow.cmd
 type FlowBinForPathOptions = {
   tryFlowBin?: boolean,
   autoDownloadFlow?: boolean,
-  semverDownloader?: (semversion: ?string, binsDir: string, reporter: Reporter) => Promise<VersionInfo>,
+  semverDownloader?: (semversion: ?string, binsDir: string, reporter: Reporter) => Promise<?VersionInfo>,
   reporter?: Reporter,
 };
 
@@ -52,7 +51,7 @@ export async function flowBinForPath(
   // get the version (or range) of flow we'll need for this path
   const semversion = await _flowSemverForRootPath(rootPath, reporter);
   if (semversion == null) {
-    return;
+    return null;
   }
   reporter.info(`Looking for a version of flow matching ${semversion}...`);
 
@@ -69,7 +68,7 @@ export async function flowBinForPath(
           'The version of flow-bin (declared in package.json) is incompatible ' +
             "with the range stated in the project's .flowconfig, and will not run.",
         );
-        return;
+        return null;
       }
     } else {
       reporter.info('Unable to locate flow-bin in node_modules');
@@ -118,10 +117,10 @@ export async function _flowSemverForRootPath(rootPath: string, reporter: Reporte
   reporter.info('Determining the version of flow for your project...');
   if (!configDir) {
     reporter.error('No valid .flowconfig was found. Use `flow init` in the root of your project to create one.');
-    return;
+    return null;
   }
   const configPath = path.join(configDir, '.flowconfig');
-  const {pkg, path: pkgPath} = await readPkgUp({cwd: rootPath});
+  const {pkg} = await readPkgUp({cwd: rootPath});
 
   let packageFlowVersion;
   const depRange = idx(pkg, _ => _.dependencies['flow-bin']);
@@ -146,7 +145,7 @@ export async function _flowSemverForRootPath(rootPath: string, reporter: Reporte
       }
     } catch (e) {
       reporter.error('Root dir contains missing or invalid flowconfig');
-      return;
+      return null;
     }
   }
 
@@ -178,7 +177,7 @@ async function getFromDiskCache(semversion: string): Promise<?VersionInfo> {
     .find(v => semver.satisfies(v, semversion));
 
   if (!foundVersion) {
-    return;
+    return null;
   }
 
   const foundPath = path.join(BINS_DIR, foundVersion, BIN_NAME);

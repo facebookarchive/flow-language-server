@@ -2,14 +2,16 @@
   "name": "flow-language-server",
   "version": "0.0.3",
   "main": "lib/index.js",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "scripts": {
     "clean": "rimraf lib/",
     "dev": "yarn watch",
     "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./src -d ./lib",
     "prepare": "yarn build",
     "lint": "eslint src/",
-    "test": "yarn lint && jest",
+    "flow": "flow",
+    "test": "jest",
+    "ci": "yarn flow && yarn lint && yarn test",
     "watch": "yarn build -- --watch"
   },
   "bin": {

@@ -10,6 +10,10 @@
  * @format
  */
 
-export function track() {
+export function track(
+  key: string,
+  values: {[key: string]: mixed} = {},
+  immediate?: boolean,
+) {
   // noop
 }

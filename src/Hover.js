@@ -11,9 +11,7 @@
  */
 
 import type {IConnection} from 'vscode-languageserver';
-import {
-  FlowSingleProjectLanguageService,
-} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
+import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import URI from 'vscode-uri';
 
@@ -43,11 +41,7 @@ export default class HoverSupport {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
 
-    const typeHint = await this.flow.typeHint(
-      fileName,
-      doc.buffer,
-      lspPositionToAtomPoint(position),
-    );
+    const typeHint = await this.flow.typeHint(fileName, doc.buffer, lspPositionToAtomPoint(position));
 
     if (typeHint) {
       return {

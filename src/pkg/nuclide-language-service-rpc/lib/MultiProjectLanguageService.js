@@ -126,9 +126,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   async _getLanguageServicesForFiles(
     filePaths: Array<string>,
   ): Promise<Array<[LanguageService, Array<string>]>> {
-    const promises: Array<
-      Promise<?[LanguageService, string]>,
-    > = filePaths.map(async filePath => {
+    const promises: Array<Promise<?[LanguageService, string]>, > = filePaths.map(async filePath => {
       const service = await this._getLanguageServiceForFile(filePath);
       return service ? [service, filePath] : null;
     });

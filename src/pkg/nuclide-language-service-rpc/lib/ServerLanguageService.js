@@ -326,9 +326,7 @@ export function ensureInvalidations(
   diagnostics: Observable<Array<FileDiagnosticMessages>>,
 ): Observable<Array<FileDiagnosticMessages>> {
   const filesWithErrors = new Set();
-  const trackedDiagnostics: Observable<
-    Array<FileDiagnosticMessages>,
-  > = diagnostics.do((diagnosticArray: Array<FileDiagnosticMessages>) => {
+  const trackedDiagnostics: Observable<Array<FileDiagnosticMessages>, > = diagnostics.do((diagnosticArray: Array<FileDiagnosticMessages>) => {
     for (const diagnostic of diagnosticArray) {
       const filePath = diagnostic.filePath;
       if (diagnostic.messages.length === 0) {
@@ -341,9 +339,7 @@ export function ensureInvalidations(
     }
   });
 
-  const fileInvalidations: Observable<
-    Array<FileDiagnosticMessages>,
-  > = Observable.defer(() => {
+  const fileInvalidations: Observable<Array<FileDiagnosticMessages>, > = Observable.defer(() => {
     logger.debug('Clearing errors after stream closed');
     return Observable.of(
       Array.from(filesWithErrors).map(file => {

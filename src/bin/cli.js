@@ -13,6 +13,7 @@
 
 /* eslint comma-dangle: [1, always-multiline], prefer-object-spread/prefer-object-spread: 0 */
 
+import type {FlowOptions} from '../types';
 import yargs from 'yargs';
 
 import connectionFromOptions from '../utils/connectionFromOptions';
@@ -20,7 +21,7 @@ import initializeLogging from '../logging/initializeLogging';
 import {createServer} from '../index';
 
 const cli = yargs
-  .usage('Flow Language Service Command-Line Interface.\n' + 'Usage: $0 [args]')
+  .usage('Flow Language Service Command-Line Interface.\nUsage: $0 [args]')
   .help('h')
   .alias('h', 'help')
   .option('node-ipc', {
@@ -65,22 +66,22 @@ cliInvariant(
 const method = methods.find(m => argv[m] != null);
 
 options.method = method;
-if (method === 'socket') {
+if (options.method === 'socket') {
   cliInvariant(options.port, '--socket option requires port.');
   options.port = argv.socket;
-} else if (method === 'pipe') {
+} else if (options.method === 'pipe') {
   cliInvariant(options.pipe, '--pipe option requires a pipe name.');
   options.pipeName = argv.pipe;
 }
 
-const flowOptions = {
+const connection = connectionFromOptions(options);
+initializeLogging(connection);
+
+const flowOptions: FlowOptions = {
   flowPath: argv['flow-path'],
   tryFlowBin: argv['try-flow-bin'],
   autoDownloadFlow: !argv['no-auto-download'],
 };
-
-const connection = connectionFromOptions(options);
-initializeLogging(connection);
 createServer(connection, flowOptions).listen();
 
 // Exit the process when stream closes from remote end.
@@ -90,8 +91,10 @@ process.stdin.on('close', () => {
 
 function cliInvariant(condition, ...msgs) {
   if (!condition) {
+    /* eslint-disable no-console */
     console.error('ERROR:', ...msgs);
     console.error();
+    /* eslint-enable */
     cli.showHelp();
     process.exit(1);
   }
