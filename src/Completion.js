@@ -1,16 +1,18 @@
-// @flow
+/**
+ * Copyright (c) 2017-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @flow
+ * @format
+ */
 
-import type {
-  ClientCapabilities,
-  TextDocumentPositionParams,
-} from 'vscode-languageserver/lib/protocol';
-import type {
-  ICompletionList,
-  CompletionItemKindType,
-} from 'vscode-languageserver-types';
-import {
-  FlowSingleProjectLanguageService,
-} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
+import type {ClientCapabilities, TextDocumentPositionParams} from 'vscode-languageserver/lib/protocol';
+import type {ICompletionList, CompletionItemKindType} from 'vscode-languageserver-types';
+import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import {Range} from 'simple-text-buffer';
 import idx from 'idx';

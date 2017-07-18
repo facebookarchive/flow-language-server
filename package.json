@@ -8,7 +8,8 @@
     "dev": "yarn watch",
     "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./src -d ./lib",
     "prepare": "yarn build",
-    "test": "eslint src && jest",
+    "lint": "eslint src/",
+    "test": "yarn lint && jest",
     "watch": "yarn build -- --watch"
   },
   "bin": {
@@ -26,7 +27,8 @@
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-rulesdir": "^0.1.0",
     "flow-bin": "^0.50.0",
     "fs-extra": "^3.0.1",
     "jest": "^20.0.4",
@@ -58,18 +60,8 @@
     "yargs": "^8.0.2"
   },
   "jest": {
-    "testMatch": [
-      "**/*-spec.js",
-      "**/*.test.js"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "flow-vscode/*",
-      "lib/*"
-    ]
+    "testMatch": ["**/*-spec.js", "**/*.test.js"],
+    "testPathIgnorePatterns": ["/node_modules/", "lib/*"]
   },
-  "files": [
-    "dirs.js",
-    "lib/"
-  ]
+  "files": ["dirs.js", "lib/"]
 }
