@@ -1,4 +1,2 @@
-node_modules
-/server/lib
-/flow-vscode/lib
-/atom-languageserver-flow/lib
+/node_modules
+/lib

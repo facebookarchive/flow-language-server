@@ -1,18 +1,18 @@
 {
   "name": "flow-language-server",
   "version": "0.0.3",
-  "main": "server/lib/index.js",
+  "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "clean": "rimraf server/lib",
+    "clean": "rimraf lib/",
     "dev": "yarn watch",
-    "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./server/src -d ./server/lib",
+    "build": "yarn run clean && babel -s --copy-files --ignore node_modules,spec ./src -d ./lib",
     "prepare": "yarn build",
-    "test": "eslint server/src && jest",
+    "test": "eslint src && jest",
     "watch": "yarn build -- --watch"
   },
   "bin": {
-    "flow-language-server": "./server/lib/bin/cli.js"
+    "flow-language-server": "./lib/bin/cli.js"
   },
   "devDependencies": {
     "atom-ide-ui": "^0.1.8",
@@ -65,10 +65,11 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "flow-vscode/*",
-      "server/lib/*"
+      "lib/*"
     ]
   },
   "files": [
-    "server/lib"
+    "dirs.js",
+    "lib/"
   ]
 }
