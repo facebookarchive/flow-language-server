@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "scripts": {
@@ -62,8 +62,17 @@
     "yargs": "^8.0.2"
   },
   "jest": {
-    "testMatch": ["**/*-spec.js", "**/*.test.js"],
-    "testPathIgnorePatterns": ["/node_modules/", "lib/*"]
+    "testMatch": [
+      "**/*-spec.js",
+      "**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "lib/*"
+    ]
   },
-  "files": ["dirs.js", "lib/"]
+  "files": [
+    "dirs.js",
+    "lib/"
+  ]
 }
