@@ -16,9 +16,7 @@ import type {FileDiagnosticMessage, FileDiagnosticMessages} from 'atom-ide-ui';
 import URI from 'vscode-uri';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 
-import {
-  FlowSingleProjectLanguageService,
-} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
+import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {atomRangeToLSPRange, flowSeverityToLSPSeverity} from './utils/util';
 import {getLogger} from 'log4js';
 
@@ -55,9 +53,7 @@ export default class Diagnostics {
   }
 }
 
-function fileDiagnosticUpdateToLSPDiagnostic(
-  diagnostic: FileDiagnosticMessages,
-): PublishDiagnosticsParams {
+function fileDiagnosticUpdateToLSPDiagnostic(diagnostic: FileDiagnosticMessages): PublishDiagnosticsParams {
   return {
     uri: URI.file(diagnostic.filePath).toString(),
     diagnostics: diagnostic.messages

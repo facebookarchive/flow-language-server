@@ -14,7 +14,6 @@ import type {VersionInfo} from './types';
 
 import path from 'path';
 import os from 'os';
-import fs from 'nuclide-commons/fsPromise';
 import {runCommand} from 'nuclide-commons/process';
 
 const platform = process.platform;

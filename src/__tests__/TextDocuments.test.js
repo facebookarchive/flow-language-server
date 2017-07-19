@@ -21,6 +21,7 @@ let docs, connection;
 describe('TextDocuments', () => {
   beforeEach(() => {
     docs = new TextDocuments();
+    // $FlowFixMe
     connection = new ConnectionMock();
     docs.listen(connection);
   });

@@ -22,7 +22,7 @@ const defaultIDEConnectionFactory = proc => new FlowIDEConnection(proc);
 // entire comment as well as the whitespace.
 // eslint-disable-next-line semi-spacing
 const IDE_CONNECTION_MAX_WAIT_MS =
-  20 /* min */ * 60 /* s/min */ * 1000 /* ms/s */;
+  20 /* min */ * 60 /* s/min */ * 1000;
 
 const IDE_CONNECTION_MIN_INTERVAL_MS = 1000;
 

@@ -17,10 +17,7 @@ import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowS
 import {Range} from 'simple-text-buffer';
 import idx from 'idx';
 import URI from 'vscode-uri';
-import {
-  CompletionItemKind,
-  InsertTextFormat,
-} from 'vscode-languageserver-types';
+import {CompletionItemKind, InsertTextFormat} from 'vscode-languageserver-types';
 import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
 
 import TextDocuments from './TextDocuments';
@@ -47,10 +44,7 @@ export default class Completion {
     this.flow = flow;
   }
 
-  async provideCompletionItems({
-    textDocument,
-    position,
-  }: TextDocumentPositionParams): Promise<ICompletionList> {
+  async provideCompletionItems({textDocument, position}: TextDocumentPositionParams): Promise<ICompletionList> {
     const fileName = URI.parse(textDocument.uri).fsPath;
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
@@ -59,10 +53,7 @@ export default class Completion {
     const match = wordAtPositionFromBuffer(doc.buffer, prevPoint, JAVASCRIPT_WORD_REGEX);
     let prefix = idx(match, _ => _.wordMatch[0]) || '';
     // Ensure that we also trigger on object properties (".").
-    if (
-      point.column !== 0 &&
-      doc.buffer.getTextInRange(new Range(prevPoint, point)) === '.'
-    ) {
+    if (point.column !== 0 && doc.buffer.getTextInRange(new Range(prevPoint, point)) === '.') {
       prefix = '.';
     }
 
@@ -89,24 +80,16 @@ export default class Completion {
           }
           completion.detail = atomCompletion.leftLabel || atomCompletion.description;
 
-          completion.kind = this.typeToKind(
-            atomCompletion.type,
-            atomCompletion.description,
-          );
+          completion.kind = this.typeToKind(atomCompletion.type, atomCompletion.description);
 
           if (
-            idx(
-              this.clientCapabilities,
-              _ => _.textDocument.completion.completionItem.snippetSupport,
-            ) &&
+            idx(this.clientCapabilities, _ => _.textDocument.completion.completionItem.snippetSupport) &&
             atomCompletion.snippet
           ) {
             completion.insertText = atomCompletion.snippet;
             completion.insertTextFormat = InsertTextFormat.Snippet;
           } else {
-            logger.debug(
-              'Was going to return a snippet completion, but the client does not support them',
-            );
+            logger.debug('Was going to return a snippet completion, but the client does not support them');
           }
 
           return completion;

@@ -15,8 +15,10 @@ export type VersionInfo = {
   flowVersion: string,
 };
 
+/* eslint-disable flowtype/no-weak-types  */
 export type Reporter = {
   +info: (...msgs: Array<any>) => void,
   +warn: (...msgs: Array<any>) => void,
   +error: (...msgs: Array<any>) => void,
 };
+/* eslint-enable */

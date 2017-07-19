@@ -51,9 +51,7 @@ export function diagnosticToFix(
   return null;
 }
 
-const fixExtractionFunctions: Array<
-  (diagnostic: FileDiagnosticMessage) => ?DiagnosticFix,
-> = [unusedSuppressionFix, namedImportTypo];
+const fixExtractionFunctions: Array<(diagnostic: FileDiagnosticMessage) => ?DiagnosticFix, > = [unusedSuppressionFix, namedImportTypo];
 
 function unusedSuppressionFix(
   diagnostic: FileDiagnosticMessage,

@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:6
+    steps:
+      - checkout
+      # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
+      - restore_cache:
+          name: Restore yarn cache
+          keys:
+            - myapp-yarn-{{ checksum "yarn.lock" }}
+            - myapp-yarn-
+      - run:
+          name: install
+          command: yarn
+      - run:
+          name: test
+          command: yarn ci
+      # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
+      - save_cache:
+          name: Store yarn cache
+          key: myapp-yarn-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.yarn-cache
