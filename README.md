@@ -1,4 +1,7 @@
 # Flow Language Server
+
+[![npm](https://img.shields.io/npm/v/flow-language-server.svg)](https://www.npmjs.com/package/flow-language-server) [![CircleCI](https://circleci.com/gh/flowtype/flow-language-server/tree/master.svg?style=shield&circle-token=58418cffe1efc61717f814506b22d443904db15d)](https://circleci.com/gh/flowtype/flow-language-server/tree/master)
+
 This is an implementation of the [Language Server Protocol](https://github.com/Microsoft/language-server-protocol/) for the [Flow static type checker](https://flow.org/) for JavaScript. `flow-language-server` makes creating a Flow integration for your favorite text editor or IDE much simpler.
 
 ## Installation
