@@ -64,6 +64,9 @@
     "vscode-uri": "^1.0.1",
     "yargs": "^8.0.2"
   },
+  "engines": {
+    "node": ">=6"
+  },
   "jest": {
     "testMatch": [
       "**/*-spec.js",
