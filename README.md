@@ -4,6 +4,10 @@
 
 This is an implementation of the [Language Server Protocol](https://github.com/Microsoft/language-server-protocol/) for the [Flow static type checker](https://flow.org/) for JavaScript. `flow-language-server` makes creating a Flow integration for your favorite text editor or IDE much simpler.
 
+## Requirements
+flow-language-server requires Node v6 or any later maintained version of Node.js.
+It also requires [any supported operating system platform for Flow](https://github.com/facebook/flow/#requirements).
+
 ## Installation
 You most likely don't need to install `flow-language-server` directly if you want Flow support for your favorite editor; instead, [check out the integrations below](#editor-integrations).
 
