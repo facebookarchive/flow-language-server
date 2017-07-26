@@ -28,7 +28,7 @@ import {getLogger} from 'log4js';
 const BIN_NAME = process.platform === 'win32' ? 'flow.cmd' : 'flow';
 const BINS_DIR = path.join(getFlowDataDir(), 'bin');
 
-const flowConfigCache = new ConfigCache('.flowconfig');
+const flowConfigCache = new ConfigCache(['.flowconfig']);
 
 const FLOW_BIN_PATH =
   process.platform === 'win32'

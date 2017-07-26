@@ -66,7 +66,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   ) {
     this._logger = logger;
     this._resources = new UniversalDisposable();
-    this._configCache = new ConfigCache(projectFileName);
+    this._configCache = new ConfigCache([projectFileName]);
 
     this._processes = new Cache(languageServiceFactory, value => {
       value.then(process => {

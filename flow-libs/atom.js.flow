@@ -49,7 +49,7 @@ type atom$Octicon = 'alert' | 'alignment-align' | 'alignment-aligned-to' | 'alig
   'trashcan' | 'triangle-down' | 'triangle-left' | 'triangle-right' | 'triangle-up' | 'unfold' |
   'unmute' | 'unverified' | 'verified' | 'versions' | 'watch' | 'x' | 'zap';
 
-type atom$ItemLocation = 'left' | 'right' | 'bottom' | 'center';
+type atom$PaneLocation = 'left' | 'right' | 'bottom' | 'center';
 
 declare class atom$Model {
   destroy(): void,
@@ -479,6 +479,7 @@ declare class atom$PaneContainer {
   destroy(): void,
   getActivePane(): atom$Pane,
   getActivePaneItem(): ?Object,
+  getLocation(): atom$PaneLocation,
   getPanes(): Array<atom$Pane>,
   getPaneItems(): Array<atom$PaneItem>,
   observePanes(cb: (pane: atom$Pane) => void): IDisposable,
@@ -646,21 +647,24 @@ declare class atom$ThemeManager {
 type atom$TooltipsPlacementOption = 'top' | 'bottom' | 'left' | 'right' | 'auto';
 
 type atom$TooltipsAddOptions = {
-  title: string,
+  title?: string,
+  item?: HTMLElement,
   keyBindingCommand?: string,
   keyBindingTarget?: HTMLElement,
   animation?: boolean,
   container?: string | false,
   delay?: number | {show: number, hide: number},
   placement?: atom$TooltipsPlacementOption | () => atom$TooltipsPlacementOption,
+  trigger?: string,
 };
 
 type atom$Tooltip = {
   hide(): void;
+  getTooltipElement(): HTMLElement,
 };
 
 declare class atom$TooltipManager {
-  tooltips: Map<HTMLElement, atom$Tooltip>;
+  tooltips: Map<HTMLElement, Array<atom$Tooltip>>;
   add(
     target: HTMLElement,
     options: atom$TooltipsAddOptions,
@@ -1116,6 +1120,8 @@ declare class atom$Workspace {
   ): IDisposable,
   onDidOpen(callback: (event: OnDidOpenEvent) => mixed): IDisposable,
 
+  getElement(): HTMLElement,
+
   // Opening
   open(
     uri?: string,
@@ -1147,6 +1153,10 @@ declare class atom$Workspace {
   addOpener(callback: (uri: string) => any): IDisposable,
   hide(uriOrItem: string | Object): void,
   toggle(uriOrItem: string | Object): void,
+
+  // Pane Containers
+  getPaneContainers(): Array<atom$PaneContainer>,
+  paneContainerForItem(item: ?mixed): ?atom$PaneContainer,
 
   // Pane Items
   getPaneItems(): Array<Object>,
@@ -1192,6 +1202,9 @@ declare class atom$AbstractPaneContainer {
   getActivePane(): atom$Pane,
   getPanes(): Array<atom$Pane>,
   onDidAddPaneItem((item: {item: Object}) => void): IDisposable,
+  state: {
+    size: number,
+  }
 }
 
 declare class atom$Dock extends atom$AbstractPaneContainer {
@@ -1509,7 +1522,6 @@ declare class atom$TextBuffer {
   }): atom$TextBuffer,
 
   file: ?atom$File,
-  changeCount: number,
 
   // Mixin
   static deserialize: (state: Object, params: Object) => mixed,

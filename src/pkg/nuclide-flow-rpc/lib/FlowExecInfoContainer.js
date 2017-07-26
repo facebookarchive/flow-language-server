@@ -54,7 +54,7 @@ export class FlowExecInfoContainer {
   _versionInfo: ?FlowVersionInfo;
 
   constructor(versionInfo: ?FlowVersionInfo) {
-    this._flowConfigDirCache = new ConfigCache('.flowconfig');
+    this._flowConfigDirCache = new ConfigCache(['.flowconfig']);
 
     this._flowExecInfoCache = LRU({
       max: 10,
