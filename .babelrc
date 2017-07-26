@@ -13,7 +13,7 @@
     ["env", {
       "exclude": ["transform-regenerator"],
       "targets": {
-        "node": 4,
+        "node": 6,
       },
     }],
   ],
