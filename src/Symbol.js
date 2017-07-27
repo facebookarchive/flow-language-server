@@ -16,7 +16,7 @@ import type {OutlineTree} from 'atom-ide-ui';
 
 import nullthrows from 'nullthrows';
 import URI from 'vscode-uri';
-import {SymbolKind} from 'vscode-languageserver-types';
+import {SymbolKind, ISymbolInformation} from 'vscode-languageserver-types';
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import TextDocuments from './TextDocuments';
@@ -44,7 +44,7 @@ export default class SymbolSupport {
 
   async provideDocumentSymbol(
     params: DocumentSymbolParams,
-  ): Promise<Array<SymbolInformation>> {
+  ): Promise<Array<ISymbolInformation>> {
     logger.debug('document symbols requested');
     const {textDocument} = params;
 
@@ -66,7 +66,7 @@ function treesToItems(
   trees: Array<OutlineTree>,
   containerName: ?string,
   uri: string,
-): Array<SymbolInformation> {
+): Array<ISymbolInformation> {
   const items = [];
   for (const tree of trees) {
     if (!tree.representativeName && !tree.children.length) {
@@ -77,7 +77,7 @@ function treesToItems(
     items.push(
       {
         name,
-        kind /* TODO */: SymbolKind.Variable,
+        kind: tree.kind ? OUTLINE_KIND_TO_LSP_KIND[tree.kind] : null,
         containerName,
         location: {
           uri,
@@ -93,3 +93,24 @@ function treesToItems(
 
   return items;
 }
+
+const OUTLINE_KIND_TO_LSP_KIND = {
+  array: SymbolKind.Array,
+  boolean: SymbolKind.Boolean,
+  class: SymbolKind.Class,
+  constant: SymbolKind.Constant,
+  constructor: SymbolKind.Constructor,
+  enum: SymbolKind.Enum,
+  field: SymbolKind.Field,
+  file: SymbolKind.File,
+  function: SymbolKind.Function,
+  interface: SymbolKind.Interface,
+  method: SymbolKind.Method,
+  module: SymbolKind.Module,
+  namespace: SymbolKind.Namespace,
+  number: SymbolKind.Number,
+  package: SymbolKind.Package,
+  property: SymbolKind.Property,
+  string: SymbolKind.String,
+  variable: SymbolKind.Variable,
+};
