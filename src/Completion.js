@@ -21,7 +21,6 @@ import type {
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import {Range} from 'simple-text-buffer';
-import idx from 'idx';
 import URI from 'vscode-uri';
 import {
   CompletionItemKind,
@@ -67,7 +66,7 @@ export default class Completion {
       prevPoint,
       JAVASCRIPT_WORD_REGEX,
     );
-    let prefix = idx(match, _ => _.wordMatch[0]) || '';
+    let prefix = (match && match.wordMatch && match.wordMatch[0]) || '';
     // Ensure that we also trigger on object properties (".").
     if (
       point.column !== 0 &&
@@ -106,10 +105,12 @@ export default class Completion {
           );
 
           if (
-            idx(
-              this.clientCapabilities,
-              _ => _.textDocument.completion.completionItem.snippetSupport,
-            ) &&
+            this.clientCapabilities &&
+            this.clientCapabilities.textDocument &&
+            this.clientCapabilities.textDocument.completion &&
+            this.clientCapabilities.textDocument.completion.completionItem &&
+            this.clientCapabilities.textDocument.completion.completionItem
+              .snippetSupport &&
             atomCompletion.snippet
           ) {
             completion.insertText = atomCompletion.snippet;
