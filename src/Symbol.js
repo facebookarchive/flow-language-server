@@ -74,21 +74,28 @@ function treesToItems(
     }
 
     const name = tree.representativeName;
-    items.push(
-      {
-        name,
-        kind: tree.kind ? OUTLINE_KIND_TO_LSP_KIND[tree.kind] : null,
-        containerName,
-        location: {
-          uri,
-          range: {
-            start: atomPointToLSPPosition(tree.startPosition),
-            end: atomPointToLSPPosition(nullthrows(tree.endPosition)),
-          },
+    const kind = tree.kind;
+    if (name == null || kind == null) {
+      continue;
+    }
+
+    const item: ISymbolInformation = {
+      name,
+      kind: OUTLINE_KIND_TO_LSP_KIND[kind],
+      location: {
+        uri,
+        range: {
+          start: atomPointToLSPPosition(tree.startPosition),
+          end: atomPointToLSPPosition(nullthrows(tree.endPosition)),
         },
       },
-      ...treesToItems(tree.children, name, uri),
-    );
+    };
+
+    if (containerName != null) {
+      item.containerName = containerName;
+    }
+
+    items.push(item, ...treesToItems(tree.children, name, uri));
   }
 
   return items;
