@@ -51,7 +51,7 @@ export function createServer(
     logger.debug('LSP connection initialized. Connecting to flow...');
 
     const flowVersionInfo = await getFlowVersionInfo(
-      rootPath,
+      root,
       connection,
       initialFlowOptions,
     );
