@@ -11,6 +11,7 @@
  */
 
 import type {FlowOptions} from './types';
+import type {InitializeParams} from 'vscode-languageserver/lib/protocol';
 import type {VersionInfo} from './flow-versions/types';
 
 import nuclideUri from 'nuclide-commons/nuclideUri';
@@ -45,88 +46,90 @@ export function createServer(
     disposable.dispose();
   });
 
-  connection.onInitialize(async ({capabilities, rootPath}) => {
-    const root = rootPath || process.cwd();
+  connection.onInitialize(
+    async ({capabilities, rootPath}: InitializeParams) => {
+      const root = rootPath || process.cwd();
 
-    logger.debug('LSP connection initialized. Connecting to flow...');
+      logger.debug('LSP connection initialized. Connecting to flow...');
 
-    const flowVersionInfo = await getFlowVersionInfo(
-      root,
-      connection,
-      initialFlowOptions,
-    );
-    if (!flowVersionInfo) {
-      return {capabilities: {}};
-    }
-    const flowContainer = new FlowExecInfoContainer(flowVersionInfo);
-    const flow = new FlowSingleProjectLanguageService(root, flowContainer);
-
-    disposable.add(
-      flow,
-      flow
-        .getServerStatusUpdates()
-        .distinctUntilChanged()
-        .subscribe(statusType => {
-          connection.console.info(`Flow status: ${statusType}`);
-        }),
-    );
-
-    const diagnostics = new Diagnostics({connection, flow});
-    disposable.add(diagnostics);
-    diagnostics.observe();
-
-    const completion = new Completion({
-      clientCapabilities: capabilities,
-      documents,
-      flow,
-    });
-    connection.onCompletion(docParams => {
-      logger.debug(
-        `completion requested for document ${docParams.textDocument.uri}`,
+      const flowVersionInfo = await getFlowVersionInfo(
+        root,
+        connection,
+        initialFlowOptions,
       );
-      return completion.provideCompletionItems(docParams);
-    });
+      if (!flowVersionInfo) {
+        return {capabilities: {}};
+      }
+      const flowContainer = new FlowExecInfoContainer(flowVersionInfo);
+      const flow = new FlowSingleProjectLanguageService(root, flowContainer);
 
-    connection.onCompletionResolve(() => {
-      // for now, noop as we can't/don't need to provide any additional
-      // information on resolve, but need to respond to implement completion
-    });
-
-    const definition = new Definition({connection, documents, flow});
-    connection.onDefinition(docParams => {
-      logger.debug(
-        `definition requested for document ${docParams.textDocument.uri}`,
+      disposable.add(
+        flow,
+        flow
+          .getServerStatusUpdates()
+          .distinctUntilChanged()
+          .subscribe(statusType => {
+            connection.console.info(`Flow status: ${statusType}`);
+          }),
       );
-      return definition.provideDefinition(docParams);
-    });
 
-    const hover = new Hover({connection, documents, flow});
-    connection.onHover(docParams => {
-      return hover.provideHover(docParams);
-    });
+      const diagnostics = new Diagnostics({connection, flow});
+      disposable.add(diagnostics);
+      diagnostics.observe();
 
-    const symbols = new SymbolSupport({connection, documents, flow});
-    connection.onDocumentSymbol(symbolParams => {
-      logger.debug(
-        `symbols requested for document ${symbolParams.textDocument.uri}`,
-      );
-      return symbols.provideDocumentSymbol(symbolParams);
-    });
+      const completion = new Completion({
+        clientCapabilities: capabilities,
+        documents,
+        flow,
+      });
+      connection.onCompletion(docParams => {
+        logger.debug(
+          `completion requested for document ${docParams.textDocument.uri}`,
+        );
+        return completion.provideCompletionItems(docParams);
+      });
 
-    logger.info('Flow language server started');
+      connection.onCompletionResolve(() => {
+        // for now, noop as we can't/don't need to provide any additional
+        // information on resolve, but need to respond to implement completion
+      });
 
-    return {
-      capabilities: {
-        textDocumentSync: documents.syncKind,
-        definitionProvider: true,
-        documentSymbolProvider: true,
-        completionProvider: {
-          resolveProvider: true,
+      const definition = new Definition({connection, documents, flow});
+      connection.onDefinition(docParams => {
+        logger.debug(
+          `definition requested for document ${docParams.textDocument.uri}`,
+        );
+        return definition.provideDefinition(docParams);
+      });
+
+      const hover = new Hover({connection, documents, flow});
+      connection.onHover(docParams => {
+        return hover.provideHover(docParams);
+      });
+
+      const symbols = new SymbolSupport({connection, documents, flow});
+      connection.onDocumentSymbol(symbolParams => {
+        logger.debug(
+          `symbols requested for document ${symbolParams.textDocument.uri}`,
+        );
+        return symbols.provideDocumentSymbol(symbolParams);
+      });
+
+      logger.info('Flow language server started');
+
+      return {
+        capabilities: {
+          textDocumentSync: documents.syncKind,
+          definitionProvider: true,
+          documentSymbolProvider: true,
+          completionProvider: {
+            resolveProvider: true,
+          },
+          hoverProvider: true,
         },
-        hoverProvider: true,
-      },
-    };
-  });
+      };
+    },
+  );
 
   return {
     listen() {
