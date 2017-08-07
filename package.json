@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "scripts": {
