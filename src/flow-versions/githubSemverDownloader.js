@@ -57,10 +57,8 @@ export async function downloadSemverFromGitHub(
     return null;
   }
 
-  // flow release names include 'win32' and 'linux' in their names;
-  const platformString =
-    process.platform === 'darwin' ? 'osx' : process.platform;
-  const bestAsset = bestMatch.assets.find(a => a.name.includes(platformString));
+  const assetSubstr = getAssetSubstr();
+  const bestAsset = bestMatch.assets.find(a => a.name.includes(assetSubstr));
   if (!bestAsset) {
     reporter.error('Unable to find a download for the desired version of flow');
     return null;
@@ -117,4 +115,28 @@ export async function downloadSemverFromGitHub(
   }
 
   reporter.error('There was a problem downloading from GitHub');
+}
+
+// flow release object 'name' field includes one of the following values:
+const PLATFORM_NAME_TO_ASSET_SUBSTR_MAP = {
+  darwin: 'osx',
+  win32: 'win64',
+  linux: 'linux',
+};
+
+function getAssetSubstr(): string {
+  if (process.arch !== 'x64') {
+    throw new Error(
+      'Unsupported operating system: only 64-bit operating systems are supported by flow.',
+    );
+  }
+
+  const substr = PLATFORM_NAME_TO_ASSET_SUBSTR_MAP[process.platform];
+  if (substr == null) {
+    throw new Error(
+      `Unsupported operating system platform ${process.platform}.`,
+    );
+  }
+
+  return substr;
 }
