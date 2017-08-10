@@ -122,16 +122,20 @@ const PLATFORM_NAME_TO_ASSET_SUBSTR_MAP = {
   darwin: 'osx',
   win32: 'win64',
   linux: 'linux',
-}
+};
 
 function getAssetSubstr(): string {
   if (process.arch !== 'x64') {
-    throw new Error('Unsupported operating system: only 64-bit operating systems are supported by flow.');
+    throw new Error(
+      'Unsupported operating system: only 64-bit operating systems are supported by flow.',
+    );
   }
 
   const substr = PLATFORM_NAME_TO_ASSET_SUBSTR_MAP[process.platform];
   if (substr == null) {
-    throw new Error(`Unsupported operating system platform ${process.platform}.`);
+    throw new Error(
+      `Unsupported operating system platform ${process.platform}.`,
+    );
   }
 
   return substr;
