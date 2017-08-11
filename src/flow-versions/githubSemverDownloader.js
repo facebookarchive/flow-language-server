@@ -19,6 +19,8 @@ import mkdirp from 'mkdirp';
 import Zip from 'adm-zip';
 import URL from 'url';
 
+import {BIN_NAME} from './constants';
+
 const FLOW_RELEASES_ENDPOINT =
   'https://api.github.com/repos/facebook/flow/releases';
 
@@ -81,7 +83,14 @@ export async function downloadSemverFromGitHub(
     `Found a match with version ${bestMatch.tag_name} on GitHub. Downloading...`,
   );
 
-  const archiveResponse = await fetch(url);
+  let archiveResponse;
+  try {
+    archiveResponse = await fetch(url);
+  } catch (e) {
+    reporter.error('Unable to download resolved flow package from GitHub');
+    return null;
+  }
+
   if (archiveResponse.ok) {
     const zipBuffer = await archiveResponse.buffer();
     // $FlowFixMe https://github.com/flowtype/flow-typed/pull/1049
@@ -91,7 +100,7 @@ export async function downloadSemverFromGitHub(
     try {
       await mkdirp(destDir);
       new Zip(zipBuffer).extractEntryTo(
-        path.join('flow', 'flow'),
+        `flow/${BIN_NAME}`, // zip-style path, not os-style, so not path.join
         destDir,
         false /* don't recreate the entry 'flow' dir */,
         true /* overwrite */,
@@ -109,7 +118,7 @@ export async function downloadSemverFromGitHub(
     );
 
     return {
-      pathToFlow: path.join(destDir, 'flow'),
+      pathToFlow: path.join(destDir, BIN_NAME),
       flowVersion: version,
     };
   }
