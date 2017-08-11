@@ -21,19 +21,10 @@ import path from 'path';
 import semver from 'semver';
 import idx from 'idx';
 import which from 'nuclide-commons/which';
+import {BIN_NAME, BINS_DIR} from './constants';
 import {downloadSemverFromGitHub} from './githubSemverDownloader';
-import {getFlowDataDir, versionInfoForPath} from './utils';
+import {versionInfoForPath} from './utils';
 import {getLogger} from 'log4js';
-
-const BIN_NAME = process.platform === 'win32' ? 'flow.cmd' : 'flow';
-const BINS_DIR = path.join(getFlowDataDir(), 'bin');
-
-const flowConfigCache = new ConfigCache(['.flowconfig']);
-
-const FLOW_BIN_PATH =
-  process.platform === 'win32'
-    ? 'node_modules/.bin/flow.cmd'
-    : 'node_modules/.bin/flow';
 
 type FlowBinForPathOptions = {
   tryFlowBin?: boolean,
@@ -45,6 +36,9 @@ type FlowBinForPathOptions = {
   ) => Promise<?VersionInfo>,
   reporter?: Reporter,
 };
+
+const FLOW_BIN_PATH = path.join('node_modules', '.bin', BIN_NAME);
+const flowConfigCache = new ConfigCache(['.flowconfig']);
 
 export async function flowBinForPath(
   rootPath: string,
@@ -204,10 +198,16 @@ async function getFromDiskCache(semversion: string): Promise<?VersionInfo> {
   }
 
   const foundPath = path.join(BINS_DIR, foundVersion, BIN_NAME);
-  if (await fs.stat(foundPath)) {
-    return {
-      pathToFlow: foundPath,
-      flowVersion: foundVersion,
-    };
+  try {
+    if (await fs.stat(foundPath)) {
+      return {
+        pathToFlow: foundPath,
+        flowVersion: foundVersion,
+      };
+    }
+  } catch (e) {
+    return null;
   }
+
+  return null;
 }
