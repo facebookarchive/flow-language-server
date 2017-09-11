@@ -10,7 +10,6 @@
  * @format
  */
 
-import type {IConnection} from 'vscode-languageserver';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import URI from 'vscode-uri';
@@ -19,7 +18,6 @@ import TextDocuments from './TextDocuments';
 import {atomRangeToLSPRange, lspPositionToAtomPoint} from './utils/util';
 
 type HoverSupportParams = {
-  connection: IConnection,
   documents: TextDocuments,
   flow: FlowSingleProjectLanguageService,
 };
@@ -29,12 +27,10 @@ const NULL_HOVER = {
 };
 
 export default class HoverSupport {
-  connection: IConnection;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor({connection, documents, flow}: HoverSupportParams) {
-    this.connection = connection;
+  constructor({documents, flow}: HoverSupportParams) {
     this.documents = documents;
     this.flow = flow;
   }

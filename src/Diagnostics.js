@@ -10,14 +10,10 @@
  * @format
  */
 
-import type {
-  IConnection,
-  PublishDiagnosticsParams,
-} from 'vscode-languageserver';
+import type {PublishDiagnosticsParams} from 'vscode-languageserver';
 import type {FileDiagnosticMessage, FileDiagnosticMessages} from 'atom-ide-ui';
 
 import URI from 'vscode-uri';
-import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {atomRangeToLSPRange, flowSeverityToLSPSeverity} from './utils/util';
@@ -26,37 +22,22 @@ import {getLogger} from 'log4js';
 const logger = getLogger('Diagnostics');
 
 type DiagnosticsParams = {
-  connection: IConnection,
   flow: FlowSingleProjectLanguageService,
 };
 
 export default class Diagnostics {
-  connection: IConnection;
   flow: FlowSingleProjectLanguageService;
-  _disposable: UniversalDisposable = new UniversalDisposable();
 
-  constructor({connection, flow}: DiagnosticsParams) {
-    this.connection = connection;
+  constructor({flow}: DiagnosticsParams) {
     this.flow = flow;
-  }
-
-  dispose() {
-    this._disposable.dispose();
   }
 
   observe() {
     logger.info('Beginning to observe diagnostics');
 
-    this._disposable.add(
-      this.flow
-        .observeDiagnostics()
-        .map(diagnostics =>
-          diagnostics.map(fileDiagnosticUpdateToLSPDiagnostic),
-        )
-        .subscribe(diagnostics =>
-          diagnostics.forEach(this.connection.sendDiagnostics),
-        ),
-    );
+    return this.flow
+      .observeDiagnostics()
+      .map(diagnostics => diagnostics.map(fileDiagnosticUpdateToLSPDiagnostic));
   }
 }
 

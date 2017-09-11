@@ -10,7 +10,6 @@
  * @format
  */
 
-import type {IConnection} from 'vscode-languageserver';
 import type {Definition, IRange} from 'vscode-languageserver-types';
 import type {TextDocumentPositionParams} from 'vscode-languageserver/lib/protocol';
 import type TextDocuments from './TextDocuments';
@@ -23,18 +22,15 @@ import {atomPointToLSPPosition, lspPositionToAtomPoint} from './utils/util';
 const logger = getLogger('Definition');
 
 type DefinitionSupportParams = {
-  connection: IConnection,
   documents: TextDocuments,
   flow: FlowSingleProjectLanguageService,
 };
 
 export default class DefinitionSupport {
-  connection: IConnection;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor({connection, documents, flow}: DefinitionSupportParams) {
-    this.connection = connection;
+  constructor({documents, flow}: DefinitionSupportParams) {
     this.documents = documents;
     this.flow = flow;
   }

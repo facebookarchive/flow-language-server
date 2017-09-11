@@ -10,7 +10,6 @@
  * @format
  */
 
-import type {IConnection} from 'vscode-languageserver';
 import type {DocumentSymbolParams} from 'vscode-languageserver-types';
 import type {OutlineTree} from 'atom-ide-ui';
 
@@ -26,18 +25,15 @@ import {getLogger} from 'log4js';
 const logger = getLogger('Symbol');
 
 type SymbolSupportParams = {
-  connection: IConnection,
   documents: TextDocuments,
   flow: FlowSingleProjectLanguageService,
 };
 
 export default class SymbolSupport {
-  connection: IConnection;
   documents: TextDocuments;
   flow: FlowSingleProjectLanguageService;
 
-  constructor({connection, documents, flow}: SymbolSupportParams) {
-    this.connection = connection;
+  constructor({documents, flow}: SymbolSupportParams) {
     this.documents = documents;
     this.flow = flow;
   }
