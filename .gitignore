@@ -1,2 +1,8 @@
-/node_modules
-/lib
+*~
+/node_modules/
+/lib/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.yarn-integrity
+
