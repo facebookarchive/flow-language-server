@@ -24,6 +24,10 @@ type HoverSupportParams = {
   flow: FlowSingleProjectLanguageService,
 };
 
+const NULL_HOVER = {
+  contents: [],
+};
+
 export default class HoverSupport {
   connection: IConnection;
   documents: TextDocuments;
@@ -54,6 +58,6 @@ export default class HoverSupport {
       };
     }
 
-    return null;
+    return NULL_HOVER;
   }
 }
