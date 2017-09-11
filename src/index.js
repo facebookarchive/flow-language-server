@@ -73,9 +73,15 @@ export function createServer(
           }),
       );
 
-      const diagnostics = new Diagnostics({connection, flow});
-      disposable.add(diagnostics);
-      diagnostics.observe();
+      const diagnostics = new Diagnostics({flow});
+
+      disposable.add(
+        diagnostics
+          .observe()
+          .subscribe(diagnosticItems =>
+            diagnosticItems.forEach(connection.sendDiagnostics),
+          ),
+      );
 
       const completion = new Completion({
         clientCapabilities: capabilities,
@@ -94,7 +100,7 @@ export function createServer(
         // information on resolve, but need to respond to implement completion
       });
 
-      const definition = new Definition({connection, documents, flow});
+      const definition = new Definition({documents, flow});
       connection.onDefinition(docParams => {
         logger.debug(
           `definition requested for document ${docParams.textDocument.uri}`,
@@ -102,12 +108,12 @@ export function createServer(
         return definition.provideDefinition(docParams);
       });
 
-      const hover = new Hover({connection, documents, flow});
+      const hover = new Hover({documents, flow});
       connection.onHover(docParams => {
         return hover.provideHover(docParams);
       });
 
-      const symbols = new SymbolSupport({connection, documents, flow});
+      const symbols = new SymbolSupport({documents, flow});
       connection.onDocumentSymbol(symbolParams => {
         logger.debug(
           `symbols requested for document ${symbolParams.textDocument.uri}`,
