@@ -124,6 +124,7 @@ export function createServer(
           documentSymbolProvider: true,
           completionProvider: {
             resolveProvider: true,
+            triggerCharacters: ['.'],
           },
           hoverProvider: true,
         },
