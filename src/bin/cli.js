@@ -55,7 +55,7 @@ const cli = yargs
     default: false,
   })
   .option('live-diagnostics', {
-    describe: 'Experimental as-you-type live diagnostics',
+    describe: 'Highly experimental as-you-type live diagnostics',
     type: 'boolean',
     default: false,
   })
