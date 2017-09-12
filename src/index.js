@@ -31,6 +31,8 @@ import {flowBinForPath} from './flow-versions/flowBinForRoot';
 import {downloadSemverFromGitHub} from './flow-versions/githubSemverDownloader';
 import {versionInfoForPath} from './flow-versions/utils';
 
+const SUPPORTS_PERSISTENT_CONNECTION = process.platform !== 'win32';
+
 export function createServer(
   connection: IConnection,
   initialFlowOptions: FlowOptions,
@@ -74,14 +76,27 @@ export function createServer(
       );
 
       const diagnostics = new Diagnostics({flow});
+      async function diagnoseAndSend({document}) {
+        const diagnosticItems = await diagnostics.diagnoseOne(document);
+        diagnosticItems.forEach(connection.sendDiagnostics);
+      }
 
-      disposable.add(
-        diagnostics
-          .observe()
-          .subscribe(diagnosticItems =>
-            diagnosticItems.forEach(connection.sendDiagnostics),
-          ),
-      );
+      if (SUPPORTS_PERSISTENT_CONNECTION) {
+        disposable.add(
+          diagnostics
+            .observe()
+            .subscribe(diagnosticItems =>
+              diagnosticItems.forEach(connection.sendDiagnostics),
+            ),
+        );
+      } else {
+        documents.onDidSave(diagnoseAndSend);
+        documents.onDidOpen(diagnoseAndSend);
+      }
+
+      if (initialFlowOptions.liveDiagnostics) {
+        documents.onDidChangeContent(diagnoseAndSend);
+      }
 
       const completion = new Completion({
         clientCapabilities: capabilities,

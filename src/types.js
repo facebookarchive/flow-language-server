@@ -10,8 +10,9 @@
  * @format
  */
 
-export type FlowOptions = {
+export type FlowOptions = {|
   flowPath: string,
   tryFlowBin: boolean,
   autoDownloadFlow: boolean,
-};
+  liveDiagnostics: boolean,
+|};

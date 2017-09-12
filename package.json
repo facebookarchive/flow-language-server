@@ -13,7 +13,7 @@
     "lint": "eslint src/",
     "prepare": "yarn build",
     "test": "jest",
-    "watch": "yarn build -- --watch"
+    "watch": "yarn build --watch"
   },
   "bin": {
     "flow-language-server": "./lib/bin/cli.js"

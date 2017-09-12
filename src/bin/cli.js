@@ -54,6 +54,11 @@ const cli = yargs
     type: 'boolean',
     default: false,
   })
+  .option('live-diagnostics', {
+    describe: 'Experimental as-you-type live diagnostics',
+    type: 'boolean',
+    default: false,
+  })
   .option('no-auto-download', {
     describe: "Don't automatically download and manage flow binaries",
     type: 'boolean',
@@ -83,9 +88,10 @@ const connection = connectionFromOptions(options);
 initializeLogging(connection);
 
 const flowOptions: FlowOptions = {
-  flowPath: argv['flow-path'],
-  tryFlowBin: argv['try-flow-bin'],
   autoDownloadFlow: !argv['no-auto-download'],
+  flowPath: argv['flow-path'],
+  liveDiagnostics: argv['live-diagnostics'],
+  tryFlowBin: argv['try-flow-bin'],
 };
 createServer(connection, flowOptions).listen();
 
