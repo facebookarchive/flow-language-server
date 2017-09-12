@@ -213,19 +213,13 @@ export class FlowSingleProjectLanguageService {
    */
   async getDiagnostics(
     filePath: NuclideUri,
-    buffer?: simpleTextBuffer$TextBuffer,
+    buffer: simpleTextBuffer$TextBuffer,
   ): Promise<?DiagnosticProviderUpdate> {
     await this._forceRecheck(filePath);
 
     const options = {};
 
-    let args;
-    if (buffer == null) {
-      args = ['status', '--json', filePath];
-    } else {
-      args = ['check-contents', '--json', filePath];
-      options.input = buffer.getText();
-    }
+    const args = ['status', '--json', filePath];
 
     let result;
 

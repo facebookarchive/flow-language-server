@@ -76,10 +76,6 @@ export function createServer(
       );
 
       const diagnostics = new Diagnostics({flow});
-      async function diagnoseAndSend({document}) {
-        const diagnosticItems = await diagnostics.diagnoseOne(document);
-        diagnosticItems.forEach(connection.sendDiagnostics);
-      }
 
       if (SUPPORTS_PERSISTENT_CONNECTION) {
         disposable.add(
@@ -90,12 +86,15 @@ export function createServer(
             ),
         );
       } else {
+        // Flow doesn't support its persistent connection well on Windows,
+        // so fall back to monitoring open and save events to offer diagnostics
+        const diagnoseAndSend = async function({document}) {
+          const diagnosticItems = await diagnostics.diagnoseOne(document);
+          diagnosticItems.forEach(connection.sendDiagnostics);
+        };
+
         documents.onDidSave(diagnoseAndSend);
         documents.onDidOpen(diagnoseAndSend);
-      }
-
-      if (initialFlowOptions.liveDiagnostics) {
-        documents.onDidChangeContent(diagnoseAndSend);
       }
 
       const completion = new Completion({

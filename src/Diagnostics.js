@@ -41,15 +41,10 @@ export default class Diagnostics {
     const documentPath = URI.parse(document.uri).fsPath;
     invariant(documentPath != null);
 
-    let diagnostics;
-    if (document.isDirty) {
-      diagnostics = await this.flow.getDiagnostics(
-        documentPath,
-        document.buffer,
-      );
-    } else {
-      diagnostics = await this.flow.getDiagnostics(documentPath);
-    }
+    const diagnostics = await this.flow.getDiagnostics(
+      documentPath,
+      document.buffer,
+    );
 
     if (diagnostics == null || diagnostics.filePathToMessages == null) {
       return [];
