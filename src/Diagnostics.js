@@ -38,7 +38,7 @@ export default class Diagnostics {
     document: TextDocument,
   ): Promise<Array<PublishDiagnosticsParams>> {
     const documentPath = URI.parse(document.uri).fsPath;
-    if (documentPath == null) {
+    if (!documentPath) {
       return [];
     }
 
