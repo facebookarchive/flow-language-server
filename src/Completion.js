@@ -91,18 +91,31 @@ export default class Completion {
         items: items.map(atomCompletion => {
           const completion: CompletionItem = {
             label: atomCompletion.displayText,
+            kind: this.typeToKind(
+              atomCompletion.type,
+              atomCompletion.description,
+            ),
           };
 
           if (atomCompletion.description) {
             completion.documentation = atomCompletion.description;
           }
-          completion.detail =
-            atomCompletion.leftLabel || atomCompletion.description;
 
-          completion.kind = this.typeToKind(
-            atomCompletion.type,
-            atomCompletion.description,
-          );
+          if (completion.kind === CompletionItemKind.Function) {
+            const {
+              leftLabel: returnDetail,
+              rightLabel: parametersDetail,
+            } = atomCompletion;
+
+            completion._returnDetail = returnDetail;
+            completion._parametersDetail = parametersDetail;
+
+            if (returnDetail != null && parametersDetail != null) {
+              completion.detail = `${parametersDetail} => ${returnDetail}`;
+            }
+          } else {
+            completion.detail = atomCompletion.rightLabel;
+          }
 
           if (
             this.clientCapabilities &&
