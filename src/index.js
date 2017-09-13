@@ -31,6 +31,8 @@ import {flowBinForPath} from './flow-versions/flowBinForRoot';
 import {downloadSemverFromGitHub} from './flow-versions/githubSemverDownloader';
 import {versionInfoForPath} from './flow-versions/utils';
 
+const SUPPORTS_PERSISTENT_CONNECTION = process.platform !== 'win32';
+
 export function createServer(
   connection: IConnection,
   initialFlowOptions: FlowOptions,
@@ -75,13 +77,25 @@ export function createServer(
 
       const diagnostics = new Diagnostics({flow});
 
-      disposable.add(
-        diagnostics
-          .observe()
-          .subscribe(diagnosticItems =>
-            diagnosticItems.forEach(connection.sendDiagnostics),
-          ),
-      );
+      if (SUPPORTS_PERSISTENT_CONNECTION) {
+        disposable.add(
+          diagnostics
+            .observe()
+            .subscribe(diagnosticItems =>
+              diagnosticItems.forEach(connection.sendDiagnostics),
+            ),
+        );
+      } else {
+        // Flow doesn't support its persistent connection well on Windows,
+        // so fall back to monitoring open and save events to offer diagnostics
+        const diagnoseAndSend = async function({document}) {
+          const diagnosticItems = await diagnostics.diagnoseOne(document);
+          diagnosticItems.forEach(connection.sendDiagnostics);
+        };
+
+        documents.onDidSave(diagnoseAndSend);
+        documents.onDidOpen(diagnoseAndSend);
+      }
 
       const completion = new Completion({
         clientCapabilities: capabilities,

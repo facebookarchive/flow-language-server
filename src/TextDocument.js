@@ -10,8 +10,6 @@
  * @format
  */
 
-import type {NuclideUri} from 'nuclide-commons/nuclideUri';
-
 import invariant from 'assert';
 import SimpleTextBuffer from 'simple-text-buffer';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
@@ -30,7 +28,7 @@ export default class TextDocument {
   buffer: SimpleTextBuffer;
   isDirty: boolean = false;
   languageId: string;
-  uri: NuclideUri;
+  uri: string;
   version: number;
 
   _disposables: UniversalDisposable = new UniversalDisposable();
@@ -81,12 +79,12 @@ export default class TextDocument {
     );
   }
 
-  onDidStopChanging(handler: (document: TextDocument) => void): IDisposable {
+  onDidStopChanging(handler: (document: TextDocument) => mixed): IDisposable {
     this.assertNotDisposed();
     return this._emitter.on('didStopChanging', handler);
   }
 
-  onDidSave(handler: (document: TextDocument) => void): IDisposable {
+  onDidSave(handler: (document: TextDocument) => mixed): IDisposable {
     this.assertNotDisposed();
     return this._emitter.on('didSave', handler);
   }

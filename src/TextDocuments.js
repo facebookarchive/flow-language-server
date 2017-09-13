@@ -98,7 +98,7 @@ export default class TextDocuments {
     logger.debug(`TextDocuments: adding document ${uri}`);
     this._documents.set(uri, document);
     this._disposables.add(document);
-    this._emitter.emit('didOpenTextDocument', {textDocument: document});
+    this._emitter.emit('didOpen', {document});
     document.onDidStopChanging(this._handleDidStopChanging);
     document.onDidSave(this._handleDidSave);
   }
@@ -115,16 +115,16 @@ export default class TextDocuments {
     return Array.from(this._documents.values());
   }
 
-  onDidChangeContent(handler: (e: TextDocumentChangeEvent) => void): void {
+  onDidChangeContent(handler: (e: TextDocumentChangeEvent) => mixed): void {
     this._emitter.on('didChangeContent', handler);
   }
 
-  onDidSave(handler: (e: TextDocumentChangeEvent) => void): void {
+  onDidSave(handler: (e: TextDocumentChangeEvent) => mixed): void {
     this._emitter.on('didSave', handler);
   }
 
-  onDidOpenTextDocument(handler: (e: TextDocumentChangeEvent) => void): void {
-    this._emitter.on('didOpenTextDocument', handler);
+  onDidOpen(handler: (e: TextDocumentChangeEvent) => mixed): void {
+    this._emitter.on('didOpen', handler);
   }
 
   _handleDidStopChanging = (document: TextDocument) => {

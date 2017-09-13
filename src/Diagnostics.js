@@ -12,6 +12,9 @@
 
 import type {PublishDiagnosticsParams} from 'vscode-languageserver';
 import type {FileDiagnosticMessage, FileDiagnosticMessages} from 'atom-ide-ui';
+import type TextDocument from './TextDocument';
+import type {Observable} from 'rxjs';
+import invariant from 'invariant';
 
 import URI from 'vscode-uri';
 
@@ -32,7 +35,29 @@ export default class Diagnostics {
     this.flow = flow;
   }
 
-  observe() {
+  async diagnoseOne(
+    document: TextDocument,
+  ): Promise<Array<PublishDiagnosticsParams>> {
+    const documentPath = URI.parse(document.uri).fsPath;
+    invariant(documentPath != null);
+
+    const diagnostics = await this.flow.getDiagnostics(
+      documentPath,
+      document.buffer,
+    );
+
+    if (diagnostics == null || diagnostics.filePathToMessages == null) {
+      return [];
+    }
+
+    /* prettier-ignore */
+    return Array.from(diagnostics.filePathToMessages.entries())
+      .map(([filePath, messages]) => {
+        return fileDiagnosticUpdateToLSPDiagnostic({filePath, messages});
+      });
+  }
+
+  observe(): Observable<Array<PublishDiagnosticsParams>> {
     logger.info('Beginning to observe diagnostics');
 
     return this.flow
