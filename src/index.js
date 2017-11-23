@@ -15,6 +15,7 @@ import type {InitializeParams} from 'vscode-languageserver/lib/protocol';
 import type {VersionInfo} from './flow-versions/types';
 
 import nuclideUri from 'nuclide-commons/nuclideUri';
+import path from 'path';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import {IConnection} from 'vscode-languageserver';
 
@@ -50,7 +51,9 @@ export function createServer(
 
   connection.onInitialize(
     async ({capabilities, rootPath}: InitializeParams) => {
-      const root = rootPath || process.cwd();
+      // Flow trips on trailing slashes in root on Windows, `path.resolve` gets
+      // rid of it.
+      const root = path.resolve(rootPath || process.cwd());
 
       logger.debug('LSP connection initialized. Connecting to flow...');
 

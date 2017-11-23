@@ -30,7 +30,7 @@ import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
 
 import TextDocuments from './TextDocuments';
 import {JAVASCRIPT_WORD_REGEX} from './pkg/nuclide-flow-common';
-import {lspPositionToAtomPoint} from './utils/util';
+import {lspPositionToAtomPoint, fileURIToPath} from './utils/util';
 import {getLogger} from 'log4js';
 
 const logger = getLogger('Completion');
@@ -56,7 +56,7 @@ export default class Completion {
     textDocument,
     position,
   }: TextDocumentPositionParams): Promise<ICompletionList> {
-    const fileName = URI.parse(textDocument.uri).fsPath;
+    const fileName = fileURIToPath(textDocument.uri);
     const doc = this.documents.get(textDocument.uri);
     const point = lspPositionToAtomPoint(position);
     // $FlowFixMe: Add to defs

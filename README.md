@@ -11,8 +11,6 @@ It also requires [any supported operating system platform for Flow](https://gith
 ## Installation
 You most likely don't need to install `flow-language-server` directly if you want Flow support for your favorite editor; instead, [check out the integrations below](#editor-integrations).
 
-**Windows is not currently fully supported. This is being actively worked on.**
-
 ## How it works
 `flow-language-server` wraps the existing flow server binary the user has installed either locally in their project as the `flow-bin` module from npm, or globally as the `flow` binary. `flow-language-server` translates messages as they come in from Flow, sending them over JSON RPC via stdio, node-ipc, a socket, or a named pipe. It also, for the time being, automatically downloads and manages any missing flow binaries, though this probably is best suited to each individual editor integration.
 

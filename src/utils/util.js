@@ -35,8 +35,22 @@ const flowSeverityToLSPSeverityMap: {
   [FlowSeverity.Warning]: DiagnosticSeverity.Warning,
 };
 
+const FILE_PROTOCOL = 'file://';
+
 export function toURI(filePath: string): URI {
   return URI.file(filePath);
+}
+
+export function fileURIToPath(fileUri: string): string {
+  invariant(fileUri.startsWith(FILE_PROTOCOL), 'Must pass a valid file URI');
+
+  let localPath = fileUri.slice(FILE_PROTOCOL.length);
+  // On Windows remove the leading slash and convert to backslashes.
+  if (process.platform === 'win32') {
+    localPath = localPath.slice(1).replace(/\//g, '\\');
+  }
+
+  return localPath;
 }
 
 export function hasFlowPragma(content: string) {

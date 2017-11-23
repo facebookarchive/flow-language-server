@@ -37,7 +37,11 @@ type FlowBinForPathOptions = {
   reporter?: Reporter,
 };
 
-const FLOW_BIN_PATH = path.join('node_modules', '.bin', BIN_NAME);
+const FLOW_BIN_PATH = path.join(
+  'node_modules',
+  '.bin',
+  process.platform === 'win32' ? 'flow.cmd' : 'flow',
+);
 const flowConfigCache = new ConfigCache(['.flowconfig']);
 
 export async function flowBinForPath(

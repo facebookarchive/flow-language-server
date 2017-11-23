@@ -18,7 +18,11 @@ import type {Observable} from 'rxjs';
 import URI from 'vscode-uri';
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
-import {atomRangeToLSPRange, flowSeverityToLSPSeverity} from './utils/util';
+import {
+  atomRangeToLSPRange,
+  flowSeverityToLSPSeverity,
+  fileURIToPath,
+} from './utils/util';
 import {getLogger} from 'log4js';
 
 const logger = getLogger('Diagnostics');
@@ -37,7 +41,7 @@ export default class Diagnostics {
   async diagnoseOne(
     document: TextDocument,
   ): Promise<Array<PublishDiagnosticsParams>> {
-    const documentPath = URI.parse(document.uri).fsPath;
+    const documentPath = fileURIToPath(document.uri);
     if (!documentPath) {
       return [];
     }
