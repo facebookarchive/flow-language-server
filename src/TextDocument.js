@@ -96,13 +96,12 @@ export default class TextDocument {
     );
   }
 
-  save(version: number, text: ?string) {
+  save(text: ?string) {
     this.assertNotDisposed();
     if (text != null) {
       this.buffer.setText(text);
     }
 
-    this.version = version;
     this.isDirty = false;
     this._emitter.emit('didSave', this);
     logger.debug(`TextDocument: saved ${this.uri} and marked not dirty`);

@@ -90,7 +90,7 @@ export default class TextDocuments {
 
     connection.onDidSaveTextDocument((e: DidSaveTextDocumentParams) => {
       const document = this.get(e.textDocument.uri);
-      document.save(e.textDocument.version, e.text);
+      document.save(e.text);
     });
   }
 
