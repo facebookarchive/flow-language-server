@@ -12,8 +12,6 @@
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import URI from 'vscode-uri';
-
 import TextDocuments from './TextDocuments';
 import {
   atomRangeToLSPRange,

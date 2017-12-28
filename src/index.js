@@ -15,8 +15,8 @@ import type {InitializeParams} from 'vscode-languageserver/lib/protocol';
 import type {VersionInfo} from './flow-versions/types';
 
 import nuclideUri from 'nuclide-commons/nuclideUri';
-import path from 'path';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
+import path from 'path';
 import {IConnection} from 'vscode-languageserver';
 
 import Completion from './Completion';

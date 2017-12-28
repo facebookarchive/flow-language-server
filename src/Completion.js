@@ -21,7 +21,6 @@ import type {
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
 import {Range} from 'simple-text-buffer';
-import URI from 'vscode-uri';
 import {
   CompletionItemKind,
   InsertTextFormat,

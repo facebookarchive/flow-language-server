@@ -42,15 +42,21 @@ export function toURI(filePath: string): URI {
 }
 
 export function fileURIToPath(fileUri: string): string {
+  if (process.platform !== 'win32') {
+    return URI.parse(fileUri).fsPath;
+  }
+
+  // On Windows, vscode-uri converts drive paths to lowercase,
+  // which Flow doesn't like very much.
+  // We'll implement our own basic converter.
   invariant(fileUri.startsWith(FILE_PROTOCOL), 'Must pass a valid file URI');
 
   let localPath = fileUri.slice(FILE_PROTOCOL.length);
-  // On Windows remove the leading slash and convert to backslashes.
-  if (process.platform === 'win32') {
-    localPath = localPath.slice(1).replace(/\//g, '\\');
+  // Remove the leading slash and convert to backslashes.
+  if (localPath.startsWith('/')) {
+    localPath = localPath.substr(1);
   }
-
-  return localPath;
+  return localPath.replace(/\//g, '\\');
 }
 
 export function hasFlowPragma(content: string) {

@@ -14,7 +14,6 @@ import type {DocumentSymbolParams} from 'vscode-languageserver-types';
 import type {OutlineTree} from 'atom-ide-ui';
 
 import nullthrows from 'nullthrows';
-import URI from 'vscode-uri';
 import {SymbolKind, ISymbolInformation} from 'vscode-languageserver-types';
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
