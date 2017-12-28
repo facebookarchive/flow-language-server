@@ -14,12 +14,11 @@ import type {DocumentSymbolParams} from 'vscode-languageserver-types';
 import type {OutlineTree} from 'atom-ide-ui';
 
 import nullthrows from 'nullthrows';
-import URI from 'vscode-uri';
 import {SymbolKind, ISymbolInformation} from 'vscode-languageserver-types';
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import TextDocuments from './TextDocuments';
-import {atomPointToLSPPosition} from './utils/util';
+import {atomPointToLSPPosition, fileURIToPath} from './utils/util';
 import {getLogger} from 'log4js';
 
 const logger = getLogger('Symbol');
@@ -44,7 +43,7 @@ export default class SymbolSupport {
     logger.debug('document symbols requested');
     const {textDocument} = params;
 
-    const fileName = URI.parse(textDocument.uri).fsPath;
+    const fileName = fileURIToPath(textDocument.uri);
     const doc = this.documents.get(textDocument.uri);
 
     const outline = await this.flow.getOutline(fileName, doc.buffer);

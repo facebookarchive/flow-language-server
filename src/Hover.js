@@ -12,10 +12,12 @@
 
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import URI from 'vscode-uri';
-
 import TextDocuments from './TextDocuments';
-import {atomRangeToLSPRange, lspPositionToAtomPoint} from './utils/util';
+import {
+  atomRangeToLSPRange,
+  lspPositionToAtomPoint,
+  fileURIToPath,
+} from './utils/util';
 
 type HoverSupportParams = {
   documents: TextDocuments,
@@ -38,7 +40,7 @@ export default class HoverSupport {
   async provideHover(params: TextDocumentPositionParams): Promise<?Hover> {
     const {position, textDocument} = params;
 
-    const fileName = URI.parse(textDocument.uri).fsPath;
+    const fileName = fileURIToPath(textDocument.uri);
     const doc = this.documents.get(textDocument.uri);
 
     const typeHint = await this.flow.typeHint(

@@ -37,7 +37,6 @@ type FlowBinForPathOptions = {
   reporter?: Reporter,
 };
 
-const FLOW_BIN_PATH = path.join('node_modules', '.bin', BIN_NAME);
 const flowConfigCache = new ConfigCache(['.flowconfig']);
 
 export async function flowBinForPath(
@@ -57,10 +56,17 @@ export async function flowBinForPath(
   reporter.info(`Looking for a version of flow matching ${semversion}...`);
 
   if (tryFlowBin) {
-    const versionInfo = await versionInfoForPath(
+    let versionInfo = await versionInfoForPath(
       rootPath,
-      nuclideUri.join(rootPath, FLOW_BIN_PATH),
+      nuclideUri.join(rootPath, 'node_modules', '.bin', BIN_NAME),
     );
+    if (versionInfo == null && process.platform === 'win32') {
+      // In newer flow-bin versions, flow.cmd is used instead of flow.exe.
+      versionInfo = await versionInfoForPath(
+        rootPath,
+        nuclideUri.join(rootPath, 'node_modules', '.bin', 'flow.cmd'),
+      );
+    }
 
     reporter.info('version info', versionInfo);
     if (versionInfo) {
