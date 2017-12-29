@@ -15,13 +15,12 @@ import type {FileDiagnosticMessage, FileDiagnosticMessages} from 'atom-ide-ui';
 import type TextDocument from './TextDocument';
 import type {Observable} from 'rxjs';
 
-import URI from 'vscode-uri';
-
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {
   atomRangeToLSPRange,
   flowSeverityToLSPSeverity,
   fileURIToPath,
+  filePathToURI,
 } from './utils/util';
 import {getLogger} from 'log4js';
 
@@ -75,7 +74,7 @@ function fileDiagnosticUpdateToLSPDiagnostic(
   diagnostic: FileDiagnosticMessages,
 ): PublishDiagnosticsParams {
   return {
-    uri: URI.file(diagnostic.filePath).toString(),
+    uri: filePathToURI(diagnostic.filePath),
     diagnostics: diagnostic.messages
       .filter(
         // range and message text are required for LSP

@@ -37,8 +37,17 @@ const flowSeverityToLSPSeverityMap: {
 
 const FILE_PROTOCOL = 'file://';
 
-export function toURI(filePath: string): URI {
-  return URI.file(filePath);
+// On Windows, vscode-uri converts drive paths to lowercase,
+// which Flow doesn't like very much.
+// We'll implement our own basic converters `filePathToURI` and
+// `fileURIToPath`.
+
+export function filePathToURI(filePath: string): string {
+  if (process.platform !== 'win32') {
+    return URI.file(filePath).toString();
+  }
+
+  return encodeURI(FILE_PROTOCOL + '/' + filePath.replace(/\\/g, '/'));
 }
 
 export function fileURIToPath(fileUri: string): string {
@@ -46,9 +55,6 @@ export function fileURIToPath(fileUri: string): string {
     return URI.parse(fileUri).fsPath;
   }
 
-  // On Windows, vscode-uri converts drive paths to lowercase,
-  // which Flow doesn't like very much.
-  // We'll implement our own basic converter.
   invariant(fileUri.startsWith(FILE_PROTOCOL), 'Must pass a valid file URI');
 
   let localPath = fileUri.slice(FILE_PROTOCOL.length);
