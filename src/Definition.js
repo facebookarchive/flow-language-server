@@ -15,12 +15,12 @@ import type {TextDocumentPositionParams} from 'vscode-languageserver/lib/protoco
 import type TextDocuments from './TextDocuments';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 
-import URI from 'vscode-uri';
 import {getLogger} from 'log4js';
 import {
   atomPointToLSPPosition,
   lspPositionToAtomPoint,
   fileURIToPath,
+  filePathToURI,
 } from './utils/util';
 
 const logger = getLogger('Definition');
@@ -62,7 +62,7 @@ export default class DefinitionSupport {
         };
 
         return {
-          uri: URI.file(def.path).toString(),
+          uri: filePathToURI(def.path),
           range,
         };
       });
