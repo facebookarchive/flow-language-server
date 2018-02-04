@@ -18,6 +18,7 @@ import nuclideUri from 'nuclide-commons/nuclideUri';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
 import path from 'path';
 import {IConnection} from 'vscode-languageserver';
+import type {ICompletionItem} from 'vscode-languageserver-types';
 
 import Completion from './Completion';
 import Definition from './Definition';
@@ -112,9 +113,12 @@ export function createServer(
         return completion.provideCompletionItems(docParams);
       });
 
-      connection.onCompletionResolve(() => {
-        // for now, noop as we can't/don't need to provide any additional
-        // information on resolve, but need to respond to implement completion
+      connection.onCompletionResolve((item: ICompletionItem) => {
+        // for now, we return the item as is as we can't/don't need to provide
+        // any additional information on resolve, but need to respond to
+        // implement completion
+        logger.debug(`completionItem/resolve requested for item ${item.label}`);
+        return item;
       });
 
       const definition = new Definition({documents, flow});
