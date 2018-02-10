@@ -22,7 +22,7 @@ import semver from 'semver';
 import idx from 'idx';
 import which from 'nuclide-commons/which';
 import {BIN_NAME, BINS_DIR} from './constants';
-import {downloadSemverFromGitHub} from './githubSemverDownloader';
+import {githubSemverDownloader} from './githubSemverDownloader';
 import {versionInfoForPath} from './utils';
 import {getLogger} from 'log4js';
 
@@ -39,12 +39,12 @@ type FlowBinForPathOptions = {
 
 const flowConfigCache = new ConfigCache(['.flowconfig']);
 
-export async function flowBinForPath(
+export async function flowBinForRoot(
   rootPath: string,
   {
     tryFlowBin = false,
     autoDownloadFlow = true,
-    semverDownloader = downloadSemverFromGitHub,
+    semverDownloader = githubSemverDownloader,
     reporter = getLogger('flow-versions'),
   }: FlowBinForPathOptions,
 ): Promise<?VersionInfo> {

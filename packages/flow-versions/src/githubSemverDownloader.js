@@ -24,7 +24,7 @@ import {BIN_NAME} from './constants';
 const FLOW_RELEASES_ENDPOINT =
   'https://api.github.com/repos/facebook/flow/releases';
 
-export async function downloadSemverFromGitHub(
+export async function githubSemverDownloader(
   semversion: ?string,
   binsDir: string,
   reporter: Reporter,
@@ -80,7 +80,9 @@ export async function downloadSemverFromGitHub(
   }
 
   reporter.info(
-    `Found a match with version ${bestMatch.tag_name} on GitHub. Downloading...`,
+    `Found a match with version ${
+      bestMatch.tag_name
+    } on GitHub. Downloading...`,
   );
 
   let archiveResponse;
@@ -114,7 +116,9 @@ export async function downloadSemverFromGitHub(
     }
 
     reporter.info(
-      `Successfully downloaded and installed flow version ${bestMatch.tag_name} from GitHub`,
+      `Successfully downloaded and installed flow version ${
+        bestMatch.tag_name
+      } from GitHub`,
     );
 
     return {
