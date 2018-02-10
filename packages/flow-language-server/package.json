@@ -1,0 +1,38 @@
+{
+  "name": "flow-language-server",
+  "version": "0.2.5",
+  "main": "lib/index.js",
+  "license": "BSD-3-Clause",
+  "bin": {
+    "flow-language-server": "./lib/bin/cli.js"
+  },
+  "dependencies": {
+    "async-to-generator": "1.1.0",
+    "event-kit": "2.2.0",
+    "flow-versions": "file:../flow-versions",
+    "fuzzaldrin-plus": "0.4.1",
+    "idx": "^1.5.0",
+    "invariant": "2.2.2",
+    "log4js": "1.1.1",
+    "lru-cache": "4.0.2",
+    "nuclide-commons": "0.1.9",
+    "nullthrows": "1.0.0",
+    "rimraf": "2.5.4",
+    "rxjs": "5.3.1",
+    "semver": "5.3.0",
+    "shell-quote": "^1.6.0",
+    "simple-text-buffer": "9.2.11",
+    "temp": "0.8.3",
+    "through": "2.3.8",
+    "vscode-languageserver": "^3.3.0",
+    "vscode-uri": "^1.0.1",
+    "yargs": "^8.0.2"
+  },
+  "engines": {
+    "node": ">=6"
+  },
+  "files": [
+    "dirs.js",
+    "lib/"
+  ]
+}
