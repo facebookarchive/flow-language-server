@@ -25,8 +25,8 @@ Otherwise, `flow-language-server` can be installed globally from npm into the us
 
 ## Editor Integrations
 
-### [Flow for Atom IDE (ide-flow)](https://github.com/flowtype/ide-flow/)
-Developed in conjunction with flow-language-server, Flow for Atom IDE showcases all that the language server has to offer. Install it as `ide-flow` through Atom's package manager along with `atom-ide-ui`.
+### [Flow for Atom IDE (ide-flowtype)](https://github.com/flowtype/ide-flowtype/)
+Developed in conjunction with flow-language-server, Flow for Atom IDE showcases all that the language server has to offer. Install it as `ide-flowtype` through Atom's package manager along with `atom-ide-ui`.
 
 ### Neovim
 `flow-language-server` can be used with neovim:
