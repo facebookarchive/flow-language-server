@@ -1,15 +1,13 @@
 {
-  "name": "flow-language-server",
-  "version": "0.2.6-0.2.6-0.0",
+  "name": "flow-versions",
+  "version": "0.2.6",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
-  "bin": {
-    "flow-language-server": "./lib/bin/cli.js"
-  },
+  "repository": "https://github.com/flowtype/flow-language-server",
   "dependencies": {
     "async-to-generator": "1.1.0",
     "event-kit": "2.2.0",
-    "flow-versions": "0.2.6",
+    "flow-versions": "file:../flow-versions",
     "fuzzaldrin-plus": "0.4.1",
     "idx": "^1.5.0",
     "invariant": "2.2.2",
