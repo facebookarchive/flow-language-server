@@ -1,8 +1,9 @@
 *~
 /node_modules/
 /packages/*/node_modules/
-/lib/
+/packages/*/lib/
 npm-debug.log*
 yarn-debug.log*
+lerna-debug.log*
 yarn-error.log*
 .yarn-integrity
