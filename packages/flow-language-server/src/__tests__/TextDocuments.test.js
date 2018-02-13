@@ -23,6 +23,7 @@ describe('TextDocuments', () => {
     docs = new TextDocuments();
     // $FlowFixMe
     connection = new ConnectionMock();
+    // $FlowFixMe
     docs.listen(connection);
   });
 

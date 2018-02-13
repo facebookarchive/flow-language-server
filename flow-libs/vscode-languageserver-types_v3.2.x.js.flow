@@ -11,7 +11,7 @@ declare module 'vscode-languageserver-types' {
     /**
      * Line position in a document (zero-based).
      */
-    line: number,
+    line: number;
 
     /**
      * Character offset on a line in a document (zero-based). Assuming that the line is
@@ -25,7 +25,7 @@ declare module 'vscode-languageserver-types' {
      * (the 𐐀 is encoded using two code units). The character offset is therefore encoding
      * independent.
      */
-    character: number,
+    character: number;
   }
 
   /**
@@ -52,12 +52,12 @@ declare module 'vscode-languageserver-types' {
     /**
      * The range's start position
      */
-    start: IPosition,
+    start: IPosition;
 
     /**
      * The range's end position
      */
-    end: IPosition,
+    end: IPosition;
   }
 
   declare var Range: {
@@ -67,8 +67,18 @@ declare module 'vscode-languageserver-types' {
      * @param end The range's end position.
      */
     create(start: IPosition, end: IPosition): IRange,
-    create(startLine: number, startCharacter: number, endLine: number, endCharacter: number): IRange,
-    create(one: Position | number, two: Position | number, three?: number, four?: number): IRange,
+    create(
+      startLine: number,
+      startCharacter: number,
+      endLine: number,
+      endCharacter: number,
+    ): IRange,
+    create(
+      one: Position | number,
+      two: Position | number,
+      three?: number,
+      four?: number,
+    ): IRange,
 
     /**
      * Checks whether the given liternal conforms to the [Position](#Position) interface.
@@ -81,20 +91,20 @@ declare module 'vscode-languageserver-types' {
    * inside a text file.
    */
   declare interface ILocation {
-    uri: string,
-    range: IRange,
+    uri: string;
+    range: IRange;
   }
 
   /**
-	 * Creates a Location literal.
-	 * @param uri The location's uri.
-	 * @param range The location's range.
-	 */
+   * Creates a Location literal.
+   * @param uri The location's uri.
+   * @param range The location's range.
+   */
   declare function Location$create(uri: string, range: IRange): ILocation;
 
   /**
-	 * Checks whether the given literal conforms to the [Location](#Location) interface.
-	 */
+   * Checks whether the given literal conforms to the [Location](#Location) interface.
+   */
   declare function Location$is(value: any): boolean;
 
   declare var Location: {
@@ -119,45 +129,45 @@ declare module 'vscode-languageserver-types' {
     /**
      * The range at which the message applies
      */
-    range: IRange,
+    range: IRange;
 
     /**
      * The diagnostic's severity. Can be omitted. If omitted it is up to the
      * client to interpret diagnostics as error, warning, info or hint.
      */
-    severity?: DiagnosticSeverityType,
+    severity?: DiagnosticSeverityType;
 
     /**
      * The diagnostic's code. Can be omitted.
      */
-    code?: number | string,
+    code?: number | string;
 
     /**
      * A human-readable string describing the source of this
      * diagnostic, e.g. 'typescript' or 'super lint'.
      */
-    source?: string,
+    source?: string;
 
     /**
      * The diagnostic's message.
      */
-    message: string,
+    message: string;
   }
 
   /**
-	 * Creates a new Diagnostic literal.
-	 */
+   * Creates a new Diagnostic literal.
+   */
   declare function Diagnostic$create(
     range: IRange,
     message: string,
     severity?: DiagnosticSeverityType,
     code?: number | string,
-    source?: string
+    source?: string,
   ): IDiagnostic;
 
   /**
-	 * Checks whether the given literal conforms to the [Diagnostic](#Diagnostic) interface.
-	 */
+   * Checks whether the given literal conforms to the [Diagnostic](#Diagnostic) interface.
+   */
   declare function Diagnostic$is(value: any): boolean;
 
   declare var Diagnostic: {
@@ -175,28 +185,32 @@ declare module 'vscode-languageserver-types' {
     /**
      * Title of the command, like `save`.
      */
-    title: string,
+    title: string;
 
     /**
      * The identifier of the actual command handler.
      */
-    command: string,
+    command: string;
 
     /**
      * Arguments that the command handler should be
      * invoked with.
      */
-    arguments?: any[],
+    arguments?: any[];
   }
 
   /**
-	 * Creates a new Command literal.
-	 */
-  declare function Command$create(title: string, command: string, ...args: Array<any>): ICommand;
+   * Creates a new Command literal.
+   */
+  declare function Command$create(
+    title: string,
+    command: string,
+    ...args: Array<any>
+  ): ICommand;
 
   /**
-	 * Checks whether the given literal conforms to the [Command](#Command) interface.
-	 */
+   * Checks whether the given literal conforms to the [Command](#Command) interface.
+   */
   declare function Command$is(value: any): boolean;
 
   declare var Command: {
@@ -212,13 +226,13 @@ declare module 'vscode-languageserver-types' {
      * The range of the text document to be manipulated. To insert
      * text into a document create a range where start === end.
      */
-    range: IRange,
+    range: IRange;
 
     /**
      * The string to be inserted. For delete operations use an
      * empty string.
      */
-    newText: string,
+    newText: string;
   }
 
   /**
@@ -261,25 +275,24 @@ declare module 'vscode-languageserver-types' {
   } & ITextDocumentIdentifier;
 
   /**
-	 * Creates a new VersionedTextDocumentIdentifier literal.
-	 * @param uri The document's uri.
-	 * @param uri The document's text.
-	 */
+   * Creates a new VersionedTextDocumentIdentifier literal.
+   * @param uri The document's uri.
+   * @param uri The document's text.
+   */
   declare function VersionedTextDocumentIdentifier$create(
     uri: string,
-    version: number
+    version: number,
   ): IVersionedTextDocumentIdentifier;
 
   /**
-	 * Checks whether the given literal conforms to the [VersionedTextDocumentIdentifier](#VersionedTextDocumentIdentifier) interface.
-	 */
+   * Checks whether the given literal conforms to the [VersionedTextDocumentIdentifier](#VersionedTextDocumentIdentifier) interface.
+   */
   declare function VersionedTextDocumentIdentifier$is(value: any): boolean;
 
   declare var VersionedTextDocumentIdentifier: {
     create: typeof VersionedTextDocumentIdentifier$create,
     is: typeof VersionedTextDocumentIdentifier$is,
   };
-
 
   /**
    * Describes textual changes on a text document.
@@ -288,17 +301,17 @@ declare module 'vscode-languageserver-types' {
     /**
      * The text document to change.
      */
-    textDocument: IVersionedTextDocumentIdentifier,
+    textDocument: IVersionedTextDocumentIdentifier;
 
     /**
      * The edits to be applied.
      */
-    edits: Array<ITextEdit>,
+    edits: Array<ITextEdit>;
   }
 
   /**
-	 * Creates a new `TextDocumentEdit`
-	 */
+   * Creates a new `TextDocumentEdit`
+   */
   declare function TextDocumentEdit$create(
     textDocument: IVersionedTextDocumentIdentifier,
     edits: Array<ITextEdit>,
@@ -322,14 +335,14 @@ declare module 'vscode-languageserver-types' {
      */
     changes?: {
       [uri: string]: Array<ITextEdit>,
-    },
+    };
 
     /**
      * An array of `TextDocumentEdit`s to express changes to specific a specific
      * version of a text document. Whether a client supports versioned document
      * edits is expressed via `WorkspaceClientCapabilites.versionedWorkspaceEdit`.
      */
-    documentChanges?: Array<ITextDocumentEdit>,
+    documentChanges?: Array<ITextDocumentEdit>;
   }
 
   /**
@@ -340,51 +353,51 @@ declare module 'vscode-languageserver-types' {
      * Gets all text edits for this change.
      * @return  An array of text edits.
      */
-    all(): Array<TextEdit>,
+    all(): Array<TextEdit>;
 
     /**
      * Clears the edits for this change.
      */
-    clear(): void,
+    clear(): void;
 
     /**
      * Adds a text edit.
      * @param edit the text edit to add.
      */
-    add(edit: TextEdit): void,
+    add(edit: TextEdit): void;
 
     /**
      * Insert the given text at the given position.
      * @param position A position.
      * @param newText A string.
      */
-    insert(position: IPosition, newText: string): void,
+    insert(position: IPosition, newText: string): void;
 
     /**
      * Replace the given range with given text for the given resource.
      * @param range A range.
      * @param newText A string.
      */
-    replace(range: IRange, newText: string): void,
+    replace(range: IRange, newText: string): void;
 
     /**
      * Delete the text at the given range.
      * @param range A range.
      */
-    delete(range: IRange): void,
+    delete(range: IRange): void;
   }
 
   /**
    * A workspace change helps constructing changes to a workspace.
    */
   declare class WorkspaceChange {
-    constructor(workspaceEdit?: WorkspaceEdit): this,
+    constructor(workspaceEdit?: WorkspaceEdit): this;
 
     /**
      * Returns the underlying [WorkspaceEdit](#WorkspaceEdit) literal
      * use to be returned from a workspace edit operation like rename.
      */
-    edit: WorkspaceEdit,
+    edit: WorkspaceEdit;
 
     /**
      * Returns the [TextEditChange](#TextEditChange) to manage text edits
@@ -392,8 +405,8 @@ declare module 'vscode-languageserver-types' {
      */
     getTextEditChange(
       textDocument: IVersionedTextDocumentIdentifier,
-    ): TextEditChange,
-    getTextEditChange(uri: string): TextEditChange,
+    ): TextEditChange;
+    getTextEditChange(uri: string): TextEditChange;
   }
 
   /**
@@ -403,18 +416,20 @@ declare module 'vscode-languageserver-types' {
     /**
      * The text document's uri.
      */
-    uri: string,
+    uri: string;
   }
 
   /**
-	 * Creates a new TextDocumentIdentifier literal.
-	 * @param uri The document's uri.
-	 */
-  declare function TextDocumentIdentifier$create(uri: string): ITextDocumentIdentifier;
+   * Creates a new TextDocumentIdentifier literal.
+   * @param uri The document's uri.
+   */
+  declare function TextDocumentIdentifier$create(
+    uri: string,
+  ): ITextDocumentIdentifier;
 
   /**
-	 * Checks whether the given literal conforms to the [TextDocumentIdentifier](#TextDocumentIdentifier) interface.
-	 */
+   * Checks whether the given literal conforms to the [TextDocumentIdentifier](#TextDocumentIdentifier) interface.
+   */
   declare function TextDocumentIdentifier$is(value: any): boolean;
 
   declare var TextDocumentIdentifier: {
@@ -430,32 +445,32 @@ declare module 'vscode-languageserver-types' {
     /**
      * The text document's uri.
      */
-    uri: string,
+    uri: string;
 
     /**
      * The text document's language identifier
      */
-    languageId: string,
+    languageId: string;
 
     /**
      * The version number of this document (it will strictly increase after each
      * change, including undo/redo).
      */
-    version: number,
+    version: number;
 
     /**
      * The content of the opened text document.
      */
-    text: string,
+    text: string;
   }
 
   /**
-	 * Creates a new TextDocumentItem literal.
-	 * @param uri The document's uri.
-	 * @param uri The document's language identifier.
-	 * @param uri The document's version number.
-	 * @param uri The document's text.
-	 */
+   * Creates a new TextDocumentItem literal.
+   * @param uri The document's uri.
+   * @param uri The document's language identifier.
+   * @param uri The document's version number.
+   * @param uri The document's text.
+   */
   declare function TextDocumentItem$create(
     uri: string,
     languageId: string,
@@ -464,8 +479,8 @@ declare module 'vscode-languageserver-types' {
   ): ITextDocumentItem;
 
   /**
-	 * Checks whether the given literal conforms to the [TextDocumentItem](#TextDocumentItem) interface.
-	 */
+   * Checks whether the given literal conforms to the [TextDocumentItem](#TextDocumentItem) interface.
+   */
   declare function TextDocumentItem$is(value: any): boolean;
 
   declare var TextDocumentItem: {
@@ -531,88 +546,86 @@ declare module 'vscode-languageserver-types' {
      * also the text that is inserted when selecting
      * this completion.
      */
-    label: string,
+    label: string;
 
     /**
      * The kind of this completion item. Based of the kind
      * an icon is chosen by the editor.
      */
-    kind?: CompletionItemKindType,
+    kind?: CompletionItemKindType;
 
     /**
      * A human-readable string with additional information
      * about this item, like type or symbol information.
      */
-    detail?: string,
+    detail?: string;
 
     /**
      * A human-readable string that represents a doc-comment.
      */
-    documentation?: string,
+    documentation?: string;
 
     /**
      * A string that shoud be used when comparing this item
      * with other items. When `falsy` the [label](#CompletionItem.label)
      * is used.
      */
-    sortText?: string,
+    sortText?: string;
 
     /**
      * A string that should be used when filtering a set of
      * completion items. When `falsy` the [label](#CompletionItem.label)
      * is used.
      */
-    filterText?: string,
+    filterText?: string;
 
     /**
      * A string that should be inserted a document when selecting
      * this completion. When `falsy` the [label](#CompletionItem.label)
      * is used.
      */
-    insertText?: string,
+    insertText?: string;
 
     /**
      * The format of the insert text. The format applies to both the `insertText` property
      * and the `newText` property of a provided `textEdit`.
      */
-    insertTextFormat?: InsertTextFormatType,
+    insertTextFormat?: InsertTextFormatType;
 
     /**
      * An [edit](#TextEdit) which is applied to a document when selecting
      * this completion. When an edit is provided the value of
      * [insertText](#CompletionItem.insertText) and [range](#CompletionItem.range) is ignored.
      */
-    textEdit?: TextEdit,
+    textEdit?: TextEdit;
 
     /**
      * An optional array of additional [text edits](#TextEdit) that are applied when
      * selecting this completion. Edits must not overlap with the main [edit](#CompletionItem.textEdit)
      * nor with themselves.
      */
-    additionalTextEdits?: TextEdit[],
+    additionalTextEdits?: TextEdit[];
 
     /**
      * An optional [command](#Command) that is executed after inserting this completion. Note that
      * additional modifications to the current document should be described with the
      * [additionalTextEdits](#CompletionItem.additionalTextEdits)-property.
      */
-    command?: ICommand,
+    command?: ICommand;
 
     /**
      * An data entry field that is preserved on a completion item between
      * a [CompletionRequest](#CompletionRequest) and a [CompletionResolveRequest]
      *(#CompletionResolveRequest)
      */
-    data?: any,
+    data?: any;
   }
 
   /**
    * The CompletionItem namespace provides functions to deal with
    * completion items.
    */
-  declare function CompletionItem$create(
-    label: string
-  ): ICompletionItem;
+  declare function CompletionItem$create(label: string): ICompletionItem;
 
   declare var CompletionItem: {
     create: typeof CompletionItem$create,
@@ -626,20 +639,20 @@ declare module 'vscode-languageserver-types' {
     /**
      * This list it not complete. Further typing results in recomputing this list.
      */
-    isIncomplete: boolean,
+    isIncomplete: boolean;
 
     /**
      * The completion items.
      */
-    items: CompletionItem[],
+    items: CompletionItem[];
   }
 
   /**
-	 * Creates a new completion list.
-	 *
-	 * @param items The completion items.
-	 * @param isIncomplete The list is not complete.
-	 */
+   * Creates a new completion list.
+   *
+   * @param items The completion items.
+   * @param isIncomplete The list is not complete.
+   */
   declare function CompletionList$create(
     items?: Array<ICompletionItem>,
     isIncomplete?: boolean,
@@ -682,12 +695,12 @@ declare module 'vscode-languageserver-types' {
     /**
      * The hover's content
      */
-    contents: IMarkedString | IMarkedString[],
+    contents: IMarkedString | IMarkedString[];
 
     /**
      * An optional range
      */
-    range?: IRange,
+    range?: IRange;
   }
 
   declare var MarkedString: {
@@ -703,24 +716,24 @@ declare module 'vscode-languageserver-types' {
      * The label of this signature. Will be shown in
      * the UI.
      */
-    label: string,
+    label: string;
 
     /**
      * The human-readable doc-comment of this signature. Will be shown
      * in the UI but can be omitted.
      */
-    documentation?: string,
+    documentation?: string;
   }
 
   /**
-	 * Creates a new parameter information literal.
-	 *
-	 * @param label A label string.
-	 * @param documentation A doc string.
-	 */
+   * Creates a new parameter information literal.
+   *
+   * @param label A label string.
+   * @param documentation A doc string.
+   */
   declare function ParameterInformation$create(
     label: string,
-    documentation?: string
+    documentation?: string,
   ): IParameterInformation;
 
   declare var ParameterInformation: {
@@ -737,18 +750,18 @@ declare module 'vscode-languageserver-types' {
      * The label of this signature. Will be shown in
      * the UI.
      */
-    label: string,
+    label: string;
 
     /**
      * The human-readable doc-comment of this signature. Will be shown
      * in the UI but can be omitted.
      */
-    documentation?: string,
+    documentation?: string;
 
     /**
      * The parameters of this signature.
      */
-    parameters?: IParameterInformation[],
+    parameters?: IParameterInformation[];
   }
 
   /**
@@ -775,17 +788,17 @@ declare module 'vscode-languageserver-types' {
     /**
      * One or more signatures.
      */
-    signatures: Array<ISignatureInformation>,
+    signatures: Array<ISignatureInformation>;
 
     /**
      * The active signature.
      */
-    activeSignature: number,
+    activeSignature: number;
 
     /**
      * The active parameter of the active signature.
      */
-    activeParameter: number,
+    activeParameter: number;
   }
 
   /**
@@ -801,16 +814,16 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface ReferenceContext {
     /**
-       * Include the declaration of the current symbol.
-       */
-    includeDeclaration: boolean,
+     * Include the declaration of the current symbol.
+     */
+    includeDeclaration: boolean;
   }
 
   declare var DocumentHighlightKind: {
-    Text: 1;
-    Read: 2;
-    Write: 3;
-  }
+    Text: 1,
+    Read: 2,
+    Write: 3,
+  };
 
   declare type DocumentHighlightKindType = 1 | 2 | 3;
   /**
@@ -820,23 +833,23 @@ declare module 'vscode-languageserver-types' {
    */
   declare interface IDocumentHighlight {
     /**
-       * The range this highlight applies to.
-       */
-    range: IRange,
+     * The range this highlight applies to.
+     */
+    range: IRange;
 
     /**
      * The highlight kind, default is [text](#DocumentHighlightKind.Text).
      */
-    kind?: DocumentHighlightKindType,
+    kind?: DocumentHighlightKindType;
   }
 
   /**
-	 * Create a DocumentHighlight object.
-	 * @param range The range the highlight applies to.
-	 */
+   * Create a DocumentHighlight object.
+   * @param range The range the highlight applies to.
+   */
   declare function DocumentHighlight$create(
     range: IRange,
-    kind?: DocumentHighlightKindType
+    kind?: DocumentHighlightKindType,
   ): IDocumentHighlight;
 
   declare var DocumentHighlight: {
@@ -862,7 +875,7 @@ declare module 'vscode-languageserver-types' {
     Number: 16,
     Boolean: 17,
     Array: 18,
-  }
+  };
 
   declare type SymbolKindType =
     | 1
@@ -892,33 +905,33 @@ declare module 'vscode-languageserver-types' {
     /**
      * The name of this symbol.
      */
-    name: string,
+    name: string;
 
     /**
      * The kind of this symbol.
      */
-    kind: SymbolKindType,
+    kind: SymbolKindType;
 
     /**
      * The location of this symbol.
      */
-    location: ILocation,
+    location: ILocation;
 
     /**
      * The name of the symbol containing this symbol.
      */
-    containerName?: string,
+    containerName?: string;
   }
 
   /**
-	 * Creates a new symbol information literal.
-	 *
-	 * @param name The name of the symbol.
-	 * @param kind The kind of the symbol.
-	 * @param range The range of the location of the symbol.
-	 * @param uri The resource of the location of symbol, defaults to the current document.
-	 * @param containerName The name of the symbol containg the symbol.
-	 */
+   * Creates a new symbol information literal.
+   *
+   * @param name The name of the symbol.
+   * @param kind The kind of the symbol.
+   * @param range The range of the location of the symbol.
+   * @param uri The resource of the location of symbol, defaults to the current document.
+   * @param containerName The name of the symbol containg the symbol.
+   */
   declare function SymbolInformation$create(
     name: string,
     kind: SymbolKindType,
@@ -936,9 +949,9 @@ declare module 'vscode-languageserver-types' {
    */
   declare export interface DocumentSymbolParams {
     /**
-       * The text document.
-       */
-    textDocument: TextDocumentIdentifier,
+     * The text document.
+     */
+    textDocument: TextDocumentIdentifier;
   }
 
   /**
@@ -948,7 +961,7 @@ declare module 'vscode-languageserver-types' {
     /**
      * A non-empty query string
      */
-    query: string,
+    query: string;
   }
 
   /**
@@ -959,17 +972,19 @@ declare module 'vscode-languageserver-types' {
     /**
      * An array of diagnostics.
      */
-    diagnostics: Diagnostic[],
+    diagnostics: Array<IDiagnostic>;
   }
 
   /**
-	 * Creates a new CodeActionContext literal.
-	 */
-  declare function CodeActionContext$create(diagnostics: Array<Diagnostic>): ICodeActionContext;
+   * Creates a new CodeActionContext literal.
+   */
+  declare function CodeActionContext$create(
+    diagnostics: Array<IDiagnostic>,
+  ): ICodeActionContext;
 
   /**
-	 * Checks whether the given literal conforms to the [CodeActionContext](#CodeActionContext) interface.
-	 */
+   * Checks whether the given literal conforms to the [CodeActionContext](#CodeActionContext) interface.
+   */
   declare function CodeActionContext$is(value: any): boolean;
 
   declare var CodeActionContext: {
@@ -988,45 +1003,45 @@ declare module 'vscode-languageserver-types' {
     /**
      * The range in which this code lens is valid. Should only span a single line.
      */
-    range: IRange,
+    range: IRange;
 
     /**
      * The command this code lens represents.
      */
-    command?: ICommand,
+    command?: ICommand;
 
     /**
      * An data entry field that is preserved on a code lens item between
      * a [CodeLensRequest](#CodeLensRequest) and a [CodeLensResolveRequest]
      * (#CodeLensResolveRequest)
      */
-    data?: any,
+    data?: any;
   }
 
   /**
-	 * Creates a new CodeLens literal.
-	 */
+   * Creates a new CodeLens literal.
+   */
   declare function CodeLens$create(range: IRange, data?: any): ICodeLens;
 
   /**
-	 * Checks whether the given literal conforms to the [CodeLens](#CodeLens) interface.
-	 */
+   * Checks whether the given literal conforms to the [CodeLens](#CodeLens) interface.
+   */
   declare function CodeLens$is(value: any): boolean;
 
   /**
    * Value-object describing what options formatting should use.
    */
   declare interface IFormattingOptions {
-    [key: string]: boolean | number | string,
+    [key: string]: boolean | number | string;
     /**
      * Size of a tab in spaces.
      */
-    tabSize: number,
+    tabSize: number;
 
     /**
      * Prefer spaces over tabs.
      */
-    insertSpaces: boolean,
+    insertSpaces: boolean;
   }
 
   declare var CodeLens: {
@@ -1035,16 +1050,16 @@ declare module 'vscode-languageserver-types' {
   };
 
   /**
-	 * Creates a new FormattingOptions literal.
-	 */
+   * Creates a new FormattingOptions literal.
+   */
   declare function FormattingOptions$create(
     tabSize: number,
-    insertSpaces: boolean
+    insertSpaces: boolean,
   ): IFormattingOptions;
 
   /**
-	 * Checks whether the given literal conforms to the [FormattingOptions](#FormattingOptions) interface.
-	 */
+   * Checks whether the given literal conforms to the [FormattingOptions](#FormattingOptions) interface.
+   */
   declare function FormattingOptions$is(value: any): boolean;
 
   declare var FormattingOptions: {
@@ -1060,10 +1075,7 @@ declare module 'vscode-languageserver-types' {
     /**
      * Creates a new DocumentLink literal.
      */
-    static create(
-      range: IRange,
-      target?: string
-    ): DocumentLink;
+    static create(range: IRange, target?: string): DocumentLink;
 
     /**
      * Checks whether the given literal conforms to the [DocumentLink](#DocumentLink) interface.
@@ -1073,12 +1085,12 @@ declare module 'vscode-languageserver-types' {
     /**
      * The range this link applies to.
      */
-    range: IRange,
+    range: IRange;
 
     /**
      * The uri this link points to.
      */
-    target: string,
+    target: string;
   }
 
   declare var EOL: ['\n', '\r\n', '\r'];
@@ -1092,34 +1104,34 @@ declare module 'vscode-languageserver-types' {
      * represent files on disk. However, some documents may have other schemes indicating that they are not
      * available on disk.
      * @readonly
-    */
-    uri: string,
+     */
+    uri: string;
 
     /**
      * The identifier of the language associated with this document.
      * @readonly
      */
-    languageId: string,
+    languageId: string;
 
     /**
      * The version number of this document (it will strictly increase after each
      * change, including undo/redo).
      * @readonly
      */
-    version: number,
+    version: number;
 
     /**
      * Get the text of this document.
      * @return  The text of this document.
      */
-    getText(): string,
+    getText(): string;
 
     /**
      * Converts a zero-based offset to a position.
      * @param offset A zero-based offset.
      * @return  A valid [position](#Position).
      */
-    positionAt(offset: number): IPosition,
+    positionAt(offset: number): IPosition;
 
     /**
      * Converts the position to a zero-based offset.
@@ -1127,32 +1139,32 @@ declare module 'vscode-languageserver-types' {
      * The position will be [adjusted](#TextDocument.validatePosition).
      * @param position A position.
      * @return  A valid zero-based offset.
-    */
-    offsetAt(position: IPosition): number,
+     */
+    offsetAt(position: IPosition): number;
 
     /**
-           * The number of lines in this document.
-           * @readonly
-           */
-    lineCount: number,
+     * The number of lines in this document.
+     * @readonly
+     */
+    lineCount: number;
   }
 
   /**
-	 * Creates a new ITextDocument literal from the given uri and content.
-	 * @param uri The document's uri.
-	 * @param languageId  The document's language Id.
-	 * @param content The document's content.
-	 */
+   * Creates a new ITextDocument literal from the given uri and content.
+   * @param uri The document's uri.
+   * @param languageId  The document's language Id.
+   * @param content The document's content.
+   */
   declare function TextDocument$create(
     uri: string,
     languageId: string,
     version: number,
-    content: string
+    content: string,
   ): ITextDocument;
 
   /**
-	 * Checks whether the given literal conforms to the [ITextDocument](#ITextDocument) interface.
-	 */
+   * Checks whether the given literal conforms to the [ITextDocument](#ITextDocument) interface.
+   */
   declare function TextDocument$is(value: any): boolean;
 
   declare var TextDocument: {
@@ -1168,17 +1180,17 @@ declare module 'vscode-languageserver-types' {
     /**
      * The range of the document that changed.
      */
-    range?: IRange,
+    range?: IRange;
 
     /**
      * The length of the range that got replaced.
      */
-    rangeLength?: number,
+    rangeLength?: number;
 
     /**
      * The new text of the document.
      */
-    text: string,
+    text: string;
   }
 
   /**
@@ -1188,25 +1200,25 @@ declare module 'vscode-languageserver-types' {
     /**
      * The document that has changed.
      */
-    document: ITextDocument,
+    document: ITextDocument;
   }
 
   declare var TextDocumentSaveReason: {
-     Manual: 1;
-     AfterDelay: 2;
-     FocusOut: 3;
-  }
+    Manual: 1,
+    AfterDelay: 2,
+    FocusOut: 3,
+  };
   declare type TextDocumentSaveReasonType = 1 | 2 | 3;
 
   declare interface TextDocumentWillSaveEvent {
     /**
      * The document that will be saved
      */
-    document: ITextDocument,
+    document: ITextDocument;
 
     /**
      * The reason why save was triggered.
      */
-    reason: TextDocumentSaveReasonType,
+    reason: TextDocumentSaveReasonType;
   }
 }

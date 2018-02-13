@@ -57,6 +57,10 @@ import type {
   WorkspaceSymbolParams,
 } from 'vscode-languageserver-types';
 
+type Disposable = {
+  dispose(): void,
+};
+
 declare module 'vscode-languageserver' {
   declare var uriToFilePath: typeof undefined;
 
@@ -85,31 +89,31 @@ declare module 'vscode-languageserver' {
     /**
      * Create a new text document manager.
      */
-    constructor(): this,
+    constructor(): this;
 
     /**
      * Returns the [TextDocumentSyncKind](#TextDocumentSyncKind) used by
      * this text document manager.
      */
-    syncKind: TextDocumentSyncKindType,
+    syncKind: TextDocumentSyncKindType;
 
     /**
      * An event that fires when a text document managed by this manager
      * has been opened or the content changes.
      */
-    onDidChangeContent: ((e: TextDocumentChangeEvent) => void) => void,
+    onDidChangeContent: ((e: TextDocumentChangeEvent) => void) => void;
 
     /**
      * An event that fires when a text document managed by this manager
      * has been opened.
      */
-    onDidOpen: Event<TextDocumentChangeEvent>,
+    onDidOpen: Event<TextDocumentChangeEvent>;
 
     /**
      * An event that fires when a text document managed by this manager
      * will be saved.
      */
-    onWillSave: Event<TextDocumentWillSaveEvent>,
+    onWillSave: Event<TextDocumentWillSaveEvent>;
 
     /**
      * Sets a handler that will be called if a participant wants to provide
@@ -117,19 +121,19 @@ declare module 'vscode-languageserver' {
      */
     onWillSaveWaitUntil(
       handler: RequestHandler<TextDocumentWillSaveEvent, TextEdit[], void>,
-    ): void,
+    ): void;
 
     /**
      * An event that fires when a text document managed by this manager
      * has been saved.
      */
-    onDidSave: Event<TextDocumentChangeEvent>,
+    onDidSave: Event<TextDocumentChangeEvent>;
 
     /**
      * An event that fires when a text document managed by this manager
      * has been closed.
      */
-    onDidClose: Event<TextDocumentChangeEvent>,
+    onDidClose: Event<TextDocumentChangeEvent>;
 
     /**
      * Returns the document for the given URI. Returns undefined if
@@ -137,26 +141,26 @@ declare module 'vscode-languageserver' {
      * @param uri The text document's URI to retrieve.
      * @return  the text document or `undefined`.
      */
-    get(uri: string): TextDocument,
+    get(uri: string): TextDocument;
 
     /**
      * Returns all text documents managed by this instance.
      * @return  all text documents.
      */
-    all(): TextDocument[],
+    all(): TextDocument[];
 
     /**
      * Returns the URIs of all text documents managed by this instance.
      * @return  the URI's of all text documents.
      */
-    keys(): string[],
+    keys(): string[];
 
     /**
      * Listens for `low level` notification on the given connection to
      * update the text documents managed by this instance.
      * @param connection The connection to listen on.
      */
-    listen(connection: IConnection): void,
+    listen(connection: IConnection): void;
   }
 
   /**
@@ -166,13 +170,13 @@ declare module 'vscode-languageserver' {
    * error message should be folded into one.
    */
   declare class ErrorMessageTracker {
-    constructor(): this,
+    constructor(): this;
 
     /**
      * Add a message to the tracker.
      * @param message The message to add.
      */
-    add(message: string): void,
+    add(message: string): void;
 
     /**
      * Send all tracked messages to the conenction's window.
@@ -180,7 +184,7 @@ declare module 'vscode-languageserver' {
      */
     sendErrors(connection: {
       window: RemoteWindow,
-    }): void,
+    }): void;
   }
 
   /**
@@ -192,25 +196,25 @@ declare module 'vscode-languageserver' {
      * Show an error message.
      * @param message The message to show.
      */
-    error(message: string): void,
+    error(message: string): void;
 
     /**
      * Show a warning message.
      * @param message The message to show.
      */
-    warn(message: string): void,
+    warn(message: string): void;
 
     /**
      * Show an information message.
      * @param message The message to show.
      */
-    info(message: string): void,
+    info(message: string): void;
 
     /**
      * Log a message.
      * @param message The message to log.
      */
-    log(message: string): void,
+    log(message: string): void;
   }
   /**
    * The RemoteWindow interface contains all functions to interact with
@@ -221,22 +225,22 @@ declare module 'vscode-languageserver' {
      * Show an error message.
      * @param message The message to show.
      */
-    showErrorMessage(message: string): void,
-    showErrorMessage<T>(message: string, ...actions: T[]): Thenable<T>,
+    showErrorMessage(message: string): void;
+    showErrorMessage<T>(message: string, ...actions: T[]): Promise<T>;
 
     /**
      * Show a warning message.
      * @param message The message to show.
      */
-    showWarningMessage(message: string): void,
-    showWarningMessage<T>(message: string, ...actions: T[]): Thenable<T>,
+    showWarningMessage(message: string): void;
+    showWarningMessage<T>(message: string, ...actions: T[]): Promise<T>;
 
     /**
      * Show an information message.
      * @param message The message to show.
      */
-    showInformationMessage(message: string): void,
-    showInformationMessage<T>(message: string, ...actions: T[]): Thenable<T>,
+    showInformationMessage(message: string): void;
+    showInformationMessage<T>(message: string, ...actions: T[]): Promise<T>;
   }
   /**
    * A bulk registration manages n single registration to be able to register
@@ -248,16 +252,16 @@ declare module 'vscode-languageserver' {
      * @param type the notification type to register for.
      * @param registerParams special registration parameters.
      */
-    add<RO>(type: NotificationType0<RO>, registerParams: RO): void,
-    add<P, RO>(type: NotificationType<P, RO>, registerParams: RO): void,
+    add<RO>(type: NotificationType0<RO>, registerParams: RO): void;
+    add<P, RO>(type: NotificationType<P, RO>, registerParams: RO): void;
 
     /**
      * Adds a single registration.
      * @param type the request type to register for.
      * @param registerParams special registration parameters.
      */
-    add<R, E, RO>(type: RequestType0<R, E, RO>, registerParams: RO): void,
-    add<P, R, E, RO>(type: RequestType<P, R, E, RO>, registerParams: RO): void,
+    add<R, E, RO>(type: RequestType0<R, E, RO>, registerParams: RO): void;
+    add<P, R, E, RO>(type: RequestType<P, R, E, RO>, registerParams: RO): void;
   }
 
   /**
@@ -270,9 +274,9 @@ declare module 'vscode-languageserver' {
    */
   declare type BulkUnregistration = {
     /**
-       * Disposes a single registration. It will be removed from the
-       * `BulkUnregistration`.
-       */
+     * Disposes a single registration. It will be removed from the
+     * `BulkUnregistration`.
+     */
     disposeSingle(arg: string | RPCMessageType): boolean,
   } & Disposable;
 
@@ -303,11 +307,11 @@ declare module 'vscode-languageserver' {
     register<RO>(
       type: NotificationType0<RO>,
       registerParams?: RO,
-    ): Thenable<Disposable>,
+    ): Promise<Disposable>;
     register<P, RO>(
       type: NotificationType<P, RO>,
       registerParams?: RO,
-    ): Thenable<Disposable>,
+    ): Promise<Disposable>;
 
     /**
      * Registers a listener for the given notification.
@@ -320,12 +324,12 @@ declare module 'vscode-languageserver' {
       unregisteration: BulkUnregistration,
       type: NotificationType0<RO>,
       registerParams?: RO,
-    ): Thenable<BulkUnregistration>,
+    ): Promise<BulkUnregistration>;
     register<P, RO>(
       unregisteration: BulkUnregistration,
       type: NotificationType<P, RO>,
       registerParams?: RO,
-    ): Thenable<BulkUnregistration>,
+    ): Promise<BulkUnregistration>;
 
     /**
      * Registers a listener for the given request.
@@ -336,11 +340,11 @@ declare module 'vscode-languageserver' {
     register<R, E, RO>(
       type: RequestType0<R, E, RO>,
       registerParams?: RO,
-    ): Thenable<Disposable>,
+    ): Promise<Disposable>;
     register<P, R, E, RO>(
       type: RequestType<P, R, E, RO>,
       registerParams?: RO,
-    ): Thenable<Disposable>,
+    ): Promise<Disposable>;
 
     /**
      * Registers a listener for the given request.
@@ -353,19 +357,19 @@ declare module 'vscode-languageserver' {
       unregisteration: BulkUnregistration,
       type: RequestType0<R, E, RO>,
       registerParams?: RO,
-    ): Thenable<BulkUnregistration>,
+    ): Promise<BulkUnregistration>;
     register<P, R, E, RO>(
       unregisteration: BulkUnregistration,
       type: RequestType<P, R, E, RO>,
       registerParams?: RO,
-    ): Thenable<BulkUnregistration>,
+    ): Promise<BulkUnregistration>;
 
     /**
      * Registers a set of listeners.
      * @param registrations the bulk registration
      * @return  a `Disposable` to unregister the listeners again.
      */
-    register(registrations: BulkRegistration): Thenable<BulkUnregistration>,
+    register(registrations: BulkRegistration): Promise<BulkUnregistration>;
   }
   /**
    * Represents the workspace managed by the client.
@@ -374,9 +378,9 @@ declare module 'vscode-languageserver' {
     /**
      * Applies a `WorkspaceEdit` to the workspace
      * @param edit the workspace edit.
-     * @return  a thenable that resolves to the `ApplyWorkspaceEditResponse`.
+     * @return  a Promise that resolves to the `ApplyWorkspaceEditResponse`.
      */
-    applyEdit(edit: WorkspaceEdit): Thenable<ApplyWorkspaceEditResponse>,
+    applyEdit(edit: WorkspaceEdit): Promise<ApplyWorkspaceEditResponse>;
   }
   /**
    * Interface to log telemetry events. The events are actually send to the client
@@ -387,7 +391,7 @@ declare module 'vscode-languageserver' {
      * Log the given data to telemetry.
      * @param data The data to log. Must be a JSON serializable object.
      */
-    logEvent(data: any): void,
+    logEvent(data: any): void;
   }
   /**
    * Interface to log traces to the client. The events are sent to the client and the
@@ -397,7 +401,7 @@ declare module 'vscode-languageserver' {
     /**
      * Log the given data to the trace Log
      */
-    log(message: string, verbose?: string): void,
+    log(message: string, verbose?: string): void;
   }
 
   /**
@@ -409,12 +413,12 @@ declare module 'vscode-languageserver' {
      * to the version after all provided content changes have
      * been applied.
      */
-    textDocument: VersionedTextDocumentIdentifier,
+    textDocument: VersionedTextDocumentIdentifier;
 
     /**
      * The actual content changes.
      */
-    contentChanges: TextDocumentContentChangeEvent[],
+    contentChanges: TextDocumentContentChangeEvent[];
   }
 
   /**
@@ -424,7 +428,7 @@ declare module 'vscode-languageserver' {
     /**
      * The document that was closed.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
   }
 
   /**
@@ -434,7 +438,7 @@ declare module 'vscode-languageserver' {
     /**
      * The document that was opened.
      */
-    textDocument: TextDocumentItem,
+    textDocument: TextDocumentItem;
   }
 
   /**
@@ -444,12 +448,12 @@ declare module 'vscode-languageserver' {
     /**
      * The URI for which diagnostic information is reported.
      */
-    uri: string,
+    uri: string;
 
     /**
      * An array of diagnostic information items.
      */
-    diagnostics: Diagnostic[],
+    diagnostics: Diagnostic[];
   }
 
   /**
@@ -457,9 +461,9 @@ declare module 'vscode-languageserver' {
    */
   declare interface DidChangeConfigurationParams {
     /**
-       * The actual changed settings
-       */
-    settings: any,
+     * The actual changed settings
+     */
+    settings: any;
   }
 
   /**
@@ -469,13 +473,13 @@ declare module 'vscode-languageserver' {
     /**
      * The document that was closed.
      */
-    textDocument: VersionedTextDocumentIdentifier,
+    textDocument: VersionedTextDocumentIdentifier;
 
     /**
      * Optional the content when saved. Depends on the includeText value
      * when the save notifcation was requested.
      */
-    text?: string,
+    text?: string;
   }
 
   /**
@@ -485,12 +489,12 @@ declare module 'vscode-languageserver' {
     /**
      * The document that will be saved.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The 'TextDocumentSaveReason'.
      */
-    reason: TextDocumentSaveReasonType,
+    reason: TextDocumentSaveReasonType;
   }
 
   /**
@@ -500,7 +504,7 @@ declare module 'vscode-languageserver' {
     /**
      * Start listening on the input stream for messages to process.
      */
-    listen(): void,
+    listen(): void;
 
     /**
      * Installs a request handler described by the given [RequestType](#RequestType).
@@ -510,18 +514,18 @@ declare module 'vscode-languageserver' {
     onRequest<R, E, RO>(
       type: RequestType0<R, E, RO>,
       handler: RequestHandler0<R, E>,
-    ): void,
+    ): void;
     onRequest<P, R, E, RO>(
       type: RequestType<P, R, E, RO>,
       handler: RequestHandler<P, R, E>,
-    ): void,
+    ): void;
 
     /**
      * Installs a request handler for the given method.
      * @param method The method to register a request handler for.
      * @param handler The handler to install.
      */
-    onRequest<R, E>(method: string, handler: GenericRequestHandler<R, E>): void,
+    onRequest<R, E>(method: string, handler: GenericRequestHandler<R, E>): void;
 
     /**
      * Send a request to the client.
@@ -531,19 +535,19 @@ declare module 'vscode-languageserver' {
     sendRequest<R, E, RO>(
       type: RequestType0<R, E, RO>,
       token?: CancellationToken,
-    ): Thenable<R>,
+    ): Promise<R>;
     sendRequest<P, R, E, RO>(
       type: RequestType<P, R, E, RO>,
       params: P,
       token?: CancellationToken,
-    ): Thenable<R>,
+    ): Promise<R>;
 
     /**
      * Send a request to the client.
      * @param method The method to invoke on the client.
      * @param params The request's parameters.
      */
-    sendRequest<R>(method: string, ...params: any[]): Thenable<R>,
+    sendRequest<R>(method: string, ...params: any[]): Promise<R>;
 
     /**
      * Installs a notification handler described by the given [NotificationType](#NotificationType).
@@ -553,33 +557,33 @@ declare module 'vscode-languageserver' {
     onNotification<RO>(
       type: NotificationType0<RO>,
       handler: NotificationHandler0,
-    ): void,
+    ): void;
     onNotification<P, RO>(
       type: NotificationType<P, RO>,
       handler: NotificationHandler<P>,
-    ): void,
+    ): void;
 
     /**
      * Installs a notification handler for the given method.
      * @param method The method to register a request handler for.
      * @param handler The handler to install.
      */
-    onNotification(method: string, handler: GenericNotificationHandler): void,
+    onNotification(method: string, handler: GenericNotificationHandler): void;
 
     /**
      * Send a notification to the client.
      * @param type The [NotificationType](#NotificationType) describing the notification.
      * @param params The notification's parameters.
      */
-    sendNotification<RO>(type: NotificationType0<RO>): void,
-    sendNotification<P, RO>(type: NotificationType<P, RO>, params?: P): void,
+    sendNotification<RO>(type: NotificationType0<RO>): void;
+    sendNotification<P, RO>(type: NotificationType<P, RO>, params?: P): void;
 
     /**
      * Send a notification to the client.
      * @param method The method to invoke on the client.
      * @param params The notification's parameters.
      */
-    sendNotification(method: string, ...args: any[]): void,
+    sendNotification(method: string, ...args: any[]): void;
 
     /**
      * Installs a handler for the intialize request.
@@ -589,58 +593,58 @@ declare module 'vscode-languageserver' {
       handler: RequestHandler<
         InitializeParams,
         InitializeResult,
-        InitializeError
+        InitializeError,
       >,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the intialized notification.
      * @param handler The initialized handler.
      */
-    onInitialized(handler: NotificationHandler<InitializedParams>): void,
+    onInitialized(handler: NotificationHandler<InitializedParams>): void;
 
     /**
      * Installs a handler for the shutdown request.
      * @param handler The initialize handler.
      */
-    onShutdown(handler: RequestHandler0<void, void>): void,
+    onShutdown(handler: RequestHandler0<void, void>): void;
 
     /**
      * Installs a handler for the exit notification.
      * @param handler The exit handler.
      */
-    onExit(handler: NotificationHandler0): void,
+    onExit(handler: NotificationHandler0): void;
 
     /**
      * A proxy interface for the language client interface to register for requests or
      * notifications.
      */
-    client: RemoteClient,
+    client: RemoteClient;
 
     /**
      * A proxy for VSCode's development console. See [RemoteConsole](#RemoteConsole)
      */
-    console: RemoteConsole,
+    console: RemoteConsole;
 
     /**
      * A proxy for VSCode's window. See [RemoteWindow](#RemoteWindow)
      */
-    window: RemoteWindow,
+    window: RemoteWindow;
 
     /**
      * A proxy to send telemetry events to the client.
      */
-    telemetry: Telemetry,
+    telemetry: Telemetry;
 
     /**
      * A proxy to send trace events to the client.
      */
-    tracer: Tracer,
+    tracer: Tracer;
 
     /**
      * A proxy to talk to the client's workspace.
      */
-    workspace: RemoteWorkspace,
+    workspace: RemoteWorkspace;
 
     /**
      * Installs a handler for the `DidChangeConfiguration` notification.
@@ -648,7 +652,7 @@ declare module 'vscode-languageserver' {
      */
     onDidChangeConfiguration(
       handler: NotificationHandler<DidChangeConfigurationParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidChangeWatchedFiles` notification.
@@ -656,7 +660,7 @@ declare module 'vscode-languageserver' {
      */
     onDidChangeWatchedFiles(
       handler: NotificationHandler<DidChangeWatchedFilesParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidOpenTextDocument` notification.
@@ -664,7 +668,7 @@ declare module 'vscode-languageserver' {
      */
     onDidOpenTextDocument(
       handler: NotificationHandler<DidOpenTextDocumentParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidChangeTextDocument` notification.
@@ -672,7 +676,7 @@ declare module 'vscode-languageserver' {
      */
     onDidChangeTextDocument(
       handler: NotificationHandler<DidChangeTextDocumentParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidCloseTextDocument` notification.
@@ -680,7 +684,7 @@ declare module 'vscode-languageserver' {
      */
     onDidCloseTextDocument(
       handler: NotificationHandler<DidCloseTextDocumentParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidSaveTextDocument` notification.
@@ -688,7 +692,7 @@ declare module 'vscode-languageserver' {
      */
     onWillSaveTextDocument(
       handler: NotificationHandler<WillSaveTextDocumentParams>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidSaveTextDocument` notification.
@@ -696,7 +700,7 @@ declare module 'vscode-languageserver' {
      */
     onWillSaveTextDocumentWaitUntil(
       handler: RequestHandler<WillSaveTextDocumentParams, TextEdit[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DidSaveTextDocument` notification.
@@ -704,14 +708,14 @@ declare module 'vscode-languageserver' {
      */
     onDidSaveTextDocument(
       handler: NotificationHandler<DidSaveTextDocumentParams>,
-    ): void,
+    ): void;
 
     /**
      * Sends diagnostics computed for a given document to VSCode to render them in the
      * user interface.
      * @param params The diagnostic parameters.
      */
-    sendDiagnostics(params: PublishDiagnosticsParams): void,
+    sendDiagnostics(params: PublishDiagnosticsParams): void;
 
     /**
      * Installs a handler for the `Hover` request.
@@ -719,7 +723,7 @@ declare module 'vscode-languageserver' {
      */
     onHover(
       handler: RequestHandler<TextDocumentPositionParams, Hover, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `Completion` request.
@@ -729,9 +733,9 @@ declare module 'vscode-languageserver' {
       handler: RequestHandler<
         TextDocumentPositionParams,
         CompletionItem[] | CompletionList,
-        void
+        void,
       >,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `CompletionResolve` request.
@@ -739,7 +743,7 @@ declare module 'vscode-languageserver' {
      */
     onCompletionResolve(
       handler: RequestHandler<CompletionItem, CompletionItem, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `SignatureHelp` request.
@@ -747,7 +751,7 @@ declare module 'vscode-languageserver' {
      */
     onSignatureHelp(
       handler: RequestHandler<TextDocumentPositionParams, SignatureHelp, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `Definition` request.
@@ -755,7 +759,7 @@ declare module 'vscode-languageserver' {
      */
     onDefinition(
       handler: RequestHandler<TextDocumentPositionParams, Definition, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `References` request.
@@ -763,7 +767,7 @@ declare module 'vscode-languageserver' {
      */
     onReferences(
       handler: RequestHandler<ReferenceParams, Location[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DocumentHighlight` request.
@@ -773,9 +777,9 @@ declare module 'vscode-languageserver' {
       handler: RequestHandler<
         TextDocumentPositionParams,
         DocumentHighlight[],
-        void
+        void,
       >,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `DocumentSymbol` request.
@@ -783,7 +787,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentSymbol(
       handler: RequestHandler<DocumentSymbolParams, SymbolInformation[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `WorkspaceSymbol` request.
@@ -791,7 +795,7 @@ declare module 'vscode-languageserver' {
      */
     onWorkspaceSymbol(
       handler: RequestHandler<WorkspaceSymbolParams, SymbolInformation[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the `CodeAction` request.
@@ -799,22 +803,22 @@ declare module 'vscode-languageserver' {
      */
     onCodeAction(
       handler: RequestHandler<CodeActionParams, Command[], void>,
-    ): void,
+    ): void;
 
     /**
      * Compute a list of [lenses](#CodeLens). This call should return as fast as possible and if
      * computing the commands is expensive implementors should only return code lens objects with the
      * range set and handle the resolve request.
      * @param handler The corresponding handler.
-    */
-    onCodeLens(handler: RequestHandler<CodeLensParams, CodeLens[], void>): void,
+     */
+    onCodeLens(handler: RequestHandler<CodeLensParams, CodeLens[], void>): void;
 
     /**
      * This function will be called for each visible code lens, usually when scrolling and after
      * the onCodeLens has been called.
      * @param handler The corresponding handler.
      */
-    onCodeLensResolve(handler: RequestHandler<CodeLens, CodeLens, void>): void,
+    onCodeLensResolve(handler: RequestHandler<CodeLens, CodeLens, void>): void;
 
     /**
      * Installs a handler for the document formatting request.
@@ -822,7 +826,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentFormatting(
       handler: RequestHandler<DocumentFormattingParams, TextEdit[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the document range formatting request.
@@ -830,7 +834,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentRangeFormatting(
       handler: RequestHandler<DocumentRangeFormattingParams, TextEdit[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the document on type formatting request.
@@ -838,7 +842,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentOnTypeFormatting(
       handler: RequestHandler<DocumentOnTypeFormattingParams, TextEdit[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the rename request.
@@ -846,7 +850,7 @@ declare module 'vscode-languageserver' {
      */
     onRenameRequest(
       handler: RequestHandler<RenameParams, WorkspaceEdit, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the document links request.
@@ -854,7 +858,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentLinks(
       handler: RequestHandler<DocumentLinkParams, DocumentLink[], void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the document links resolve request.
@@ -862,7 +866,7 @@ declare module 'vscode-languageserver' {
      */
     onDocumentLinkResolve(
       handler: RequestHandler<DocumentLink, DocumentLink, void>,
-    ): void,
+    ): void;
 
     /**
      * Installs a handler for the execute command request.
@@ -870,12 +874,12 @@ declare module 'vscode-languageserver' {
      */
     onExecuteCommand(
       handler: RequestHandler<ExecuteCommandParams, any, void>,
-    ): void,
+    ): void;
 
     /**
      * Disposes the connection
      */
-    dispose(): void,
+    dispose(): void;
   }
   /**
    * Creates a new connection using a the given streams.
@@ -919,7 +923,7 @@ declare module 'vscode-languageserver/lib/protocol' {
    * its resource, or a glob-pattern that is applied to the [path](#TextDocument.fileName).
    * @sample  A language filter that applies to typescript files on disk: `{ language: 'typescript', scheme: 'file' }`
    * @sample  A language filter that applies to all package.json paths: `{ language: 'json', pattern: '**package.json' }`
-  */
+   */
   declare type DocumentFilter =
     | {
         /**
@@ -986,20 +990,20 @@ declare module 'vscode-languageserver/lib/protocol' {
      * The id used to register the request. The id can be used to deregister
      * the request again.
      */
-    id: string,
+    id: string;
 
     /**
      * The method to register for.
      */
-    method: string,
+    method: string;
 
     /**
      * Options necessary for the registration.
      */
-    registerOptions?: any,
+    registerOptions?: any;
   }
   declare interface RegistrationParams {
-    registrations: Registration[],
+    registrations: Registration[];
   }
   declare var type: RequestType<RegistrationParams, void, void, void>;
   /**
@@ -1010,15 +1014,15 @@ declare module 'vscode-languageserver/lib/protocol' {
      * The id used to unregister the request or notification. Usually an id
      * provided during the register request.
      */
-    id: string,
+    id: string;
 
     /**
      * The method to unregister for.
      */
-    method: string,
+    method: string;
   }
   declare interface UnregistrationParams {
-    unregisterations: Unregistration[],
+    unregisterations: Unregistration[];
   }
   declare var type: RequestType<UnregistrationParams, void, void, void>;
   /**
@@ -1029,12 +1033,12 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The text document.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The position inside the text document.
      */
-    position: Position,
+    position: Position;
   }
   /**
    * Workspace specific client capabilities.
@@ -1045,7 +1049,7 @@ declare module 'vscode-languageserver/lib/protocol' {
      * to the workspace by supporting the request
      * 'workspace/applyEdit'
      */
-    applyEdit?: boolean,
+    applyEdit?: boolean;
 
     /**
      * Capabilities specific to `WorkspaceEdit`s
@@ -1055,7 +1059,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * The client supports versioned document changes in `WorkspaceEdit`s
        */
       documentChanges?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `workspace/didChangeConfiguration` notification.
@@ -1065,7 +1069,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Did change configuration notification supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `workspace/didChangeWatchedFiles` notification.
@@ -1075,7 +1079,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Did change watched files notification supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `workspace/symbol` request.
@@ -1085,7 +1089,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Symbol request supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `workspace/executeCommand` request.
@@ -1095,7 +1099,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Execute command supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
   }
   /**
    * Text document specific client capabilities.
@@ -1123,10 +1127,10 @@ declare module 'vscode-languageserver/lib/protocol' {
       willSaveWaitUntil?: boolean,
 
       /**
-               * The client supports did save notifications.
-               */
+       * The client supports did save notifications.
+       */
       didSave?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/completion`
@@ -1152,7 +1156,7 @@ declare module 'vscode-languageserver/lib/protocol' {
          */
         snippetSupport?: boolean,
       },
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/hover`
@@ -1162,7 +1166,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether hover supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/signatureHelp`
@@ -1172,7 +1176,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether signature help supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/references`
@@ -1182,7 +1186,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether references supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/documentHighlight`
@@ -1192,7 +1196,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether document highlight supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/documentSymbol`
@@ -1202,7 +1206,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether document symbol supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/formatting`
@@ -1212,7 +1216,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether formatting supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/rangeFormatting`
@@ -1222,7 +1226,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether range formatting supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/onTypeFormatting`
@@ -1232,7 +1236,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether on type formatting supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/definition`
@@ -1242,7 +1246,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether definition supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/codeAction`
@@ -1252,7 +1256,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether code action supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/codeLens`
@@ -1262,7 +1266,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether code lens supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/documentLink`
@@ -1272,7 +1276,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether document link supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
 
     /**
      * Capabilities specific to the `textDocument/rename`
@@ -1282,7 +1286,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * Whether rename supports dynamic registration.
        */
       dynamicRegistration?: boolean,
-    },
+    };
   }
   /**
    * Defines the capabilities provided by the client.
@@ -1291,17 +1295,17 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * Workspace specific client capabilities.
      */
-    workspace?: WorkspaceClientCapabilites,
+    workspace?: WorkspaceClientCapabilites;
 
     /**
      * Text document specific client capabilities.
      */
-    textDocument?: TextDocumentClientCapabilities,
+    textDocument?: TextDocumentClientCapabilities;
 
     /**
      * Experimental client capabilities.
      */
-    experimental?: any,
+    experimental?: any;
   }
 
   /**
@@ -1312,7 +1316,7 @@ declare module 'vscode-languageserver/lib/protocol' {
      * A document selector to identify the scope of the registration. If set to null
      * the document selector provided on the client side will be used.
      */
-    documentSelector: DocumentSelector | null,
+    documentSelector: DocumentSelector | null;
   }
   /**
    * Completion options.
@@ -1322,99 +1326,99 @@ declare module 'vscode-languageserver/lib/protocol' {
      * The server provides support to resolve additional
      * information for a completion item.
      */
-    resolveProvider?: boolean,
+    resolveProvider?: boolean;
 
     /**
      * The characters that trigger completion automatically.
      */
-    triggerCharacters?: string[],
+    triggerCharacters?: string[];
   }
   /**
    * Signature help options.
    */
   declare interface SignatureHelpOptions {
     /**
-       * The characters that trigger signature help
-       * automatically.
-       */
-    triggerCharacters?: string[],
+     * The characters that trigger signature help
+     * automatically.
+     */
+    triggerCharacters?: string[];
   }
   /**
    * Code Lens options.
    */
   declare interface CodeLensOptions {
     /**
-       * Code lens has a resolve provider as well.
-       */
-    resolveProvider?: boolean,
+     * Code lens has a resolve provider as well.
+     */
+    resolveProvider?: boolean;
   }
   /**
    * Format document on type options
    */
   declare interface DocumentOnTypeFormattingOptions {
     /**
-       * A character on which formatting should be triggered, like `}`.
-       */
-    firstTriggerCharacter: string,
+     * A character on which formatting should be triggered, like `}`.
+     */
+    firstTriggerCharacter: string;
 
     /**
-           * More trigger characters.
-           */
-    moreTriggerCharacter?: string[],
+     * More trigger characters.
+     */
+    moreTriggerCharacter?: string[];
   }
   /**
    * Document link options
    */
   declare interface DocumentLinkOptions {
     /**
-       * Document links have a resolve provider as well.
-       */
-    resolveProvider?: boolean,
+     * Document links have a resolve provider as well.
+     */
+    resolveProvider?: boolean;
   }
   /**
    * Execute command options.
    */
   declare interface ExecuteCommandOptions {
     /**
-       * The commands to be executed on the server
-       */
-    commands: string[],
+     * The commands to be executed on the server
+     */
+    commands: string[];
   }
   /**
    * Save options.
    */
   declare interface SaveOptions {
     /**
-       * The client is supposed to include the content on save.
-       */
-    includeText?: boolean,
+     * The client is supposed to include the content on save.
+     */
+    includeText?: boolean;
   }
   declare interface TextDocumentSyncOptions {
     /**
      * Open and close notifications are sent to the server.
      */
-    openClose?: boolean,
+    openClose?: boolean;
 
     /**
      * Change notificatins are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
      * and TextDocumentSyncKindIncremental.
      */
-    change?: TextDocumentSyncKindType,
+    change?: TextDocumentSyncKindType;
 
     /**
      * Will save notifications are sent to the server.
      */
-    willSave?: boolean,
+    willSave?: boolean;
 
     /**
      * Will save wait until requests are sent to the server.
      */
-    willSaveWaitUntil?: boolean,
+    willSaveWaitUntil?: boolean;
 
     /**
      * Save notifications are sent to the server.
      */
-    save?: SaveOptions,
+    save?: SaveOptions;
   }
   /**
    * Defines the capabilities provided by a language
@@ -1425,67 +1429,67 @@ declare module 'vscode-languageserver/lib/protocol' {
      * Defines how text documents are synced. Is either a detailed structure defining each notification or
      * for backwards compatibility the TextDocumentSyncKind number.
      */
-    textDocumentSync?: TextDocumentSyncOptions | TextDocumentSyncKindType,
+    textDocumentSync?: TextDocumentSyncOptions | TextDocumentSyncKindType;
 
     /**
      * The server provides hover support.
      */
-    hoverProvider?: boolean,
+    hoverProvider?: boolean;
 
     /**
      * The server provides completion support.
      */
-    completionProvider?: CompletionOptions,
+    completionProvider?: CompletionOptions;
 
     /**
      * The server provides signature help support.
      */
-    signatureHelpProvider?: SignatureHelpOptions,
+    signatureHelpProvider?: SignatureHelpOptions;
 
     /**
      * The server provides goto definition support.
      */
-    definitionProvider?: boolean,
+    definitionProvider?: boolean;
 
     /**
      * The server provides find references support.
      */
-    referencesProvider?: boolean,
+    referencesProvider?: boolean;
 
     /**
      * The server provides document highlight support.
      */
-    documentHighlightProvider?: boolean,
+    documentHighlightProvider?: boolean;
 
     /**
      * The server provides document symbol support.
      */
-    documentSymbolProvider?: boolean,
+    documentSymbolProvider?: boolean;
 
     /**
      * The server provides workspace symbol support.
      */
-    workspaceSymbolProvider?: boolean,
+    workspaceSymbolProvider?: boolean;
 
     /**
      * The server provides code actions.
      */
-    codeActionProvider?: boolean,
+    codeActionProvider?: boolean;
 
     /**
      * The server provides code lens.
      */
-    codeLensProvider?: CodeLensOptions,
+    codeLensProvider?: CodeLensOptions;
 
     /**
      * The server provides document formatting.
      */
-    documentFormattingProvider?: boolean,
+    documentFormattingProvider?: boolean;
 
     /**
      * The server provides document range formatting.
      */
-    documentRangeFormattingProvider?: boolean,
+    documentRangeFormattingProvider?: boolean;
 
     /**
      * The server provides document formatting on typing.
@@ -1500,34 +1504,34 @@ declare module 'vscode-languageserver/lib/protocol' {
        * More trigger characters.
        */
       moreTriggerCharacter?: string[],
-    },
+    };
 
     /**
      * The server provides rename support.
      */
-    renameProvider?: boolean,
+    renameProvider?: boolean;
 
     /**
      * The server provides document link support.
      */
-    documentLinkProvider?: DocumentLinkOptions,
+    documentLinkProvider?: DocumentLinkOptions;
 
     /**
      * The server provides execute command support.
      */
-    executeCommandProvider?: ExecuteCommandOptions,
+    executeCommandProvider?: ExecuteCommandOptions;
 
     /**
      * Experimental server capabilities.
      */
-    experimental?: any,
+    experimental?: any;
   }
 
   declare var type: RequestType<
     InitializeParams,
     InitializeResult,
     InitializeError,
-    void
+    void,
   >;
 
   /**
@@ -1538,36 +1542,36 @@ declare module 'vscode-languageserver/lib/protocol' {
      * The process Id of the parent process that started
      * the server.
      */
-    processId: number,
+    processId: number;
 
     /**
      * The rootPath of the workspace. Is null
      * if no folder is open.
      * @deprecated  in favour of rootUri.
      */
-    rootPath?: string | null,
+    rootPath?: string | null;
 
     /**
      * The rootUri of the workspace. Is null if no
      * folder is open. If both `rootPath` and `rootUri` are set
      * `rootUri` wins.
      */
-    rootUri: string | null,
+    rootUri: string | null;
 
     /**
      * The capabilities provided by the client (editor or tool)
      */
-    capabilities: ClientCapabilities,
+    capabilities: ClientCapabilities;
 
     /**
      * User provided initialization options.
      */
-    initializationOptions?: any,
+    initializationOptions?: any;
 
     /**
      * The initial trace setting. If omitted trace is disabled ('off').
      */
-    trace?: 'off' | 'messages' | 'verbose',
+    trace?: 'off' | 'messages' | 'verbose';
   }
 
   /**
@@ -1575,9 +1579,9 @@ declare module 'vscode-languageserver/lib/protocol' {
    */
   declare interface InitializeResult {
     /**
-       * The capabilities the language server provides.
-       */
-    capabilities: ServerCapabilities,
+     * The capabilities the language server provides.
+     */
+    capabilities: ServerCapabilities;
   }
 
   declare var unknownProtocolVersion: number;
@@ -1592,7 +1596,7 @@ declare module 'vscode-languageserver/lib/protocol' {
        * initialize request after showing the message provided
       in the {@link ResponseError}
       */
-    retry: boolean,
+    retry: boolean;
   }
 
   declare interface InitializedParams {}
@@ -1606,7 +1610,7 @@ declare module 'vscode-languageserver/lib/protocol' {
     Warning: 2,
     Info: 3,
     Log: 4,
-  }
+  };
   declare type MessageTypeType = 1 | 2 | 3 | 4;
 
   /**
@@ -1616,12 +1620,12 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The message type. See {@link MessageType}
      */
-    type: MessageTypeType,
+    type: MessageTypeType;
 
     /**
      * The actual message
      */
-    message: string,
+    message: string;
   }
   declare var type: NotificationType<ShowMessageParams, void>;
 
@@ -1629,24 +1633,24 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * A short title like 'Retry', 'Open Log' etc.
      */
-    title: string,
+    title: string;
   }
 
   declare interface ShowMessageRequestParams {
     /**
      * The message type. See {@link MessageType}
      */
-    type: MessageTypeType,
+    type: MessageTypeType;
 
     /**
      * The actual message
      */
-    message: string,
+    message: string;
 
     /**
      * The message action items to present.
      */
-    actions?: MessageActionItem[],
+    actions?: MessageActionItem[];
   }
 
   /**
@@ -1656,26 +1660,26 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The message type. See {@link MessageType}
      */
-    type: MessageTypeType,
+    type: MessageTypeType;
 
     /**
      * The actual message
      */
-    message: string,
+    message: string;
   }
 
   declare var type: RequestType<
     ShowMessageRequestParams,
     MessageActionItem,
     void,
-    void
+    void,
   >;
 
   declare var type: NotificationType<LogMessageParams, void>;
   declare var type: NotificationType<any, void>;
   declare var type: NotificationType<
     DidOpenTextDocumentParams,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   /**
@@ -1690,36 +1694,35 @@ declare module 'vscode-languageserver/lib/protocol' {
 
   declare var type: NotificationType<
     DidChangeTextDocumentParams,
-    TextDocumentChangeRegistrationOptions
+    TextDocumentChangeRegistrationOptions,
   >;
 
   declare var type: NotificationType<
     DidCloseTextDocumentParams,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   /**
    * Save registration options.
    */
-  declare type TextDocumentSaveRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type TextDocumentSaveRegistrationOptions = {} & TextDocumentRegistrationOptions &
     SaveOptions;
 
   declare var type: NotificationType<
     DidSaveTextDocumentParams,
-    TextDocumentSaveRegistrationOptions
+    TextDocumentSaveRegistrationOptions,
   >;
 
   declare var type: NotificationType<
     WillSaveTextDocumentParams,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare var type: RequestType<
     WillSaveTextDocumentParams,
     TextEdit[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare var type: NotificationType<DidChangeWatchedFilesParams, void>;
@@ -1731,14 +1734,14 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The actual file events.
      */
-    changes: FileEvent[],
+    changes: FileEvent[];
   }
 
   declare var FileChangeType: {
     Created: 1,
     Changed: 2,
     Deleted: 3,
-  }
+  };
   declare type FileChangeTypeType = 1 | 2 | 3;
 
   /**
@@ -1748,12 +1751,12 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The file's uri.
      */
-    uri: string,
+    uri: string;
 
     /**
      * The change type.
      */
-    type: FileChangeTypeType,
+    type: FileChangeTypeType;
   }
 
   declare var type: NotificationType<PublishDiagnosticsParams, void>;
@@ -1761,15 +1764,14 @@ declare module 'vscode-languageserver/lib/protocol' {
   /**
    * Completion registration options.
    */
-  declare type CompletionRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type CompletionRegistrationOptions = {} & TextDocumentRegistrationOptions &
     CompletionOptions;
 
   declare var type: RequestType<
     TextDocumentPositionParams,
     CompletionList | CompletionItem[],
     void,
-    CompletionRegistrationOptions
+    CompletionRegistrationOptions,
   >;
 
   declare var type: RequestType<CompletionItem, CompletionItem, void, void>;
@@ -1778,28 +1780,27 @@ declare module 'vscode-languageserver/lib/protocol' {
     TextDocumentPositionParams,
     Hover,
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   /**
    * Signature help registration options.
    */
-  declare type SignatureHelpRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type SignatureHelpRegistrationOptions = {} & TextDocumentRegistrationOptions &
     SignatureHelpOptions;
 
   declare var type: RequestType<
     TextDocumentPositionParams,
     SignatureHelp,
     void,
-    SignatureHelpRegistrationOptions
+    SignatureHelpRegistrationOptions,
   >;
 
   declare var type: RequestType<
     TextDocumentPositionParams,
     Definition,
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   /**
@@ -1813,28 +1814,28 @@ declare module 'vscode-languageserver/lib/protocol' {
     ReferenceParams,
     Location[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare var type: RequestType<
     TextDocumentPositionParams,
     DocumentHighlight[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare var type: RequestType<
     DocumentSymbolParams,
     SymbolInformation[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare var type: RequestType<
     WorkspaceSymbolParams,
     SymbolInformation[],
     void,
-    void
+    void,
   >;
 
   /**
@@ -1844,24 +1845,24 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The document in which the command was invoked.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The range for which the command was invoked.
      */
-    range: Range,
+    range: Range;
 
     /**
      * Context carrying additional information.
      */
-    context: ICodeActionContext,
+    context: ICodeActionContext;
   }
 
   declare var type: RequestType<
     CodeActionParams,
     Command[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   /**
@@ -1871,21 +1872,20 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The document to request code lens for.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
   }
 
   /**
    * Code Lens registration options.
    */
-  declare type CodeLensRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type CodeLensRegistrationOptions = {} & TextDocumentRegistrationOptions &
     CodeLensOptions;
 
   declare var type: RequestType<
     CodeLensParams,
     CodeLens[],
     void,
-    CodeLensRegistrationOptions
+    CodeLensRegistrationOptions,
   >;
 
   declare var type: RequestType<CodeLens, CodeLens, void, void>;
@@ -1894,126 +1894,124 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The document to format.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The format options
      */
-    options: IFormattingOptions,
+    options: IFormattingOptions;
   }
 
   declare var type: RequestType<
     DocumentFormattingParams,
     TextEdit[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare interface DocumentRangeFormattingParams {
     /**
      * The document to format.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The range to format
      */
-    range: Range,
+    range: Range;
 
     /**
      * The format options
      */
-    options: IFormattingOptions,
+    options: IFormattingOptions;
   }
 
   declare var type: RequestType<
     DocumentRangeFormattingParams,
     TextEdit[],
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare interface DocumentOnTypeFormattingParams {
     /**
      * The document to format.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The position at which this request was send.
      */
-    position: Position,
+    position: Position;
 
     /**
      * The character that has been typed.
      */
-    ch: string,
+    ch: string;
 
     /**
      * The format options.
      */
-    options: IFormattingOptions,
+    options: IFormattingOptions;
   }
 
   /**
    * Format document on type options
    */
-  declare type DocumentOnTypeFormattingRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type DocumentOnTypeFormattingRegistrationOptions = {} & TextDocumentRegistrationOptions &
     DocumentOnTypeFormattingOptions;
 
   declare var type: RequestType<
     DocumentOnTypeFormattingParams,
     TextEdit[],
     void,
-    DocumentOnTypeFormattingRegistrationOptions
+    DocumentOnTypeFormattingRegistrationOptions,
   >;
 
   declare interface RenameParams {
     /**
      * The document to format.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The position at which this request was send.
      */
-    position: Position,
+    position: Position;
 
     /**
      * The new name of the symbol. If the given name is not valid the
      * request must return a [ResponseError](#ResponseError) with an
      * appropriate message set.
      */
-    newName: string,
+    newName: string;
   }
 
   declare var type: RequestType<
     RenameParams,
     WorkspaceEdit,
     void,
-    TextDocumentRegistrationOptions
+    TextDocumentRegistrationOptions,
   >;
 
   declare interface DocumentLinkParams {
     /**
      * The document to provide document links for.
      */
-    textDocument: TextDocumentIdentifier,
+    textDocument: TextDocumentIdentifier;
   }
 
   /**
    * Document link registration options
    */
-  declare type DocumentLinkRegistrationOptions = {
-  } & TextDocumentRegistrationOptions &
+  declare type DocumentLinkRegistrationOptions = {} & TextDocumentRegistrationOptions &
     DocumentLinkOptions;
 
   declare var type: RequestType<
     DocumentLinkParams,
     DocumentLink[],
     void,
-    DocumentLinkRegistrationOptions
+    DocumentLinkRegistrationOptions,
   >;
 
   declare var type: RequestType<DocumentLink, DocumentLink, void, void>;
@@ -2022,12 +2020,12 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The identifier of the actual command handler.
      */
-    command: string,
+    command: string;
 
     /**
      * Arguments that the command should be invoked with.
      */
-    arguments?: any[],
+    arguments?: any[];
   }
 
   /**
@@ -2039,7 +2037,7 @@ declare module 'vscode-languageserver/lib/protocol' {
     ExecuteCommandParams,
     any,
     void,
-    ExecuteCommandRegistrationOptions
+    ExecuteCommandRegistrationOptions,
   >;
 
   /**
@@ -2049,7 +2047,7 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * The edits to apply.
      */
-    edit: WorkspaceEdit,
+    edit: WorkspaceEdit;
   }
 
   /**
@@ -2059,13 +2057,13 @@ declare module 'vscode-languageserver/lib/protocol' {
     /**
      * Indicates whether the edit was applied or not.
      */
-    applied: boolean,
+    applied: boolean;
   }
 
   declare var type: RequestType<
     ApplyWorkspaceEditParams,
     ApplyWorkspaceEditResponse,
     void,
-    void
+    void,
   >;
 }

@@ -238,9 +238,9 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
 
-atom-ide-ui@0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.1.9.tgz#1e76c430a6624decab7f1421f28bacce178b3cfa"
+atom-ide-ui@0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/atom-ide-ui/-/atom-ide-ui-0.4.0.tgz#6f4a2c4e26cfd2930731df49862b108be0c1755b"
   dependencies:
     async-to-generator "1.1.0"
     classnames "2.2.5"
@@ -248,11 +248,13 @@ atom-ide-ui@0.1.9:
     idx "1.2.0"
     log4js "1.1.1"
     marked "0.3.6"
-    nuclide-commons "0.1.9"
-    nuclide-commons-atom "0.1.9"
-    nuclide-commons-ui "0.1.9"
-    react "15.3.1"
-    react-dom "15.3.1"
+    nuclide-commons "0.4.0"
+    nuclide-commons-atom "0.4.0"
+    nuclide-commons-ui "0.4.0"
+    react "16.0.0"
+    react-dom "16.0.0"
+    redux "3.6.0"
+    reselect "3.0.1"
     rxjs "5.3.1"
     semver "5.3.0"
 
@@ -1212,6 +1214,10 @@ combined-stream@^1.0.5, combined-stream@~1.0.5:
   dependencies:
     delayed-stream "~1.0.0"
 
+command-exists@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/command-exists/-/command-exists-1.2.2.tgz#12819c64faf95446ec0ae07fe6cafb6eb3708b22"
+
 command-join@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/command-join/-/command-join-2.0.0.tgz#52e8b984f4872d952ff1bdc8b98397d27c7144cf"
@@ -1507,6 +1513,10 @@ dedent@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/dedent/-/dedent-0.7.0.tgz#2495ddbaf6eb874abb0e1be9df22d2e5a544326c"
 
+deep-diff@^0.3.5:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/deep-diff/-/deep-diff-0.3.8.tgz#c01de63efb0eec9798801d40c7e0dae25b582c84"
+
 deep-extend@~0.4.0:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/deep-extend/-/deep-extend-0.4.2.tgz#48b699c27e334bf89f10892be432f6e4c7d34a7f"
@@ -1701,7 +1711,7 @@ es6-weak-map@^2.0.1:
     es6-iterator "^2.0.1"
     es6-symbol "^3.1.1"
 
-escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
+escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
 
@@ -1996,7 +2006,7 @@ fbjs-eslint-utils@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fbjs-eslint-utils/-/fbjs-eslint-utils-1.0.0.tgz#e6d09d14e9360b30e0840d1609f769b70f56c3ea"
 
-fbjs@^0.8.4:
+fbjs@^0.8.16:
   version "0.8.16"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
   dependencies:
@@ -2071,9 +2081,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flow-bin@0.50.0:
-  version "0.50.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.50.0.tgz#d4cdb2430dee1a3599f0eb6fe551146e3027256a"
+flow-bin@0.64.0:
+  version "0.64.0"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.64.0.tgz#ddd3fb3b183ab1ab35a5d5dec9caf5ebbcded167"
 
 for-in@^1.0.1:
   version "1.0.2"
@@ -3279,6 +3289,10 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
+lodash-es@^4.2.1:
+  version "4.17.5"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.5.tgz#9fc6e737b1c4d151d8f9cae2247305d552ce748f"
+
 lodash._getnative@^3.0.0:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/lodash._getnative/-/lodash._getnative-3.9.1.tgz#570bc7dede46d61cdcde687d65d3eecbaa3aaff5"
@@ -3336,7 +3350,7 @@ longest@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/longest/-/longest-1.0.1.tgz#30a0b2da38f73770e8294a0d22e6625ed77d0097"
 
-loose-envify@^1.0.0, loose-envify@^1.1.0:
+loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.3.1.tgz#d1a8ad33fa9ce0e713d65fdd0ac8b748d478c848"
   dependencies:
@@ -3430,9 +3444,19 @@ micromatch@^2.1.5, micromatch@^2.3.11:
     parse-glob "^3.0.4"
     regex-cache "^0.4.2"
 
+mime-db@~1.29.0:
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.29.0.tgz#48d26d235589651704ac5916ca06001914266878"
+
 mime-db@~1.30.0:
   version "1.30.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.30.0.tgz#74c643da2dd9d6a45399963465b26d5ca7d71f01"
+
+mime-types@2.1.16:
+  version "2.1.16"
+  resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.16.tgz#2b858a52e5ecd516db897ac2be87487830698e23"
+  dependencies:
+    mime-db "~1.29.0"
 
 mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.7:
   version "2.1.17"
@@ -3581,28 +3605,36 @@ npmlog@^4.0.2, npmlog@^4.1.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nuclide-commons-atom@0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.1.9.tgz#3a6e7b29a57195cfcbde9c09e4e6a75daf79a580"
+nuclide-commons-atom@0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-atom/-/nuclide-commons-atom-0.4.0.tgz#4118117245bc0107580bd13a974b4b8bba1414d8"
   dependencies:
     async-to-generator "1.1.0"
+    escape-string-regexp "1.0.5"
+    idx "1.2.0"
     log4js "1.1.1"
-    nuclide-commons "0.1.9"
+    nuclide-commons "0.4.0"
+    redux-logger "3.0.6"
     rxjs "5.3.1"
     semver "5.3.0"
     shallowequal "0.2.2"
 
-nuclide-commons-ui@0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.1.9.tgz#4a8b0d869e41e8041e573ebb12d6d5ce80c1dce0"
+nuclide-commons-ui@0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/nuclide-commons-ui/-/nuclide-commons-ui-0.4.0.tgz#1ea7bc78e517068054c8d94a666ca6232bb996e6"
   dependencies:
     async-to-generator "1.1.0"
     classnames "2.2.5"
-    nuclide-commons "0.1.9"
-    nuclide-commons-atom "0.1.9"
-    react "15.3.1"
-    react-dom "15.3.1"
+    escape-string-regexp "1.0.5"
+    idx "1.2.0"
+    invariant "2.2.2"
+    nuclide-commons "0.4.0"
+    nuclide-commons-atom "0.4.0"
+    nullthrows "1.0.0"
+    react "16.0.0"
+    react-dom "16.0.0"
     rxjs "5.3.1"
+    shallowequal "0.2.2"
 
 nuclide-commons@0.1.9:
   version "0.1.9"
@@ -3615,6 +3647,25 @@ nuclide-commons@0.1.9:
     idx "1.2.0"
     lru-cache "4.0.2"
     mkdirp "0.5.1"
+    rimraf "2.5.4"
+    rxjs "5.3.1"
+    shell-quote "1.6.1"
+    temp "0.8.3"
+
+nuclide-commons@0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.4.0.tgz#b574b1b5271e70613aa98730af35e57a9d12a041"
+  dependencies:
+    async-to-generator "1.1.0"
+    command-exists "1.2.2"
+    event-kit "2.2.0"
+    fs-plus "2.9.3"
+    glob "7.1.1"
+    idx "1.2.0"
+    lru-cache "4.0.2"
+    mime-types "2.1.16"
+    mkdirp "0.5.1"
+    nullthrows "1.0.0"
     rimraf "2.5.4"
     rxjs "5.3.1"
     shell-quote "1.6.1"
@@ -3636,7 +3687,7 @@ oauth-sign@~0.8.1, oauth-sign@~0.8.2:
   version "0.8.2"
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.8.2.tgz#46a6ab7f0aead8deae9ec0565780b7d4efeb9d43"
 
-object-assign@^4.0.1, object-assign@^4.1.0:
+object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
 
@@ -3921,6 +3972,14 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
+prop-types@^15.6.0:
+  version "15.6.0"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
+
 prr@~1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/prr/-/prr-1.0.1.tgz#d3fc114ba06995a45ec6893f484ceb1d78f5f476"
@@ -3965,17 +4024,23 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-dom@15.3.1:
-  version "15.3.1"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.3.1.tgz#6d42cd2b64c8c5e0b693f3ffaec301e6e627e24e"
-
-react@15.3.1:
-  version "15.3.1"
-  resolved "https://registry.yarnpkg.com/react/-/react-15.3.1.tgz#f78501ed8c2ec6e6e31c3223652e97f1369d2bd6"
+react-dom@16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.0.0.tgz#9cc3079c3dcd70d4c6e01b84aab2a7e34c303f58"
   dependencies:
-    fbjs "^0.8.4"
+    fbjs "^0.8.16"
     loose-envify "^1.1.0"
-    object-assign "^4.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
+
+react@16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.0.0.tgz#ce7df8f1941b036f02b2cca9dbd0cb1f0e855e2d"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
 read-cmd-shim@^1.0.1:
   version "1.0.1"
@@ -4078,6 +4143,21 @@ redent@^1.0.0:
   dependencies:
     indent-string "^2.1.0"
     strip-indent "^1.0.1"
+
+redux-logger@3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/redux-logger/-/redux-logger-3.0.6.tgz#f7555966f3098f3c88604c449cf0baf5778274bf"
+  dependencies:
+    deep-diff "^0.3.5"
+
+redux@3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/redux/-/redux-3.6.0.tgz#887c2b3d0b9bd86eca2be70571c27654c19e188d"
+  dependencies:
+    lodash "^4.2.1"
+    lodash-es "^4.2.1"
+    loose-envify "^1.1.0"
+    symbol-observable "^1.0.2"
 
 regenerate@^1.2.1:
   version "1.3.3"
@@ -4222,6 +4302,10 @@ require-uncached@^1.0.2:
   dependencies:
     caller-path "^0.1.0"
     resolve-from "^1.0.0"
+
+reselect@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/reselect/-/reselect-3.0.1.tgz#efdaa98ea7451324d092b2b2163a6a1d7a9a2147"
 
 resolve-from@^1.0.0:
   version "1.0.1"
@@ -4591,7 +4675,7 @@ supports-color@^4.0.0:
   dependencies:
     has-flag "^2.0.0"
 
-symbol-observable@^1.0.1:
+symbol-observable@^1.0.1, symbol-observable@^1.0.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
 

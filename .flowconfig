@@ -1,8 +1,16 @@
 [ignore]
 ; annotated with `@flow` but have errors
 <PROJECT_ROOT>/node_modules/fbjs/lib/.*
+<PROJECT_ROOT>/packages/flow-language-server/src/pkg/.*
 <PROJECT_ROOT>/node_modules/.*/test/.*
+<PROJECT_ROOT>/node_modules/atom-ide-ui/pkg/atom-ide-diagnostics/lib/services/LinterAdapter.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons/debounce.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons/nuclideUri.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons/string.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons-atom/ActiveEditorRegistry.js.flow
 <PROJECT_ROOT>/node_modules/nuclide-commons-atom/workspace-views-compat.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons-atom/go-to-location.js.flow
+<PROJECT_ROOT>/node_modules/nuclide-commons-atom/text-edit.js.flow
 <PROJECT_ROOT>/atom-languageserver-flow/node_modules/.*/test/.*
 <PROJECT_ROOT>/atom-languageserver-flow/node_modules/atom-languageclient
 
@@ -14,9 +22,7 @@ flow-libs/
 [options]
 emoji=true
 experimental.const_params=true
-experimental.strict_type_args=true
 module.use_strict=true
-unsafe.enable_getters_and_setters=true
 esproposal.export_star_as=enable
 
 suppress_comment=.*\\$FlowFixMe.*
@@ -25,4 +31,4 @@ suppress_comment=.*\\$FlowIgnore.*
 suppress_comment=.*\\$FlowFB.*
 
 [version]
-0.50.0
+0.64.0
