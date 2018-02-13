@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.2.6-3",
+  "version": "0.3.0",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "bin": {
@@ -9,8 +9,8 @@
   "dependencies": {
     "async-to-generator": "1.1.0",
     "event-kit": "2.2.0",
+    "flow-versions": "^0.3.0",
     "fuzzaldrin-plus": "0.4.1",
-    "flow-versions": "^0.2.9",
     "log4js": "1.1.1",
     "nuclide-commons": "0.1.9",
     "semver": "5.3.0",
