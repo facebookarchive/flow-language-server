@@ -11,7 +11,7 @@
  */
 
 import path from 'path';
-import {_flowSemverForRootPath} from '../flowBinForRoot';
+import {_flowSemverForRootPath} from '../src/flowBinForRoot';
 
 describe('flowBinForRoot', () => {
   let mockReporter;

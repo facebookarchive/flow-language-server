@@ -12,7 +12,7 @@
 
 import type {FlowOptions} from './types';
 import type {InitializeParams} from 'vscode-languageserver/lib/protocol';
-import type {VersionInfo} from './flow-versions/types';
+import type {VersionInfo} from 'flow-versions';
 
 import nuclideUri from 'nuclide-commons/nuclideUri';
 import UniversalDisposable from 'nuclide-commons/UniversalDisposable';
@@ -29,9 +29,7 @@ import TextDocuments from './TextDocuments';
 import {FlowExecInfoContainer} from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {getLogger} from 'log4js';
-import {flowBinForPath} from './flow-versions/flowBinForRoot';
-import {downloadSemverFromGitHub} from './flow-versions/githubSemverDownloader';
-import {versionInfoForPath} from './flow-versions/utils';
+import {flowBinForRoot, githubSemverDownloader, utils} from 'flow-versions';
 
 const SUPPORTS_PERSISTENT_CONNECTION = process.platform !== 'win32';
 
@@ -187,7 +185,7 @@ async function getFlowVersionInfo(
       return null;
     }
 
-    const flowVersionInfo = await versionInfoForPath(
+    const flowVersionInfo = await utils.versionInfoForPath(
       rootPath,
       flowOptions.flowPath,
     );
@@ -207,10 +205,10 @@ async function getFlowVersionInfo(
     warn: versionLogger.warn.bind(versionLogger),
   };
 
-  const versionInfo = await flowBinForPath(rootPath, {
+  const versionInfo = await flowBinForRoot(rootPath, {
     autoDownloadFlow: flowOptions.autoDownloadFlow,
     reporter: downloadManagerLogger,
-    semverDownloader: downloadSemverFromGitHub,
+    semverDownloader: githubSemverDownloader,
     tryFlowBin: flowOptions.tryFlowBin,
   });
 
