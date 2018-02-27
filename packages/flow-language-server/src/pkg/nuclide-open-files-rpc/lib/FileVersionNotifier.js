@@ -41,7 +41,10 @@ export class FileVersionNotifier {
       case FileEventKind.EDIT:
         this._versions.set(filePath, changeCount);
         break;
+      case FileEventKind.SAVE:
+        break;
       default:
+        (event.kind: empty);
         throw new Error(`Unexpected LocalFileEvent.kind: ${event.kind}`);
     }
     this._checkRequests(filePath);

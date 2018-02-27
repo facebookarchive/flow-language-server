@@ -33,6 +33,9 @@ import {getConfig} from './config';
 import {ServerStatus} from './FlowConstants';
 import {FlowIDEConnection} from './FlowIDEConnection';
 import {FlowIDEConnectionWatcher} from './FlowIDEConnectionWatcher';
+import {FlowVersion} from './FlowVersion';
+
+import type {FileCache} from '../../nuclide-open-files-rpc';
 
 type FlowExecResult = {
   stdout: string,
@@ -79,6 +82,7 @@ export class FlowProcess {
   // The path to the directory where the .flowconfig is -- i.e. the root of the Flow project.
   _root: string;
   _execInfoContainer: FlowExecInfoContainer;
+  _version: FlowVersion;
 
   _ideConnections: Observable<?FlowIDEConnection>;
 
@@ -89,12 +93,19 @@ export class FlowProcess {
   _isDisposed: BehaviorSubject<boolean>;
   _subscriptions: UniversalDisposable;
 
-  constructor(root: string, execInfoContainer: FlowExecInfoContainer) {
+  _fileCache: FileCache;
+
+  constructor(
+    root: string,
+    execInfoContainer: FlowExecInfoContainer,
+    fileCache: FileCache,
+  ) {
     this._subscriptions = new UniversalDisposable();
     this._execInfoContainer = execInfoContainer;
     this._serverStatus = new BehaviorSubject(ServerStatus.UNKNOWN);
     this._root = root;
     this._isDisposed = new BehaviorSubject(false);
+    this._fileCache = fileCache;
 
     this._optionalIDEConnections = new BehaviorSubject(null);
     this._ideConnections = this._createIDEConnectionStream();
@@ -133,6 +144,17 @@ export class FlowProcess {
       .subscribe(() => {
         track('flow-server-failed');
       });
+
+    this._version = new FlowVersion(async () => {
+      const execInfo = await execInfoContainer.getFlowExecInfo(root);
+      if (!execInfo) {
+        return null;
+      }
+      return execInfo.flowVersion;
+    });
+    this._serverStatus
+      .filter(state => state === 'not running')
+      .subscribe(() => this._version.invalidateVersion());
   }
 
   dispose(): void {
@@ -143,6 +165,10 @@ export class FlowProcess {
       this._startedServer.kill('SIGKILL');
     }
     this._subscriptions.dispose();
+  }
+
+  getVersion(): FlowVersion {
+    return this._version;
   }
 
   /**
@@ -238,6 +264,7 @@ export class FlowProcess {
         invariant(connectionWatcher == null);
         connectionWatcher = new FlowIDEConnectionWatcher(
           this._tryCreateIDEProcess(),
+          this._fileCache,
           handler,
         );
         connectionWatcher.start();
@@ -260,11 +287,24 @@ export class FlowProcess {
         if (!serverIsReady) {
           return Observable.of(null);
         }
-        return getAllExecInfo(
-          ['ide', '--protocol', 'very-unstable', ...NO_RETRY_ARGS],
-          this._root,
-          this._execInfoContainer,
-        );
+        return this.getVersion()
+          .satisfies('>=0.66.0')
+          .then(supportsFriendlyStatusError => {
+            const jsonFlag = supportsFriendlyStatusError
+              ? ['--json-version', '2']
+              : [];
+            return getAllExecInfo(
+              [
+                'ide',
+                '--protocol',
+                'very-unstable',
+                ...jsonFlag,
+                ...NO_RETRY_ARGS,
+              ],
+              this._root,
+              this._execInfoContainer,
+            );
+          });
       })
       .switchMap(allExecInfo => {
         if (allExecInfo == null) {
@@ -353,6 +393,9 @@ export class FlowProcess {
     if (getConfig('lazyServer')) {
       lazy.push('--lazy');
     }
+    if (getConfig('ideLazyMode')) {
+      lazy.push('--lazy-mode', 'ide');
+    }
     // `flow server` will start a server in the foreground. runCommand/runCommandDetailed
     // will not resolve the promise until the process exits, which in this
     // case is never. We need to use spawn directly to get access to the
@@ -385,6 +428,7 @@ export class FlowProcess {
       // is null. So, let's blacklist conservatively for now and we can
       // add cases later if we observe Flow crashes that do not fit this
       // pattern.
+      // eslint-disable-next-line eqeqeq
       if (code === 2 && signal === null) {
         logger.error('Flow server unexpectedly exited', this._root);
         this._setServerStatus(ServerStatus.FAILED);
@@ -495,7 +539,9 @@ export class FlowProcess {
   }
 
   _pingServerOnce(): Promise<void> {
-    return this._rawExecFlow(['status']).catch(() => {}).then(() => {});
+    return this._rawExecFlow(['status'])
+      .catch(() => {})
+      .then(() => {});
   }
 
   /**

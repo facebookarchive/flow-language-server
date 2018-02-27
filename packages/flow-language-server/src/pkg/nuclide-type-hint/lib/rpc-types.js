@@ -14,6 +14,6 @@ export type TypeHint = {
   /**
    * A type hint string to display.
    */
-  hint: string,
+  hint: Array<{type: 'snippet' | 'markdown', value: string}>,
   range: atom$Range,
 };

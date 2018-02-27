@@ -12,7 +12,7 @@ module.exports = {
     'import/no-duplicates': 2,
     'max-len': 0, // handled by prettier
     'no-duplicate-imports': 0,
-    'prettier/prettier': ['error', 'fb', '@format'],
+    'prettier/prettier': ['error'],
     'rulesdir/license-header': 2,
   },
 };

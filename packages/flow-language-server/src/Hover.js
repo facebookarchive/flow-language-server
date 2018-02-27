@@ -51,7 +51,15 @@ export default class HoverSupport {
 
     if (typeHint) {
       return {
-        contents: {language: 'javascript', value: typeHint.hint},
+        contents: typeHint.hint.map(
+          hint =>
+            hint.type === 'snippet'
+              ? {
+                  language: hint.type === 'javascript',
+                  value: hint.value,
+                }
+              : hint.value,
+        ),
         range: atomRangeToLSPRange(typeHint.range),
       };
     }

@@ -11,10 +11,11 @@
  */
 
 import type {PublishDiagnosticsParams} from 'vscode-languageserver';
-import type {FileDiagnosticMessage, FileDiagnosticMessages} from 'atom-ide-ui';
+import type {DiagnosticMessage, DiagnosticTrace} from 'atom-ide-ui';
 import type TextDocument from './TextDocument';
 import type {Observable} from 'rxjs';
 
+import {arrayCompact} from 'nuclide-commons/collection';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {
   atomRangeToLSPRange,
@@ -23,6 +24,7 @@ import {
   filePathToURI,
 } from './utils/util';
 import {getLogger} from 'log4js';
+import invariant from 'assert';
 
 const logger = getLogger('Diagnostics');
 
@@ -40,6 +42,11 @@ export default class Diagnostics {
   async diagnoseOne(
     document: TextDocument,
   ): Promise<Array<PublishDiagnosticsParams>> {
+    const emptyDiagnostic = {
+      uri: document.uri,
+      diagnostics: [],
+    };
+
     const documentPath = fileURIToPath(document.uri);
     if (!documentPath) {
       return [];
@@ -50,47 +57,81 @@ export default class Diagnostics {
       document.buffer,
     );
 
-    if (diagnostics == null || diagnostics.filePathToMessages == null) {
-      return [];
+    if (diagnostics == null || diagnostics.size === 0) {
+      // clear out any old diagnostics by sending an explicit empty list of
+      // diagnostics
+      return [emptyDiagnostic];
     }
 
-    /* prettier-ignore */
-    return Array.from(diagnostics.filePathToMessages.entries())
-      .map(([filePath, messages]) => {
-        return fileDiagnosticUpdateToLSPDiagnostic({filePath, messages});
-      });
+    return Array.from(diagnostics.entries()).map(
+      fileDiagnosticUpdateToLSPDiagnostic,
+    );
   }
 
   observe(): Observable<Array<PublishDiagnosticsParams>> {
     logger.info('Beginning to observe diagnostics');
 
-    return this.flow
-      .observeDiagnostics()
-      .map(diagnostics => diagnostics.map(fileDiagnosticUpdateToLSPDiagnostic));
+    return this.flow.observeDiagnostics().map(diagnostics =>
+      Array.from(diagnostics.entries()).map(
+        // $FlowFixMe
+        fileDiagnosticUpdateToLSPDiagnostic,
+      ),
+    );
   }
 }
 
-function fileDiagnosticUpdateToLSPDiagnostic(
-  diagnostic: FileDiagnosticMessages,
-): PublishDiagnosticsParams {
+function fileDiagnosticUpdateToLSPDiagnostic([filePath, flowDiagnostics]: [
+  string,
+  Array<DiagnosticMessage>,
+]): PublishDiagnosticsParams {
   return {
-    uri: filePathToURI(diagnostic.filePath),
-    diagnostics: diagnostic.messages
-      .filter(
-        // range and message text are required for LSP
-        d => d.range != null && d.text != null,
-      )
-      .map(message => ({
-        // $FlowFixMe Diagnostics without range filtered out above
-        range: atomRangeToLSPRange(message.range),
-        severity: flowSeverityToLSPSeverity(message.type),
-        message: toMessage(message),
-        source: message.providerName,
-      })),
+    uri: filePathToURI(filePath),
+    diagnostics: flowDiagnostics
+      .filter(d => d.range != null)
+      .map(diagnostic => {
+        const relatedLocations = arrayCompact(
+          (diagnostic.trace || []).map(atomTrace_lspRelatedLocation),
+        );
+
+        invariant(diagnostic.range != null);
+        return {
+          range: atomRangeToLSPRange(diagnostic.range),
+          severity: flowSeverityToLSPSeverity(diagnostic.type),
+          source: diagnostic.providerName,
+          relatedLocations,
+          message:
+            relatedLocations.length === 0
+              ? toMessage(diagnostic)
+              : diagnostic.text || '',
+        };
+      }),
   };
 }
 
-function toMessage(diagnostic: FileDiagnosticMessage): string {
+/**
+ * From Nuclide's convert.js
+ *
+ * Converts an Atom Trace to an Lsp RelatedLocation. A RelatedLocation requires a
+ * range. Therefore, this will return null when called with an Atom Trace that
+ * does not have a range.
+ */
+function atomTrace_lspRelatedLocation(trace: DiagnosticTrace): ?Object {
+  const {range, text, filePath} = trace;
+  if (range != null) {
+    return {
+      message: text || '',
+      location: {
+        uri: filePath,
+        range: atomRangeToLSPRange(range),
+      },
+    };
+  }
+  return null;
+}
+
+// transform legacy diagnostics (without relatedLocations) into a more verbose
+// description
+function toMessage(diagnostic: DiagnosticMessage): string {
   let message = diagnostic.text || '';
   if (diagnostic.trace && diagnostic.trace.length) {
     for (const trace of diagnostic.trace) {
