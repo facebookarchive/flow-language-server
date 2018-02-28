@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "bin": {
@@ -17,9 +17,9 @@
     "simple-text-buffer": "9.2.11",
     "temp": "0.8.3",
     "through": "2.3.8",
+    "vscode-jsonrpc": "3.3.0",
     "vscode-languageserver": "^3.3.0",
     "vscode-uri": "^1.0.1",
-    "vscode-jsonrpc": "3.3.0",
     "yargs": "^8.0.2"
   },
   "engines": {
