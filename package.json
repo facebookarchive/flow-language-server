@@ -3,7 +3,9 @@
   "version": "0.2.5",
   "private": true,
   "license": "BSD-3-Clause",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "sh ./scripts/build.sh",
     "ci": "yarn flow && yarn lint && yarn test",
@@ -27,22 +29,29 @@
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-rulesdir": "^0.1.0",
     "flow-bin": "0.66.0",
     "fs-extra": "^3.0.1",
     "jest": "^20.0.4",
     "lerna": "^2.8.0",
-    "prettier": "^1.5.3",
+    "prettier": "^1.11.0",
     "vscode-languageserver-types": "^3.3.0"
   },
   "engines": {
     "node": ">=6"
   },
   "jest": {
-    "testMatch": ["**/*-spec.js", "**/*.test.js"],
-    "testPathIgnorePatterns": ["/node_modules/", "lib/*"]
+    "testMatch": [
+      "**/*-spec.js",
+      "**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "lib/*"
+    ]
   },
   "prettier": {
     "bracketSpacing": false,
