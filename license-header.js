@@ -74,7 +74,11 @@ module.exports = function(context) {
       let fix;
       // The modules folder has a special license that shouldn't be blindly applied.
       const comment = context.getSourceCode().getAllComments()[0];
-      if (comment != null && comment.type === 'Block' && comment.loc.start.line === 1) {
+      if (
+        comment != null &&
+        comment.type === 'Block' &&
+        comment.loc.start.line === 1
+      ) {
         if (comment.value.includes('@flow')) {
           fix = fixer => fixer.replaceText(comment, flowHeader.trim());
         } else if (comment.value.includes('@noflow')) {

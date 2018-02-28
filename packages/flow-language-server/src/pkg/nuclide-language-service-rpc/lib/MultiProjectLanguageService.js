@@ -11,26 +11,34 @@
  */
 
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
+import type {DeadlineRequest} from 'nuclide-commons/promise';
+import type {SearchStrategy} from 'nuclide-commons/ConfigCache';
+import type {AdditionalLogFile} from '../../nuclide-logging/lib/rpc-types';
 import type {FileVersion} from '../../nuclide-open-files-rpc/lib/rpc-types';
 import type {TextEdit} from 'nuclide-commons-atom/text-edit';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   DefinitionQueryResult,
-  DiagnosticProviderUpdate,
-  FileDiagnosticMessages,
   FindReferencesReturn,
   Outline,
+  CodeAction,
 } from 'atom-ide-ui';
 import type {
+  AutocompleteRequest,
   AutocompleteResult,
-  SymbolResult,
+  FileDiagnosticMap,
+  FileDiagnosticMessage,
+  FormatOptions,
   LanguageService,
+  SymbolResult,
 } from '../../nuclide-language-service/lib/LanguageService';
 import type {HostServices} from '../../nuclide-language-service-rpc/lib/rpc-types';
-import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {NuclideEvaluationExpression} from 'nuclide-debugger-common';
 import type {ConnectableObservable} from 'rxjs';
 
+import {timeoutAfterDeadline} from 'nuclide-commons/promise';
+import {stringifyError} from 'nuclide-commons/string';
 import {FileCache, ConfigObserver} from '../../nuclide-open-files-rpc';
 import {Cache} from 'nuclide-commons/cache';
 import {Observable} from 'rxjs';
@@ -60,13 +68,17 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     logger: log4js$Logger,
     fileCache: FileCache,
     host: HostServices,
-    projectFileName: string,
+    projectFileNames: Array<string>,
+    projectFileSearchStrategy: ?SearchStrategy,
     fileExtensions: Array<NuclideUri>,
     languageServiceFactory: (projectDir: NuclideUri) => Promise<?T>,
   ) {
     this._logger = logger;
     this._resources = new UniversalDisposable();
-    this._configCache = new ConfigCache([projectFileName]);
+    this._configCache = new ConfigCache(
+      projectFileNames,
+      projectFileSearchStrategy != null ? projectFileSearchStrategy : undefined,
+    );
 
     this._processes = new Cache(languageServiceFactory, value => {
       value.then(process => {
@@ -126,10 +138,12 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   async _getLanguageServicesForFiles(
     filePaths: Array<string>,
   ): Promise<Array<[LanguageService, Array<string>]>> {
-    const promises: Array<Promise<?[LanguageService, string]>, > = filePaths.map(async filePath => {
-      const service = await this._getLanguageServiceForFile(filePath);
-      return service ? [service, filePath] : null;
-    });
+    const promises: Array<Promise<?[LanguageService, string]>> = filePaths.map(
+      async filePath => {
+        const service = await this._getLanguageServiceForFile(filePath);
+        return service ? [service, filePath] : null;
+      },
+    );
 
     const fileServices: Array<?[LanguageService, string]> = await Promise.all(
       promises,
@@ -194,9 +208,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return arrayCompact(await Promise.all(lsPromises));
   }
 
-  async getDiagnostics(
-    fileVersion: FileVersion,
-  ): Promise<?DiagnosticProviderUpdate> {
+  async getDiagnostics(fileVersion: FileVersion): Promise<?FileDiagnosticMap> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
     )).getDiagnostics(fileVersion);
@@ -206,7 +218,7 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return this._observeDiagnosticsPromise;
   }
 
-  observeDiagnostics(): ConnectableObservable<Array<FileDiagnosticMessages>> {
+  observeDiagnostics(): ConnectableObservable<FileDiagnosticMap> {
     this._observeDiagnosticsPromiseResolver();
 
     return this.observeLanguageServices()
@@ -214,10 +226,13 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
         this._logger.trace('observeDiagnostics');
         return ensureInvalidations(
           this._logger,
-          process.observeDiagnostics().refCount().catch(error => {
-            this._logger.error('Error: observeDiagnostics', error);
-            return Observable.empty();
-          }),
+          process
+            .observeDiagnostics()
+            .refCount()
+            .catch(error => {
+              this._logger.error('Error: observeDiagnostics', error);
+              return Observable.empty();
+            }),
         );
       })
       .publish();
@@ -226,17 +241,11 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   async getAutocompleteSuggestions(
     fileVersion: FileVersion,
     position: atom$Point,
-    activatedManually: boolean,
-    prefix: string,
+    request: AutocompleteRequest,
   ): Promise<?AutocompleteResult> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
-    )).getAutocompleteSuggestions(
-      fileVersion,
-      position,
-      activatedManually,
-      prefix,
-    );
+    )).getAutocompleteSuggestions(fileVersion, position, request);
   }
 
   async getDefinition(
@@ -248,13 +257,15 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     )).getDefinition(fileVersion, position);
   }
 
-  async findReferences(
+  findReferences(
     fileVersion: FileVersion,
     position: atom$Point,
-  ): Promise<?FindReferencesReturn> {
-    return (await this._getLanguageServiceForFile(
-      fileVersion.filePath,
-    )).findReferences(fileVersion, position);
+  ): ConnectableObservable<?FindReferencesReturn> {
+    return Observable.fromPromise(
+      this._getLanguageServiceForFile(fileVersion.filePath),
+    )
+      .concatMap(ls => ls.findReferences(fileVersion, position).refCount())
+      .publish();
   }
 
   async getCoverage(filePath: NuclideUri): Promise<?CoverageResult> {
@@ -267,6 +278,44 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
     )).getOutline(fileVersion);
+  }
+
+  async getAdditionalLogFiles(
+    deadline: DeadlineRequest,
+  ): Promise<Array<AdditionalLogFile>> {
+    const roots: Array<NuclideUri> = Array.from(this._processes.keys());
+
+    const results = await Promise.all(
+      roots.map(async root => {
+        try {
+          const service = await timeoutAfterDeadline(
+            deadline,
+            this._processes.get(root),
+          );
+          if (service == null) {
+            return [{title: root, data: 'no language service'}];
+          } else {
+            return timeoutAfterDeadline(
+              deadline,
+              service.getAdditionalLogFiles(deadline - 1000),
+            );
+          }
+        } catch (e) {
+          return [{title: root, data: stringifyError(e)}];
+        }
+      }),
+    );
+    return arrayFlatten(results);
+  }
+
+  async getCodeActions(
+    fileVersion: FileVersion,
+    range: atom$Range,
+    diagnostics: Array<FileDiagnosticMessage>,
+  ): Promise<Array<CodeAction>> {
+    return (await this._getLanguageServiceForFile(
+      fileVersion.filePath,
+    )).getCodeActions(fileVersion, range, diagnostics);
   }
 
   async typeHint(
@@ -290,32 +339,35 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   async formatSource(
     fileVersion: FileVersion,
     range: atom$Range,
+    options: FormatOptions,
   ): Promise<?Array<TextEdit>> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
-    )).formatSource(fileVersion, range);
+    )).formatSource(fileVersion, range, options);
   }
 
   async formatEntireFile(
     fileVersion: FileVersion,
     range: atom$Range,
+    options: FormatOptions,
   ): Promise<?{
     newCursor?: number,
     formatted: string,
   }> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
-    )).formatEntireFile(fileVersion, range);
+    )).formatEntireFile(fileVersion, range, options);
   }
 
   async formatAtPosition(
     fileVersion: FileVersion,
     position: atom$Point,
     triggerCharacter: string,
+    options: FormatOptions,
   ): Promise<?Array<TextEdit>> {
     return (await this._getLanguageServiceForFile(
       fileVersion.filePath,
-    )).formatAtPosition(fileVersion, position, triggerCharacter);
+    )).formatAtPosition(fileVersion, position, triggerCharacter, options);
   }
 
   async getEvaluationExpression(
@@ -366,6 +418,29 @@ export class MultiProjectLanguageService<T: LanguageService = LanguageService> {
   async isFileInProject(filePath: NuclideUri): Promise<boolean> {
     return (await this._getLanguageServiceForFile(filePath)).isFileInProject(
       filePath,
+    );
+  }
+
+  async getExpandedSelectionRange(
+    fileVersion: FileVersion,
+    currentSelection: atom$Range,
+  ): Promise<?atom$Range> {
+    return (await this._getLanguageServiceForFile(
+      fileVersion.filePath,
+    )).getExpandedSelectionRange(fileVersion, currentSelection);
+  }
+
+  async getCollapsedSelectionRange(
+    fileVersion: FileVersion,
+    currentSelection: atom$Range,
+    originalCursorPosition: atom$Point,
+  ): Promise<?atom$Range> {
+    return (await this._getLanguageServiceForFile(
+      fileVersion.filePath,
+    )).getCollapsedSelectionRange(
+      fileVersion,
+      currentSelection,
+      originalCursorPosition,
     );
   }
 

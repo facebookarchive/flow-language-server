@@ -12,21 +12,24 @@
 
 import type {NuclideUri} from 'nuclide-commons/nuclideUri';
 import {wordAtPositionFromBuffer} from 'nuclide-commons/range';
+import type {DeadlineRequest} from 'nuclide-commons/promise';
+import type {AdditionalLogFile} from '../../nuclide-logging/lib/rpc-types';
 import type {CoverageResult} from '../../nuclide-type-coverage/lib/rpc-types';
 import type {
   AutocompleteResult,
   Completion,
+  FileDiagnosticMap,
+  FileDiagnosticMessage,
 } from '../../nuclide-language-service/lib/LanguageService';
 import type {
   DefinitionQueryResult,
-  DiagnosticProviderUpdate,
-  FileDiagnosticMessages,
-  FileDiagnosticMessage,
   FindReferencesReturn,
+  Reference,
   Outline,
+  CodeAction,
 } from 'atom-ide-ui';
 import type {SingleFileLanguageService} from '../../nuclide-language-service-rpc';
-import type {NuclideEvaluationExpression} from '../../nuclide-debugger-interfaces/rpc-types';
+import type {NuclideEvaluationExpression} from 'nuclide-debugger-common';
 import type {TextEdit} from 'nuclide-commons-atom/text-edit';
 import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
 
@@ -39,10 +42,13 @@ import type {
   FlowAutocompleteItem,
   TypeAtPosOutput,
   FlowStatusOutput,
+  FindRefsOutput,
+  FlowLoc,
 } from './flowOutputTypes';
 
 import invariant from 'assert';
 import {Range, Point} from 'simple-text-buffer';
+import {typeHintFromSnippet} from '../../nuclide-language-service-rpc';
 import {getConfig} from './config';
 import {Observable} from 'rxjs';
 
@@ -58,34 +64,27 @@ const logger = getLogger('nuclide-flow-rpc');
 import {flowCoordsToAtomCoords} from '../../nuclide-flow-common';
 
 import {FlowProcess} from './FlowProcess';
-import {FlowVersion} from './FlowVersion';
 import prettyPrintTypes from './prettyPrintTypes';
 import {astToOutline} from './astToOutline';
 import {flowStatusOutputToDiagnostics} from './diagnosticsParser';
+
+import type {FileCache} from '../../nuclide-open-files-rpc';
 
 /** Encapsulates all of the state information we need about a specific Flow root */
 export class FlowSingleProjectLanguageService {
   // The path to the directory where the .flowconfig is -- i.e. the root of the Flow project.
   _root: string;
   _process: FlowProcess;
-  _version: FlowVersion;
   _execInfoContainer: FlowExecInfoContainer;
 
-  constructor(root: string, execInfoContainer: FlowExecInfoContainer) {
+  constructor(
+    root: string,
+    execInfoContainer: FlowExecInfoContainer,
+    fileCache: FileCache,
+  ) {
     this._root = root;
     this._execInfoContainer = execInfoContainer;
-    this._process = new FlowProcess(root, execInfoContainer);
-    this._version = new FlowVersion(async () => {
-      const execInfo = await execInfoContainer.getFlowExecInfo(root);
-      if (!execInfo) {
-        return null;
-      }
-      return execInfo.flowVersion;
-    });
-    this._process
-      .getServerStatusUpdates()
-      .filter(state => state === 'not running')
-      .subscribe(() => this._version.invalidateVersion());
+    this._process = new FlowProcess(root, execInfoContainer, fileCache);
   }
 
   dispose(): void {
@@ -169,13 +168,24 @@ export class FlowSingleProjectLanguageService {
     buffer: simpleTextBuffer$TextBuffer,
     position: atom$Point,
   ): Promise<?Array<atom$Range>> {
-    // `flow find-refs` came out in v0.38.0
-    // https://github.com/facebook/flow/releases/tag/v0.38.0
-    const isSupported = await this._version.satisfies('>=0.38.0');
+    // `flow find-refs` did not work well until version v0.55.0
+    const isSupported = await this._process.getVersion().satisfies('>=0.55.0');
     if (!isSupported) {
       return null;
     }
+    const result = await this._findRefs(filePath, buffer, position, false);
+    if (result == null || result.type === 'error') {
+      return null;
+    }
+    return result.references.map(ref => ref.range);
+  }
 
+  async _findRefs(
+    filePath: NuclideUri,
+    buffer: simpleTextBuffer$TextBuffer,
+    position: atom$Point,
+    global_: boolean,
+  ): Promise<?FindReferencesReturn> {
     const options = {input: buffer.getText()};
     const args = [
       'find-refs',
@@ -185,24 +195,22 @@ export class FlowSingleProjectLanguageService {
       position.row + 1,
       position.column + 1,
     ];
+    if (global_) {
+      args.push('--global');
+    }
     try {
       const result = await this._process.execFlow(args, options);
       if (result == null) {
         return null;
       }
-      const json = parseJSON(args, result.stdout);
-      if (!Array.isArray(json)) {
-        return null;
-      }
-      return json.map(loc => {
-        return new Range(
-          new Point(loc.start.line - 1, loc.start.column - 1),
-          new Point(loc.end.line - 1, loc.end.column),
-        );
-      });
+      const json: FindRefsOutput = parseJSON(args, result.stdout);
+      return convertFindRefsOutput(json, this._root);
     } catch (e) {
       logger.error(`flowFindRefs error: ${String(e)}`);
-      return null;
+      return {
+        type: 'error',
+        message: String(e),
+      };
     }
   }
 
@@ -214,12 +222,18 @@ export class FlowSingleProjectLanguageService {
   async getDiagnostics(
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
-  ): Promise<?DiagnosticProviderUpdate> {
+  ): Promise<?FileDiagnosticMap> {
     await this._forceRecheck(filePath);
 
     const options = {};
 
-    const args = ['status', '--json', filePath];
+    const supportsFriendlyStatusError = await this._process
+      .getVersion()
+      .satisfies('>=0.66.0');
+    const jsonFlag = supportsFriendlyStatusError
+      ? ['--json', '--json-version', '2']
+      : ['--json'];
+    const args = ['status', ...jsonFlag, filePath];
 
     let result;
 
@@ -267,12 +281,10 @@ export class FlowSingleProjectLanguageService {
       diagnosticArray.push(diagnostic);
     }
 
-    return {
-      filePathToMessages,
-    };
+    return filePathToMessages;
   }
 
-  observeDiagnostics(): Observable<Array<FileDiagnosticMessages>> {
+  observeDiagnostics(): Observable<FileDiagnosticMap> {
     const ideConnections = this._process.getIDEConnections();
     return ideConnections
       .switchMap(ideConnection => {
@@ -333,7 +345,7 @@ export class FlowSingleProjectLanguageService {
       const ideConnection = this._process.getCurrentIDEConnection();
       if (
         ideConnection != null &&
-        (await this._version.satisfies('>=0.48.0'))
+        (await this._process.getVersion().satisfies('>=0.48.0'))
       ) {
         json = await ideConnection.getAutocompleteSuggestions(
           filePath,
@@ -418,10 +430,7 @@ export class FlowSingleProjectLanguageService {
       logger.error(`Problem pretty printing type hint: ${e.message}`);
       typeString = type;
     }
-    return {
-      hint: typeString,
-      range,
-    };
+    return typeHintFromSnippet(typeString, range);
   }
 
   async getCoverage(filePath: NuclideUri): Promise<?CoverageResult> {
@@ -546,6 +555,20 @@ export class FlowSingleProjectLanguageService {
     return json;
   }
 
+  getCodeActions(
+    filePath: NuclideUri,
+    range: atom$Range,
+    diagnostics: Array<FileDiagnosticMessage>,
+  ): Promise<Array<CodeAction>> {
+    throw new Error('Not implemeneted');
+  }
+
+  async getAdditionalLogFiles(
+    deadline: DeadlineRequest,
+  ): Promise<Array<AdditionalLogFile>> {
+    return [];
+  }
+
   formatSource(
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
@@ -578,8 +601,11 @@ export class FlowSingleProjectLanguageService {
     filePath: NuclideUri,
     buffer: simpleTextBuffer$TextBuffer,
     position: atom$Point,
-  ): Promise<?FindReferencesReturn> {
-    throw new Error('Not Yet Implemented');
+  ): Observable<?FindReferencesReturn> {
+    // TODO check flow version
+    return Observable.fromPromise(
+      this._findRefs(filePath, buffer, position, true),
+    );
   }
 
   getEvaluationExpression(
@@ -591,6 +617,23 @@ export class FlowSingleProjectLanguageService {
   }
 
   isFileInProject(fileUri: NuclideUri): Promise<boolean> {
+    throw new Error('Not Yet Implemented');
+  }
+
+  getExpandedSelectionRange(
+    filePath: NuclideUri,
+    buffer: simpleTextBuffer$TextBuffer,
+    currentSelection: atom$Range,
+  ): Promise<?atom$Range> {
+    throw new Error('Not Yet Implemented');
+  }
+
+  getCollapsedSelectionRange(
+    filePath: NuclideUri,
+    buffer: simpleTextBuffer$TextBuffer,
+    currentSelection: atom$Range,
+    originalCursorPosition: atom$Point,
+  ): Promise<?atom$Range> {
     throw new Error('Not Yet Implemented');
   }
 }
@@ -796,10 +839,13 @@ export function updateDiagnostics(
     case 'start-recheck':
       const staleMessages = new Map();
       for (const [file, oldMessages] of state.currentMessages.entries()) {
-        const messages = oldMessages.map(message => ({
-          ...message,
-          stale: true,
-        }));
+        const messages = oldMessages.map(
+          message =>
+            ({
+              ...message,
+              stale: true,
+            }: any),
+        );
         staleMessages.set(file, messages);
       }
       return {
@@ -825,21 +871,19 @@ export function updateDiagnostics(
 // Exported only for testing
 export function getDiagnosticUpdates(
   state: DiagnosticsState,
-): Observable<Array<FileDiagnosticMessages>> {
-  const updates = [];
+): Observable<FileDiagnosticMap> {
+  const updates = new Map();
   for (const file of state.filesToUpdate) {
     const messages = [
       ...mapGetWithDefault(state.staleMessages, file, []),
       ...mapGetWithDefault(state.currentMessages, file, []),
     ];
-    updates.push({filePath: file, messages});
+    updates.set(file, messages);
   }
   return Observable.of(updates);
 }
 
-function collateDiagnostics(
-  output: FlowStatusOutput,
-): Map<NuclideUri, Array<FileDiagnosticMessage>> {
+function collateDiagnostics(output: FlowStatusOutput): FileDiagnosticMap {
   const diagnostics = flowStatusOutputToDiagnostics(output);
   const filePathToMessages = new Map();
 
@@ -853,4 +897,45 @@ function collateDiagnostics(
     diagnosticArray.push(diagnostic);
   }
   return filePathToMessages;
+}
+
+function locsToReferences(locs: Array<FlowLoc>): Array<Reference> {
+  return locs.map(loc => {
+    return {
+      name: null,
+      range: new Range(
+        new Point(loc.start.line - 1, loc.start.column - 1),
+        new Point(loc.end.line - 1, loc.end.column),
+      ),
+      uri: loc.source,
+    };
+  });
+}
+
+function convertFindRefsOutput(
+  output: FindRefsOutput,
+  root: string,
+): FindReferencesReturn {
+  if (Array.isArray(output)) {
+    return {
+      type: 'data',
+      baseUri: root,
+      referencedSymbolName: '',
+      references: locsToReferences(output),
+    };
+  } else {
+    if (output.kind === 'no-symbol-found') {
+      return {
+        type: 'error',
+        message: 'No symbol found at the current location by Flow.',
+      };
+    } else {
+      return {
+        type: 'data',
+        baseUri: root,
+        referencedSymbolName: output.name,
+        references: locsToReferences(output.locs),
+      };
+    }
+  }
 }

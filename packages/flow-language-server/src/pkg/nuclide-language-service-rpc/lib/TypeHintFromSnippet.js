@@ -10,7 +10,11 @@
  * @format
  */
 
-export type NuclideEvaluationExpression = {
+import type {TypeHint} from '../../nuclide-type-hint/lib/rpc-types';
+
+export function typeHintFromSnippet(
+  snippet: string,
   range: atom$Range,
-  expression: string,
-};
+): TypeHint {
+  return {hint: [{type: 'snippet', value: snippet}], range};
+}

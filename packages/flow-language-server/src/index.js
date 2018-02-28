@@ -26,6 +26,7 @@ import Diagnostics from './Diagnostics';
 import Hover from './Hover';
 import SymbolSupport from './Symbol';
 import TextDocuments from './TextDocuments';
+import {FileCache} from './pkg/nuclide-open-files-rpc/lib/FileCache';
 import {FlowExecInfoContainer} from './pkg/nuclide-flow-rpc/lib/FlowExecInfoContainer';
 import {FlowSingleProjectLanguageService} from './pkg/nuclide-flow-rpc/lib/FlowSingleProjectLanguageService';
 import {getLogger} from 'log4js';
@@ -40,6 +41,7 @@ export function createServer(
   const logger = getLogger('index');
   const disposable = new UniversalDisposable();
   const documents = new TextDocuments();
+  const fileCache = new FileCache();
 
   disposable.add(documents);
 
@@ -65,7 +67,11 @@ export function createServer(
         return {capabilities: {}};
       }
       const flowContainer = new FlowExecInfoContainer(flowVersionInfo);
-      const flow = new FlowSingleProjectLanguageService(root, flowContainer);
+      const flow = new FlowSingleProjectLanguageService(
+        root,
+        flowContainer,
+        fileCache,
+      );
 
       disposable.add(
         flow,
@@ -189,6 +195,7 @@ async function getFlowVersionInfo(
       rootPath,
       flowOptions.flowPath,
     );
+
     if (!flowVersionInfo) {
       connection.window.showErrorMessage('Invalid path to flow binary.');
     }

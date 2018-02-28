@@ -9,14 +9,15 @@
     "ci": "yarn flow && yarn lint && yarn test",
     "clean": "rimraf packages/*/lib/",
     "dev": "yarn watch",
-    "format": "prettier package.json lerna.json packages/*/src/**/*.js --write",
+    "format":
+      "prettier package.json lerna.json packages/flow-language-server/src/**/*.js packages/flow-versions/src/**/*.js --write",
     "lint": "eslint packages/*/src/",
     "prepare": "yarn clean && yarn build",
     "test": "jest",
     "watch": "yarn build --watch"
   },
   "devDependencies": {
-    "atom-ide-ui": "0.4.0",
+    "atom-ide-ui": "0.5.0",
     "babel-cli": "^6.24.1",
     "babel-jest": "^20.0.3",
     "babel-plugin-idx": "^2.0.0",
@@ -27,14 +28,16 @@
     "babel-preset-stage-1": "^6.24.1",
     "eslint": "^3.19.0",
     "eslint-config-fbjs-opensource": "^1.0.0",
-    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-import": "^2.9.0",
     "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-rulesdir": "^0.1.0",
     "flow-bin": "0.66.0",
     "fs-extra": "^3.0.1",
     "jest": "^20.0.4",
     "lerna": "^2.8.0",
-    "prettier": "^1.5.3",
+    "prettier": "^1.11.0",
+    "nuclide-debugger-common": "0.5.1",
     "vscode-languageserver-types": "^3.3.0"
   },
   "engines": {
