@@ -3677,22 +3677,6 @@ nuclide-commons-ui@0.5.0:
     shallowequal "0.2.2"
     tabbable "1.1.0"
 
-nuclide-commons@0.1.9:
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.1.9.tgz#95cb7e3fbea340ad56cf29da65f3a98c0256355e"
-  dependencies:
-    async-to-generator "1.1.0"
-    event-kit "2.2.0"
-    fs-plus "2.9.3"
-    glob "7.1.1"
-    idx "1.2.0"
-    lru-cache "4.0.2"
-    mkdirp "0.5.1"
-    rimraf "2.5.4"
-    rxjs "5.3.1"
-    shell-quote "1.6.1"
-    temp "0.8.3"
-
 nuclide-commons@0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/nuclide-commons/-/nuclide-commons-0.5.0.tgz#9b3ea8e898b92266715e0eeea0cfbf657e336c7b"
@@ -4486,12 +4470,6 @@ rx-lite@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/rx-lite/-/rx-lite-3.1.2.tgz#19ce502ca572665f3b647b10939f97fd1615f102"
 
-rxjs@5.3.1:
-  version "5.3.1"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.3.1.tgz#9ecc9e722247e4f4490d30a878577a3740fd0cb7"
-  dependencies:
-    symbol-observable "^1.0.1"
-
 rxjs@5.5.5:
   version "5.5.5"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.5.tgz#e164f11d38eaf29f56f08c3447f74ff02dd84e97"
@@ -4788,7 +4766,7 @@ symbol-observable@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
 
-symbol-observable@^1.0.1, symbol-observable@^1.0.2:
+symbol-observable@^1.0.2:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
 
