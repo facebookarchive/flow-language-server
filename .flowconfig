@@ -5,13 +5,10 @@
 <PROJECT_ROOT>/node_modules/nuclide-debugger-common/VsDebugSessionTranslator.js.flow
 <PROJECT_ROOT>/node_modules/nuclide-debugger-common/VsDebugSession.js.flow
 <PROJECT_ROOT>/node_modules/nuclide-debugger-common/ChromeMessageRemoting.js.flow
-<PROJECT_ROOT>/packages/flow-language-server/node_modules/nuclide-commons/promise.js.flow
-<PROJECT_ROOT>/packages/flow-language-server/node_modules/nuclide-commons/process.js.flow
-<PROJECT_ROOT>/packages/flow-language-server/node_modules/nuclide-commons/string.js.flow
-<PROJECT_ROOT>/packages/flow-language-server/node_modules/nuclide-commons/nuclideUri.js.flow
-<PROJECT_ROOT>/node_modules/nuclide-commons/string.js.flow
-<PROJECT_ROOT>/node_modules/nuclide-commons/process.js.flow
-<PROJECT_ROOT>/node_modules/nuclide-commons/nuclideUri.js.flow
+.*/node_modules/nuclide-commons/promise.js.flow
+.*/node_modules/nuclide-commons/process.js.flow
+.*/node_modules/nuclide-commons/string.js.flow
+.*/node_modules/nuclide-commons/nuclideUri.js.flow
 <PROJECT_ROOT>/node_modules/nuclide-commons-ui/SimpleValueComponent.js.flow
 <PROJECT_ROOT>/node_modules/nuclide-commons-ui/LazyNestedValueComponent.js.flow
 <PROJECT_ROOT>/node_modules/atom-ide-ui/pkg/atom-ide-diagnostics/lib/services/LinterAdapter.js.flow
