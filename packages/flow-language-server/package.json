@@ -3,6 +3,7 @@
   "version": "0.4.0",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
+  "repository": "https://github.com/flowtype/flow-language-server/tree/master/packages/flow-language-server",
   "bin": {
     "flow-language-server": "./lib/bin/cli.js"
   },
