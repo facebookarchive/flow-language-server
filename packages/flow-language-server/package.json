@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "repository": "https://github.com/flowtype/flow-language-server/tree/master/packages/flow-language-server",
