@@ -55,7 +55,7 @@ export default class HoverSupport {
           hint =>
             hint.type === 'snippet'
               ? {
-                  language: hint.type === 'javascript',
+                  language: 'javascript',
                   value: hint.value,
                 }
               : hint.value,
