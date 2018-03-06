@@ -1,8 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.2.5",
   "private": true,
-  "license": "BSD-3-Clause",
   "workspaces": ["packages/*"],
   "scripts": {
     "build": "sh ./scripts/build.sh",
