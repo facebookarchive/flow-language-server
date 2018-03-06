@@ -1,6 +1,6 @@
 {
   "name": "flow-language-server",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "main": "lib/index.js",
   "license": "BSD-3-Clause",
   "repository": "https://github.com/flowtype/flow-language-server/tree/master/packages/flow-language-server",
@@ -10,7 +10,7 @@
   "dependencies": {
     "async-to-generator": "1.1.0",
     "event-kit": "2.2.0",
-    "flow-versions": "^0.3.0",
+    "flow-versions": "^0.3.1",
     "fuzzaldrin-plus": "0.4.1",
     "log4js": "1.1.1",
     "nuclide-commons": "0.5.1",
