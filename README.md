@@ -34,13 +34,10 @@ Developed in conjunction with flow-language-server, Flow for Atom IDE showcases 
 2. Run `npm install -g flow-language-server` or `yarn global add flow-language-server`
 3. Add the following to neovim's configuration:
 
-```
+```vim
 let g:LanguageClient_serverCommands = {
-\ 'javascript': ['flow-language-server', '--stdio'],
-\ }
-
-" (Optionally) automatically start language servers.
-let g:LanguageClient_autoStart = 1
+    \ 'javascript': ['flow-language-server', '--stdio'],
+    \ }
 ```
 
 ### Wrote your own editor integration using `flow-language-server`? Send us a pull request to add it here!
