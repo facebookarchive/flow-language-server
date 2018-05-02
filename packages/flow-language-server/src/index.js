@@ -23,6 +23,7 @@ import type {ICompletionItem} from 'vscode-languageserver-types';
 import Completion from './Completion';
 import Definition from './Definition';
 import Diagnostics from './Diagnostics';
+import DocumentHighlight from './DocumentHighlight';
 import Hover from './Hover';
 import SymbolSupport from './Symbol';
 import TextDocuments from './TextDocuments';
@@ -133,6 +134,11 @@ export function createServer(
         return definition.provideDefinition(docParams);
       });
 
+      const documentHighlight = new DocumentHighlight({documents, flow});
+      connection.onDocumentHighlight(docParams => {
+        return documentHighlight.provideDocumentHighlight(docParams);
+      });
+
       const hover = new Hover({documents, flow});
       connection.onHover(docParams => {
         return hover.provideHover(docParams);
@@ -157,6 +163,7 @@ export function createServer(
             resolveProvider: true,
             triggerCharacters: ['.'],
           },
+          documentHighlightProvider: true,
           hoverProvider: true,
         },
       };
