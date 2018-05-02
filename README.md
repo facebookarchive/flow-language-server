@@ -8,6 +8,13 @@ This is an implementation of the [Language Server Protocol](https://github.com/M
 flow-language-server requires Node v6 or any later maintained version of Node.js.
 It also requires [any supported operating system platform for Flow](https://github.com/facebook/flow/#requirements).
 
+## Supported features
+
+- IntelliSense/code completion (`textDocument/completion`)
+- go to definition (`textDocument/definition`)
+- document symbols outline (`textDocument/documentSymbol`)
+- hovers (`textDocument/hover`)
+
 ## Installation
 You most likely don't need to install `flow-language-server` directly if you want Flow support for your favorite editor; instead, [check out the integrations below](#editor-integrations).
 
