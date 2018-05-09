@@ -12,6 +12,7 @@ It also requires [any supported operating system platform for Flow](https://gith
 
 - IntelliSense/code completion (`textDocument/completion`)
 - go to definition (`textDocument/definition`)
+- document highlighting (`textDocument/documentHighlight`)
 - document symbols outline (`textDocument/documentSymbol`)
 - hovers (`textDocument/hover`)
 
