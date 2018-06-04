@@ -98,7 +98,7 @@ function fileDiagnosticUpdateToLSPDiagnostic([filePath, flowDiagnostics]: [
           range: atomRangeToLSPRange(diagnostic.range),
           severity: flowSeverityToLSPSeverity(diagnostic.type),
           source: diagnostic.providerName,
-          relatedLocations,
+          relatedInformation: relatedLocations,
           message:
             relatedLocations.length === 0
               ? toMessage(diagnostic)
@@ -121,7 +121,7 @@ function atomTrace_lspRelatedLocation(trace: DiagnosticTrace): ?Object {
     return {
       message: text || '',
       location: {
-        uri: filePath,
+        uri: filePathToURI(filePath),
         range: atomRangeToLSPRange(range),
       },
     };
