@@ -92,7 +92,7 @@ export function lspPositionToAtomPoint(lspPosition: IPosition): atom$Point {
 
 export function atomPointToLSPPosition(atomPoint: atom$PointObject): IPosition {
   return {
-    line: atomPoint.row,
+    line: atomPoint.row < 0 ? 0 : atomPoint.row,
     character: atomPoint.column,
   };
 }
