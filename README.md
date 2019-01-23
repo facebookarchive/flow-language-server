@@ -1,3 +1,9 @@
+# Project Status:  🚨 Unmaintained 🚨
+
+This project is no longer maintained. We will not be accepting pull requests, addressing issues, nor making future releases.
+
+Language Server Protocol is now supported natively in [the core `flow` program](https://github.com/facebook/flow) by running `flow lsp`, and all of `flow-language-server`'s supported features are supported in Flow's native LSP implementation.
+
 # Flow Language Server
 
 [![npm](https://img.shields.io/npm/v/flow-language-server.svg)](https://www.npmjs.com/package/flow-language-server) [![CircleCI](https://circleci.com/gh/flowtype/flow-language-server/tree/master.svg?style=shield&circle-token=58418cffe1efc61717f814506b22d443904db15d)](https://circleci.com/gh/flowtype/flow-language-server/tree/master)
